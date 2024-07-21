@@ -5,19 +5,37 @@ import PackageDescription
 
 let package = Package(
     name: "OversizeAppStoreConnectServices",
+    platforms: [
+        .iOS(.v15),
+        .macOS(.v12),
+        .tvOS(.v15),
+        .watchOS(.v8),
+    ],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "OversizeAppStoreConnectServices",
-            targets: ["OversizeAppStoreConnectServices"]),
+            targets: ["OversizeAppStoreConnectServices"]
+        ),
+    ],
+    dependencies: [
+        .package(url: "https://github.com/aaronsky/asc-swift.git", .upToNextMajor(from: "0.6.1")),
+        .package(url: "https://github.com/hmlongco/Factory.git", .upToNextMajor(from: "2.1.3")),
+        .package(name: "OversizeModels", path: "../OversizeModels"),
+        .package(name: "OversizeServices", path: "../OversizeLibrary/OversizeServices"),
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "OversizeAppStoreConnectServices"),
+            name: "OversizeAppStoreConnectServices",
+            dependencies: [
+                .product(name: "AppStoreConnect", package: "asc-swift"),
+                .product(name: "Factory", package: "Factory"),
+                .product(name: "OversizeModels", package: "OversizeModels"),
+                .product(name: "OversizeServices", package: "OversizeServices"),
+            ]
+        ),
         .testTarget(
             name: "OversizeAppStoreConnectServicesTests",
-            dependencies: ["OversizeAppStoreConnectServices"]),
+            dependencies: ["OversizeAppStoreConnectServices"]
+        ),
     ]
 )

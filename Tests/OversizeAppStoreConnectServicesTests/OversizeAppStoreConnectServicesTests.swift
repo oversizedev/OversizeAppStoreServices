@@ -1,5 +1,5 @@
-import XCTest
 @testable import OversizeAppStoreConnectServices
+import XCTest
 
 final class OversizeAppStoreConnectServicesTests: XCTestCase {
     func testExample() throws {
