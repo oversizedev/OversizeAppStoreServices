@@ -22,7 +22,7 @@ let localDependencies: [PackageDescription.Package.Dependency] = [
 
 var dependencies: [PackageDescription.Package.Dependency] = []
 
-if ProcessInfo.processInfo.environment["PRODUCTION"] == "true" {
+if let environmentValue = ProcessInfo.processInfo.environment["PRODUCTION"], environmentValue == "true" {
     dependencies = remoteDependencies
 } else {
     dependencies = localDependencies
