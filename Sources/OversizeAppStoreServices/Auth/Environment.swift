@@ -1,3 +1,8 @@
+//
+// Copyright © 2024 Alexander Romanov
+// Environment.swift, created on 22.07.2024
+//
+
 import Foundation
 
 /// Environment wrapper that loads values from a local file, falling back on a `ProcessInfo`.
