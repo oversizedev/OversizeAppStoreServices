@@ -10,15 +10,15 @@ public extension Container {
     var appsService: Factory<AppsService> {
         self { AppsService() }
     }
-    
+
     var inAppPurchasesService: Factory<InAppPurchasesService> {
         self { InAppPurchasesService() }
     }
-    
+
     var certificateService: Factory<CertificateService> {
         self { CertificateService() }
     }
-    
+
     var reviewService: Factory<ReviewService> {
         self { ReviewService() }
     }

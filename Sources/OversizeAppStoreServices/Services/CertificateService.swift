@@ -1,7 +1,7 @@
 //
 // Copyright © 2024 Alexander Romanov
 // CertificateService.swift, created on 23.07.2024
-//  
+//
 
 import AppStoreConnect
 import Foundation
@@ -9,7 +9,7 @@ import OversizeModels
 
 public actor CertificateService {
     private let client: AppStoreConnectClient?
-    
+
     public init() {
         do {
             client = try AppStoreConnectClient(authenticator: EnvAuthenticator())
@@ -17,7 +17,7 @@ public actor CertificateService {
             client = nil
         }
     }
-    
+
     public func fetchProfiles() async -> Result<[Profile], AppError> {
         guard let client = client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.profiles.get()
@@ -28,7 +28,7 @@ public actor CertificateService {
             return .failure(.network(type: .noResponse))
         }
     }
-    
+
     func fetchActiveCertificates() async throws -> Result<[Certificate], AppError> {
         guard let client = client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.certificates.get()

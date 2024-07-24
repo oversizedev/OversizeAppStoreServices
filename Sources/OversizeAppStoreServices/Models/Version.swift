@@ -1,7 +1,7 @@
 //
 // Copyright © 2024 Alexander Romanov
 // File.swift, created on 23.07.2024
-//  
+//
 
 import AppStoreConnect
 
@@ -12,9 +12,8 @@ public struct Version {
     init?(schema: AppStoreConnect.AppStoreVersion) {
         guard let state = schema.attributes?.appStoreState,
               let version = schema.attributes?.versionString else { return nil }
-        self.appStoreState = state.rawValue
+        appStoreState = state.rawValue
         self.version = version
-        self.id = schema.id
+        id = schema.id
     }
 }
-

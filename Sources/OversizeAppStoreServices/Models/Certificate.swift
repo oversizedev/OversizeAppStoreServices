@@ -1,7 +1,7 @@
 //
 // Copyright © 2024 Alexander Romanov
 // File.swift, created on 23.07.2024
-//  
+//
 
 import AppStoreConnect
 import Foundation
@@ -19,9 +19,9 @@ public struct Certificate {
               let type = CertificateType(rawValue: schema.attributes?.certificateType?.rawValue ?? ""),
               let content = schema.attributes?.certificateContent,
               let platform = schema.attributes?.platform,
-                let expirationDate = schema.attributes?.expirationDate
+              let expirationDate = schema.attributes?.expirationDate
         else { return nil }
-        self.id = schema.id
+        id = schema.id
         self.name = name
         self.platform = BundleID.Platform(schema: platform)
         self.type = type
@@ -32,7 +32,7 @@ public struct Certificate {
 
 extension Certificate {
     static func from(response: AppStoreConnect.CertificatesResponse, include: (Certificate) -> Bool) -> [Certificate] {
-        response.data.compactMap({ Certificate(schema: $0) }).filter({ include($0) })
+        response.data.compactMap { Certificate(schema: $0) }.filter { include($0) }
     }
 }
 

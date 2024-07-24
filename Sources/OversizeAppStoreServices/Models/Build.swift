@@ -1,7 +1,7 @@
 //
 // Copyright © 2024 Alexander Romanov
 // File.swift, created on 22.07.2024
-//  
+//
 
 import AppStoreConnect
 import Foundation
@@ -21,7 +21,7 @@ public struct Build {
         self.uploadedDate = uploadedDate
         self.expirationDate = expirationDate
         let templateUrl = schema.attributes?.iconAssetToken?.templateURL
-        self.iconURL = parseURL(
+        iconURL = parseURL(
             from: constructURLString(
                 baseURL: templateUrl ?? "",
                 width: schema.attributes?.iconAssetToken?.width ?? 100,

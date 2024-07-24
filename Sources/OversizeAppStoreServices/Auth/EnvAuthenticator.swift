@@ -8,14 +8,16 @@ public struct EnvAuthenticator: Authenticator {
 
     var jwt: JWT
 
+    private let secureStorage: SecureStorageService = .init()
+
     public init() throws {
-        guard let keyID = UserDefaults.standard.string(forKey: "AppStore.KeyID") else {
+        guard let keyID = secureStorage.getKeychain(forKey: "AppStore.KeyID") else {
             throw Error.missingEnvironmentVariable("AppStore.KeyID")
         }
-        guard let issuerID = UserDefaults.standard.string(forKey: "AppStore.IssuerID") else {
+        guard let issuerID = secureStorage.getKeychain(forKey: "AppStore.IssuerID") else {
             throw Error.missingEnvironmentVariable("AppStore.IssuerID")
         }
-        guard let privateKeyRepresentation = UserDefaults.standard.string(forKey: "AppStore.PrivateKey") else {
+        guard let privateKeyRepresentation = secureStorage.getKeychain(forKey: "AppStore.PrivateKey") else {
             throw Error.missingEnvironmentVariable("AppStore.PrivateKey")
         }
 

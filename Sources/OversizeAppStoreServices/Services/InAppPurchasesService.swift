@@ -1,7 +1,7 @@
 //
 // Copyright © 2024 Alexander Romanov
 // InAppPurchasesService.swift, created on 22.07.2024
-//  
+//
 
 import AppStoreConnect
 import Foundation
@@ -18,4 +18,3 @@ public actor InAppPurchasesService {
         }
     }
 }
-

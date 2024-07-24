@@ -14,11 +14,11 @@ public struct AppInfoLocalization {
     public let privacyPolicyText: String?
 
     init?(schema: AppStoreConnect.AppInfoLocalization) {
-        self.locale = schema.attributes?.locale
-        self.name = schema.attributes?.name
-        self.subtitle = schema.attributes?.subtitle
-        self.privacyPolicyURL = schema.attributes?.privacyPolicyURL
-        self.privacyChoicesURL = schema.attributes?.privacyChoicesURL
-        self.privacyPolicyText = schema.attributes?.privacyPolicyText
+        locale = schema.attributes?.locale
+        name = schema.attributes?.name
+        subtitle = schema.attributes?.subtitle
+        privacyPolicyURL = schema.attributes?.privacyPolicyURL
+        privacyChoicesURL = schema.attributes?.privacyChoicesURL
+        privacyPolicyText = schema.attributes?.privacyPolicyText
     }
 }

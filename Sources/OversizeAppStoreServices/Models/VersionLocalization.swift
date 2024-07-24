@@ -16,13 +16,12 @@ public struct VersionLocalization {
     public let whatsNew: String?
 
     init?(schema: AppStoreConnect.AppStoreVersionLocalization) {
-        self.description = schema.attributes?.description
-        self.locale = schema.attributes?.locale
-        self.keywords = schema.attributes?.keywords
-        self.marketingURL = schema.attributes?.marketingURL
-        self.promotionalText = schema.attributes?.promotionalText
-        self.supportURL = schema.attributes?.supportURL
-        self.whatsNew = schema.attributes?.whatsNew
+        description = schema.attributes?.description
+        locale = schema.attributes?.locale
+        keywords = schema.attributes?.keywords
+        marketingURL = schema.attributes?.marketingURL
+        promotionalText = schema.attributes?.promotionalText
+        supportURL = schema.attributes?.supportURL
+        whatsNew = schema.attributes?.whatsNew
     }
 }
-
