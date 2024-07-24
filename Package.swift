@@ -15,9 +15,9 @@ let remoteDependencies: [PackageDescription.Package.Dependency] = [
 let localDependencies: [PackageDescription.Package.Dependency] = [
     .package(url: "https://github.com/aaronsky/asc-swift.git", .upToNextMajor(from: "0.6.1")),
     .package(url: "https://github.com/hmlongco/Factory.git", .upToNextMajor(from: "2.1.3")),
-    .package(name: "OversizeCore", path: "../OversizeCore"),
-    .package(name: "OversizeModels", path: "../OversizeModels"),
-    .package(name: "OversizeServices", path: "../OversizeServices"),
+    .package(url: "https://github.com/oversizedev/OversizeCore.git", .upToNextMajor(from: "1.3.0")),
+    .package(url: "https://github.com/oversizedev/OversizeServices.git", .upToNextMajor(from: "1.4.0")),
+    .package(url: "https://github.com/oversizedev/OversizeModels.git", .upToNextMajor(from: "0.1.0")),
 ]
 
 var dependencies: [PackageDescription.Package.Dependency] = []

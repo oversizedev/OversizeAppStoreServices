@@ -4,6 +4,8 @@ on:
   pull_request:
     branches:
       - main
+    types:
+      - closed
   push:
     branches:
       - main
@@ -28,5 +30,6 @@ jobs:
   bump:
      name: Bump version
      needs: tests
+     if: github.ref == 'refs/heads/main'
      uses: oversizedev/GithubWorkflows/.github/workflows/bump.yml@main
      secrets: inherit
