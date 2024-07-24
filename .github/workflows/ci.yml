@@ -19,9 +19,14 @@ jobs:
       package: "OversizeAppStoreServices"
     secrets: inherit
 
+  tests:
+    name: Test
+    needs: build-swiftpm
+    uses: oversizedev/GithubWorkflows/.github/workflows/test.yml@main
+    secrets: inherit
+
   bump:
      name: Bump version
-     needs: build-swiftpm
-     if: github.ref == 'refs/heads/main' || github.event.pull_request.base.ref == 'main'
+     needs: tests
      uses: oversizedev/GithubWorkflows/.github/workflows/bump.yml@main
      secrets: inherit
