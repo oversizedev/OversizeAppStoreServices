@@ -1,4 +1,4 @@
-@testable import OversizeAppStoreConnectServices
+@testable import OversizeAppStoreServices
 import XCTest
 
 final class OversizeAppStoreServicesTests: XCTestCase {
