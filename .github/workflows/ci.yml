@@ -19,6 +19,6 @@ jobs:
   bump:
      name: Bump version
      needs: build-swiftpm
-     if: github.ref == 'refs/heads/main' || github.event.pull_request.base.ref == 'main'
+     if: github.ref == 'refs/heads/main'
      uses: oversizedev/GithubWorkflows/.github/workflows/bump.yml@main
      secrets: inherit
