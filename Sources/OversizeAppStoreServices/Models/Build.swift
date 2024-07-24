@@ -1,6 +1,6 @@
 //
 // Copyright © 2024 Alexander Romanov
-// File.swift, created on 22.07.2024
+// Build.swift, created on 22.07.2024
 //
 
 import AppStoreConnect

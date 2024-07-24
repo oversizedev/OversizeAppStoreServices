@@ -1,5 +1,9 @@
+//
+// Copyright © 2024 Alexander Romanov
+// EnvAuthenticator.swift, created on 22.07.2024
+//
+
 import AppStoreConnect
-import Foundation
 
 public struct EnvAuthenticator: Authenticator {
     public enum Error: Swift.Error {
