@@ -14,27 +14,6 @@ on:
   
 jobs:
 
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Set up Swift
-      uses: fwal/setup-swift@v1
-      with:
-        swift-version: '5.9'
-
-    - name: Set environment variable
-      run: echo "PRODUCTION=true" >> $GITHUB_ENV
-
-    - name: Build the project
-      run: swift build
-
-    - name: Run tests
-      run: swift test
-    
   build-swiftpm:
     name: Build SwiftPM
     uses: oversizedev/GithubWorkflows/.github/workflows/build-swiftpm.yml@main
