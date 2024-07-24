@@ -21,7 +21,7 @@ let package = Package(
         .package(url: "https://github.com/aaronsky/asc-swift.git", .upToNextMajor(from: "0.6.1")),
         .package(url: "https://github.com/hmlongco/Factory.git", .upToNextMajor(from: "2.1.3")),
         .package(name: "OversizeModels", path: "../OversizeModels"),
-        .package(name: "OversizeServices", path: "../OversizeLibrary/OversizeServices"),
+        .package(name: "OversizeServices", path: "../OversizeServices"),
     ],
     targets: [
         .target(

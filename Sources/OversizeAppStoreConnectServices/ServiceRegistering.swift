@@ -7,7 +7,19 @@ import Factory
 import Foundation
 
 public extension Container {
-    var appStoreConnectService: Factory<AppStoreConnectServices> {
-        self { AppStoreConnectServices() }
+    var appsService: Factory<AppsService> {
+        self { AppsService() }
+    }
+    
+    var inAppPurchasesService: Factory<InAppPurchasesService> {
+        self { InAppPurchasesService() }
+    }
+    
+    var certificateService: Factory<CertificateService> {
+        self { CertificateService() }
+    }
+    
+    var reviewService: Factory<ReviewService> {
+        self { ReviewService() }
     }
 }
