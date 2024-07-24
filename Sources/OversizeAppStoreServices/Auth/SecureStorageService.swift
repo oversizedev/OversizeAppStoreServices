@@ -4,6 +4,7 @@
 //  
 
 import Security
+import Foundation
 
 final class SecureStorageService {
     func getKeychain(forKey account: String) -> String? {
