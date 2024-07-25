@@ -11,15 +11,12 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  PACKAGE: OversizeAppStoreServices
-
 jobs:
   build-swiftpm:
     name: Build SwiftPM
     uses: oversizedev/GithubWorkflows/.github/workflows/build-swiftpm.yml@main
     with:
-      package: "${{ env.PACKAGE }}"
+      package: "OversizeAppStoreServices"
     secrets: inherit
 
   tests:
@@ -41,5 +38,5 @@ jobs:
     if: github.ref == 'refs/heads/main'
     uses: oversizedev/GithubWorkflows/.github/workflows/docc.yml@main
     with:
-      package: "${{ env.PACKAGE }}"
+      package: "OversizeAppStoreServices"
     secrets: inherit
