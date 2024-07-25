@@ -10,6 +10,7 @@ let remoteDependencies: [PackageDescription.Package.Dependency] = [
     .package(url: "https://github.com/oversizedev/OversizeCore.git", .upToNextMajor(from: "1.3.0")),
     .package(url: "https://github.com/oversizedev/OversizeServices.git", .upToNextMajor(from: "1.4.0")),
     .package(url: "https://github.com/oversizedev/OversizeModels.git", .upToNextMajor(from: "0.1.0")),
+    .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
 ]
 
 let localDependencies: [PackageDescription.Package.Dependency] = [
@@ -18,6 +19,7 @@ let localDependencies: [PackageDescription.Package.Dependency] = [
     .package(name: "OversizeCore", path: "../OversizeCore"),
     .package(name: "OversizeModels", path: "../OversizeModels"),
     .package(name: "OversizeServices", path: "../OversizeServices"),
+    .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
 ]
 
 var dependencies: [PackageDescription.Package.Dependency] = localDependencies

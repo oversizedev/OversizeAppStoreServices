@@ -10,7 +10,7 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-  
+
 jobs:
   build-swiftpm:
     name: Build SwiftPM
@@ -26,7 +26,17 @@ jobs:
     secrets: inherit
 
   bump:
-     name: Bump version
-     needs: tests
-     uses: oversizedev/GithubWorkflows/.github/workflows/bump.yml@main
-     secrets: inherit
+    name: Bump version
+    needs: tests
+    if: github.ref == 'refs/heads/main'
+    uses: oversizedev/GithubWorkflows/.github/workflows/bump.yml@main
+    secrets: inherit
+     
+  docc:
+    name: Generate DocC
+    needs: tests
+    if: github.ref == 'refs/heads/main'
+    uses: oversizedev/GithubWorkflows/.github/workflows/docc.yml@main
+    with:
+      package: "OversizeAppStoreServices"
+    secrets: inherit
