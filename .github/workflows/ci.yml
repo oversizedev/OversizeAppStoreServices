@@ -6,6 +6,9 @@ on:
       - main
       - develop
   workflow_dispatch:
+  
+env:
+  PACKAGE: OversizeAppStoreServices
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -16,7 +19,7 @@ jobs:
     name: Build SwiftPM
     uses: oversizedev/GithubWorkflows/.github/workflows/build-swiftpm.yml@main
     with:
-      package: "OversizeAppStoreServices"
+      package: "${{ env.PACKAGE }}"
     secrets: inherit
 
   tests:
@@ -26,7 +29,17 @@ jobs:
     secrets: inherit
 
   bump:
-     name: Bump version
-     needs: tests
-     uses: oversizedev/GithubWorkflows/.github/workflows/bump.yml@main
-     secrets: inherit
+    name: Bump version
+    needs: tests
+    if: github.ref == 'refs/heads/main'
+    uses: oversizedev/GithubWorkflows/.github/workflows/bump.yml@main
+    secrets: inherit
+     
+  docc:
+    name: Generate DocC
+    needs: tests
+    if: github.ref == 'refs/heads/main'
+    uses: oversizedev/GithubWorkflows/.github/workflows/docc.yml@main
+    with:
+      package: "${{ env.PACKAGE }}"
+    secrets: inherit
