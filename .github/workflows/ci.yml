@@ -6,14 +6,14 @@ on:
       - main
       - develop
   workflow_dispatch:
-  
-env:
-  PACKAGE: OversizeAppStoreServices
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-  
+
+env:
+  PACKAGE: OversizeAppStoreServices
+
 jobs:
   build-swiftpm:
     name: Build SwiftPM
