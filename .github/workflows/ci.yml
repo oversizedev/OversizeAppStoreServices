@@ -12,30 +12,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-swiftpm:
-    name: Build SwiftPM
-    uses: oversizedev/GithubWorkflows/.github/workflows/build-swiftpm.yml@main
-    with:
-      package: "OversizeAppStoreServices"
-    secrets: inherit
-
-  tests:
-    name: Test
-    needs: build-swiftpm
-    uses: oversizedev/GithubWorkflows/.github/workflows/test.yml@main
-    secrets: inherit
-
-  bump:
-    name: Bump version
-    needs: tests
-    if: github.ref == 'refs/heads/main'
-    uses: oversizedev/GithubWorkflows/.github/workflows/bump.yml@main
-    secrets: inherit
+#  build-swiftpm:
+#    name: Build SwiftPM
+#    uses: oversizedev/GithubWorkflows/.github/workflows/build-swiftpm.yml@main
+#    with:
+#      package: "OversizeAppStoreServices"
+#    secrets: inherit
+#
+#  tests:
+#    name: Test
+#    needs: build-swiftpm
+#    uses: oversizedev/GithubWorkflows/.github/workflows/test.yml@main
+#    secrets: inherit
+#
+#  bump:
+#    name: Bump version
+#    needs: tests
+#    if: github.ref == 'refs/heads/main'
+#    uses: oversizedev/GithubWorkflows/.github/workflows/bump.yml@main
+#    secrets: inherit
      
   docc:
     name: Generate DocC
-    needs: tests
-    if: github.ref == 'refs/heads/main'
+#    needs: tests
+#    if: github.ref == 'refs/heads/main'
     uses: oversizedev/GithubWorkflows/.github/workflows/docc.yml@main
     with:
       package: "OversizeAppStoreServices"

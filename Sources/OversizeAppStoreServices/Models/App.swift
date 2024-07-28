@@ -5,7 +5,7 @@
 
 import AppStoreConnect
 
-public struct App {
+public struct App: Identifiable {
     public let id: String
     public let name: String
     public let bundleID: String
