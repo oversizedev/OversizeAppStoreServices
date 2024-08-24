@@ -1,10 +1,10 @@
 //
 // Copyright © 2024 Alexander Romanov
 // SecureStorageService.swift, created on 24.07.2024
-//  
+//
 
-import Security
 import Foundation
+import Security
 
 final class SecureStorageService {
     func getKeychain(forKey account: String) -> String? {

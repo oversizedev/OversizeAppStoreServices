@@ -6,7 +6,6 @@
 import Factory
 
 public extension Container {
-
     var appsService: Factory<AppsService> {
         self { AppsService() }
     }
