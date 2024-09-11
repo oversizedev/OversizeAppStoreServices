@@ -1,11 +1,11 @@
 //
 // Copyright © 2024 Alexander Romanov
-// File.swift, created on 23.07.2024
+// AppStoreLanguage.swift, created on 23.07.2024
 //
 
 import Foundation
 
-enum AppStoreLanguage: String, CaseIterable, Codable {
+public enum AppStoreLanguage: String, CaseIterable, Codable {
     case arabic = "ar-SA"
     case catalan = "ca"
     case chineseSimplified = "zh-Hans"

@@ -6,6 +6,6 @@
 import Foundation
 
 public enum ContentRightsDeclaration: String, CaseIterable, Codable, Sendable {
-    case notUseThirdPartyContent
-    case usesThirdPartyContent
+    case doesNotUseThirdPartyContent = "DOES_NOT_USE_THIRD_PARTY_CONTENT"
+    case usesThirdPartyContent = "USES_THIRD_PARTY_CONTENT"
 }

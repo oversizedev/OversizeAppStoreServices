@@ -6,7 +6,7 @@
 import Foundation
 
 /// Environment wrapper that loads values from a local file, falling back on a `ProcessInfo`.
-public struct Environment {
+public struct NetworkEnvironment {
     /// Error that is thrown if the environment file cannot be loaded.
     public enum FileParserError: Error, CustomStringConvertible {
         /// An error that describes a line in the environment file that cannot be parsed.
