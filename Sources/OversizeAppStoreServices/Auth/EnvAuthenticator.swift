@@ -15,21 +15,15 @@ public struct EnvAuthenticator: Authenticator {
     private let secureStorage: SecureStorageService = .init()
 
     public init() throws {
-        guard let keyID = secureStorage.getKeychain(forKey: "AppStore.KeyID") else {
+        guard let appStoreCertificate = secureStorage.getAppStoreCertificate(with: "AppStore.KeyID") else {
             throw Error.missingEnvironmentVariable("AppStore.KeyID")
         }
-        guard let issuerID = secureStorage.getKeychain(forKey: "AppStore.IssuerID") else {
-            throw Error.missingEnvironmentVariable("AppStore.IssuerID")
-        }
-        guard let privateKeyRepresentation = secureStorage.getKeychain(forKey: "AppStore.PrivateKey") else {
-            throw Error.missingEnvironmentVariable("AppStore.PrivateKey")
-        }
 
-        let privateKey = try JWT.PrivateKey(pemRepresentation: privateKeyRepresentation)
+        let privateKey = try JWT.PrivateKey(pemRepresentation: appStoreCertificate.privateKey)
 
         jwt = JWT(
-            keyID: keyID,
-            issuerID: issuerID,
+            keyID: appStoreCertificate.keyId,
+            issuerID: appStoreCertificate.issuerId,
             expiryDuration: 20 * 60,
             privateKey: privateKey
         )
