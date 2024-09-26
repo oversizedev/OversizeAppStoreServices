@@ -6,6 +6,10 @@
 import Factory
 
 public extension Container {
+    var keychainService: Factory<KeychainService> {
+        self { KeychainService() }
+    }
+
     var appsService: Factory<AppsService> {
         self { AppsService() }
     }
@@ -20,5 +24,9 @@ public extension Container {
 
     var reviewService: Factory<ReviewService> {
         self { ReviewService() }
+    }
+
+    var usersService: Factory<UsersService> {
+        self { UsersService() }
     }
 }

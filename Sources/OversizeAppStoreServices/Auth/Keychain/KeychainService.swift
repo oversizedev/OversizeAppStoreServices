@@ -1,13 +1,13 @@
 //
 // Copyright © 2022 Alexander Romanov
-// SecureStorageService.swift
+// KeychainService.swift
 //
 
 import Foundation
 import OversizeCore
 import Security
 
-public final class SecureStorageService {
+public final class KeychainService {
     enum KeychainError: Error {
         case itemAlreadyExist
         case itemNotFound
