@@ -4,32 +4,27 @@
 //
 
 import AppStoreConnect
+import Foundation
 
 public struct EnvAuthenticator: Authenticator {
-    public enum Error: Swift.Error {
-        case missingEnvironmentVariable(String)
-    }
+    private let secureStorage: KeychainService = .init()
 
-    var jwt: JWT
-
-    private let secureStorage: SecureStorageService = .init()
+    private var jwt: JWT
 
     public init() throws {
-        guard let keyID = secureStorage.getKeychain(forKey: "AppStore.KeyID") else {
-            throw Error.missingEnvironmentVariable("AppStore.KeyID")
-        }
-        guard let issuerID = secureStorage.getKeychain(forKey: "AppStore.IssuerID") else {
-            throw Error.missingEnvironmentVariable("AppStore.IssuerID")
-        }
-        guard let privateKeyRepresentation = secureStorage.getKeychain(forKey: "AppStore.PrivateKey") else {
-            throw Error.missingEnvironmentVariable("AppStore.PrivateKey")
+        guard let keyLabel = UserDefaults.standard.string(forKey: "AppStore.Account") else {
+            throw Error.missingEnvironmentVariable("AppStore.Account")
         }
 
-        let privateKey = try JWT.PrivateKey(pemRepresentation: privateKeyRepresentation)
+        guard let appStoreCertificate = secureStorage.getAppStoreCertificate(with: keyLabel) else {
+            throw Error.missingEnvironmentVariable("AppStore.Key.Default")
+        }
+
+        let privateKey = try JWT.PrivateKey(pemRepresentation: appStoreCertificate.privateKey)
 
         jwt = JWT(
-            keyID: keyID,
-            issuerID: issuerID,
+            keyID: appStoreCertificate.keyId,
+            issuerID: appStoreCertificate.issuerId,
             expiryDuration: 20 * 60,
             privateKey: privateKey
         )
@@ -37,5 +32,11 @@ public struct EnvAuthenticator: Authenticator {
 
     public mutating func token() throws -> String {
         try jwt.token()
+    }
+}
+
+public extension EnvAuthenticator {
+    enum Error: Swift.Error {
+        case missingEnvironmentVariable(String)
     }
 }

@@ -6,9 +6,9 @@
 import AppStoreConnect
 
 public struct Version {
+    public let id: String
     public let version: String
-    let appStoreState: String
-    let id: String
+    public let appStoreState: String
     init?(schema: AppStoreConnect.AppStoreVersion) {
         guard let state = schema.attributes?.appStoreState,
               let version = schema.attributes?.versionString else { return nil }
