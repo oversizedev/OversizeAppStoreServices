@@ -4,14 +4,15 @@
 //
 
 import AppStoreConnect
+import AppStoreAPI
 
 public enum BundleID {
     public enum Platform {
-        case ios
+        case iOS
         case macOS
 
-        init(schema: AppStoreConnect.BundleIDPlatform) {
-            self = schema == .ios ? .ios : .macOS
+        init(schema: AppStoreAPI.BundleIDPlatform) {
+            self = schema == .iOS ? .iOS : .macOS
         }
     }
 }

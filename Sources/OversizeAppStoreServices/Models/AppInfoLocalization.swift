@@ -5,6 +5,7 @@
 
 import AppStoreConnect
 import Foundation
+import AppStoreAPI
 
 public struct AppInfoLocalization {
     public let id: String
@@ -15,7 +16,7 @@ public struct AppInfoLocalization {
     public let privacyChoicesURL: URL?
     public let privacyPolicyText: String?
 
-    public init?(schema: AppStoreConnect.AppInfoLocalization) {
+    public init?(schema: AppStoreAPI.AppInfoLocalization) {
         guard let localeRawValue = schema.attributes?.locale,
               let locale: AppStoreLanguage = .init(rawValue: localeRawValue)
         else { return nil }

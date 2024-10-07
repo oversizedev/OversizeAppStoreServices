@@ -4,6 +4,7 @@
 //
 
 import AppStoreConnect
+import AppStoreAPI
 import OversizeCore
 
 public struct AppInfo {
@@ -14,7 +15,7 @@ public struct AppInfo {
         return primaryCategoryId?.capitalizingFirstLetter() ?? ""
     }
 
-    public init?(schema: AppStoreConnect.AppInfo) {
+    public init?(schema: AppStoreAPI.AppInfo) {
         id = schema.id
         primaryCategoryId = schema.relationships?.primaryCategory?.data?.id
         secondaryCategoryId = schema.relationships?.secondaryCategory?.data?.id

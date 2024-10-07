@@ -4,6 +4,7 @@
 //
 
 import AppStoreConnect
+import AppStoreAPI
 
 public struct Profile {
     public let name: String
@@ -11,7 +12,7 @@ public struct Profile {
     public let content: String
     public let isActive: Bool
 
-    init?(schema: AppStoreConnect.Profile) {
+    init?(schema: AppStoreAPI.Profile) {
         guard let name = schema.attributes?.name,
               let content = schema.attributes?.profileContent,
               let state = schema.attributes?.profileState,
@@ -26,7 +27,7 @@ public struct Profile {
 }
 
 extension Profile {
-    static func from(_ response: AppStoreConnect.ProfilesResponse, include: (Profile) -> Bool) -> [Profile] {
+    static func from(_ response: AppStoreAPI.ProfilesResponse, include: (Profile) -> Bool) -> [Profile] {
         response.data.compactMap { Profile(schema: $0) }.filter { include($0) }
     }
 }

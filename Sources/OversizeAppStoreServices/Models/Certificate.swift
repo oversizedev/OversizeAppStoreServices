@@ -5,6 +5,7 @@
 
 import AppStoreConnect
 import Foundation
+import AppStoreAPI
 
 public struct Certificate {
     public let id: String
@@ -14,7 +15,7 @@ public struct Certificate {
     public let content: String
     public var expirationDate: Date
 
-    init?(schema: AppStoreConnect.Certificate) {
+    init?(schema: AppStoreAPI.Certificate) {
         guard let name = schema.attributes?.name,
               let type = CertificateType(rawValue: schema.attributes?.certificateType?.rawValue ?? ""),
               let content = schema.attributes?.certificateContent,
@@ -31,12 +32,12 @@ public struct Certificate {
 }
 
 extension Certificate {
-    static func from(response: AppStoreConnect.CertificatesResponse, include: (Certificate) -> Bool) -> [Certificate] {
+    static func from(response: AppStoreAPI.CertificatesResponse, include: (Certificate) -> Bool) -> [Certificate] {
         response.data.compactMap { Certificate(schema: $0) }.filter { include($0) }
     }
 }
 
-private extension AppStoreConnect.CertificateType {
+private extension AppStoreAPI.CertificateType {
     init?(from certType: CertificateType) {
         guard let resolved = Self(rawValue: certType.rawValue) else { return nil }
         self = resolved

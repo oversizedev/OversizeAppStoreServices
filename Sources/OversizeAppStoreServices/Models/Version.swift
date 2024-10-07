@@ -5,6 +5,7 @@
 
 import AppStoreConnect
 import Foundation
+import AppStoreAPI
 import OversizeCore
 
 public struct Version {
@@ -21,7 +22,7 @@ public struct Version {
     public let isDownloadable: Bool?
     public let createdDate: Date?
     
-    init?(schema: AppStoreConnect.AppStoreVersion) {
+    init?(schema: AppStoreAPI.AppStoreVersion) {
         guard let storeState = schema.attributes?.appStoreState?.rawValue,
               let storeStateType: AppStoreVersionState = .init(rawValue: storeState),
               let state = schema.attributes?.appVersionState?.rawValue,

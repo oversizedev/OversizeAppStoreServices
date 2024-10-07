@@ -3,7 +3,6 @@
 // AppVersionState.swift, created on 06.10.2024
 //  
 
-
 import Foundation
 
 public enum AppVersionState: String, CaseIterable, Codable, Sendable {

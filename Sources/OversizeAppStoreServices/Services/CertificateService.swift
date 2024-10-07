@@ -5,6 +5,7 @@
 
 import AppStoreConnect
 import Foundation
+import AppStoreAPI
 import OversizeModels
 
 public actor CertificateService {

@@ -7,7 +7,7 @@ import Foundation
 import OversizeCore
 import Security
 
-public final class KeychainService {
+public final class KeychainService: @unchecked Sendable {
     enum KeychainError: Error {
         case itemAlreadyExist
         case itemNotFound
