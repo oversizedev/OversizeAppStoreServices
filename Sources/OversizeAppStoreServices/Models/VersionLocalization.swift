@@ -7,6 +7,7 @@ import AppStoreConnect
 import Foundation
 
 public struct VersionLocalization {
+    
     public let description: String?
     public let locale: String?
     public let keywords: String?
