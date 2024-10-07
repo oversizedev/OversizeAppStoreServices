@@ -4,6 +4,7 @@
 //
 
 import AppStoreConnect
+import AppStoreAPI
 import OversizeModels
 
 public actor UsersService {

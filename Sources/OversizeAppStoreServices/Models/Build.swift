@@ -4,6 +4,7 @@
 //
 
 import AppStoreConnect
+import AppStoreAPI
 import Foundation
 
 public struct Build {
@@ -19,7 +20,7 @@ public struct Build {
     public let processingState: ProcessingState?
     public let buildAudienceType: BuildAudienceType?
 
-    public init?(schema: AppStoreConnect.Build) {
+    public init?(schema: AppStoreAPI.Build) {
         guard let version = schema.attributes?.version,
               let uploadedDate = schema.attributes?.uploadedDate,
               let expirationDate = schema.attributes?.expirationDate

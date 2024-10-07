@@ -4,10 +4,11 @@
 //
 
 import AppStoreConnect
+import AppStoreAPI
 
 public struct Review {
     public let rating: Int
-    init?(schema: AppStoreConnect.CustomerReview) {
+    init?(schema: AppStoreAPI.CustomerReview) {
         guard let rating = schema.attributes?.rating else { return nil }
         self.rating = rating
     }

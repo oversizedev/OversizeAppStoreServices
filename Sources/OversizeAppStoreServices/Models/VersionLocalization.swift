@@ -5,8 +5,10 @@
 
 import AppStoreConnect
 import Foundation
+import AppStoreAPI
 
 public struct VersionLocalization {
+    
     public let description: String?
     public let locale: String?
     public let keywords: String?
@@ -15,7 +17,7 @@ public struct VersionLocalization {
     public let supportURL: URL?
     public let whatsNew: String?
 
-    init?(schema: AppStoreConnect.AppStoreVersionLocalization) {
+    init?(schema: AppStoreAPI.AppStoreVersionLocalization) {
         description = schema.attributes?.description
         locale = schema.attributes?.locale
         keywords = schema.attributes?.keywords

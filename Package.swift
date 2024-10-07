@@ -5,7 +5,7 @@ import Foundation
 import PackageDescription
 
 let remoteDependencies: [PackageDescription.Package.Dependency] = [
-    .package(url: "https://github.com/aaronsky/asc-swift.git", .upToNextMajor(from: "0.6.1")),
+    .package(url: "https://github.com/aaronsky/asc-swift.git", .upToNextMajor(from: "1.0.1")),
     .package(url: "https://github.com/hmlongco/Factory.git", .upToNextMajor(from: "2.1.3")),
     .package(url: "https://github.com/oversizedev/OversizeCore.git", .upToNextMajor(from: "1.3.0")),
     .package(url: "https://github.com/oversizedev/OversizeServices.git", .upToNextMajor(from: "1.4.0")),
@@ -13,7 +13,7 @@ let remoteDependencies: [PackageDescription.Package.Dependency] = [
 ]
 
 let localDependencies: [PackageDescription.Package.Dependency] = [
-    .package(url: "https://github.com/aaronsky/asc-swift.git", .upToNextMajor(from: "0.6.1")),
+    .package(url: "https://github.com/aaronsky/asc-swift.git", .upToNextMajor(from: "1.0.1")),
     .package(url: "https://github.com/hmlongco/Factory.git", .upToNextMajor(from: "2.1.3")),
     .package(name: "OversizeCore", path: "../OversizeCore"),
     .package(name: "OversizeModels", path: "../OversizeModels"),
@@ -29,10 +29,10 @@ if ProcessInfo.processInfo.environment["BUILD_MODE"] == "PRODUCTION" {
 let package = Package(
     name: "OversizeAppStoreServices",
     platforms: [
-        .iOS(.v15),
-        .macOS(.v12),
-        .tvOS(.v15),
-        .watchOS(.v8),
+        .iOS(.v16),
+        .macOS(.v13),
+        .tvOS(.v16),
+        .watchOS(.v9),
     ],
     products: [
         .library(
