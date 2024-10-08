@@ -3,13 +3,12 @@
 // Version.swift, created on 23.07.2024
 //
 
+import AppStoreAPI
 import AppStoreConnect
 import Foundation
-import AppStoreAPI
 import OversizeCore
 
 public struct Version {
-
     public let id: String
     public let version: String
     public let platform: Platform
@@ -21,7 +20,7 @@ public struct Version {
     public let earliestReleaseDate: Date?
     public let isDownloadable: Bool?
     public let createdDate: Date?
-    
+
     init?(schema: AppStoreAPI.AppStoreVersion) {
         guard let storeState = schema.attributes?.appStoreState?.rawValue,
               let storeStateType: AppStoreVersionState = .init(rawValue: storeState),
@@ -35,11 +34,11 @@ public struct Version {
         self.state = stateType
         self.platform = platformType
         self.version = version
-        self.copyright = schema.attributes?.copyright.valueOrEmpty
-        self.earliestReleaseDate = schema.attributes?.earliestReleaseDate
-        self.isDownloadable = schema.attributes?.isDownloadable
-        self.createdDate = schema.attributes?.createdDate
-        self.reviewType = .init(rawValue: schema.attributes?.createdDate?.rawValue ?? "")
-        self.releaseType = .init(rawValue: schema.attributes?.releaseType?.rawValue ?? "")
+        copyright = schema.attributes?.copyright.valueOrEmpty
+        earliestReleaseDate = schema.attributes?.earliestReleaseDate
+        isDownloadable = schema.attributes?.isDownloadable
+        createdDate = schema.attributes?.createdDate
+        reviewType = .init(rawValue: schema.attributes?.createdDate?.rawValue ?? "")
+        releaseType = .init(rawValue: schema.attributes?.releaseType?.rawValue ?? "")
     }
 }

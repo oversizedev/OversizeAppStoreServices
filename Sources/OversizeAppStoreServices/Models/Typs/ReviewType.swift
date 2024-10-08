@@ -1,7 +1,7 @@
 //
 // Copyright © 2024 Alexander Romanov
 // ReviewType.swift, created on 06.10.2024
-//  
+//
 
 import Foundation
 

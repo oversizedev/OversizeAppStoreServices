@@ -3,12 +3,11 @@
 // AppStoreVersionLocalization.swift, created on 22.07.2024
 //
 
+import AppStoreAPI
 import AppStoreConnect
 import Foundation
-import AppStoreAPI
 
 public struct VersionLocalization {
-    
     public let description: String?
     public let locale: String?
     public let keywords: String?

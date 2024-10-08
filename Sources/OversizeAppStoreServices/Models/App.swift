@@ -3,8 +3,8 @@
 // App.swift, created on 21.07.2024
 //
 
-import AppStoreConnect
 import AppStoreAPI
+import AppStoreConnect
 import Foundation
 
 public struct App: Identifiable {
@@ -19,7 +19,6 @@ public struct App: Identifiable {
     public let subscriptionStatusURLVersion: SubscriptionStatusURLVersion?
     public let subscriptionStatusURLForSandbox: URL?
     public let subscriptionStatusURLVersionForSandbox: SubscriptionStatusURLVersion?
-
 
     public init?(schema: AppStoreAPI.App) {
         guard let bundleID = schema.attributes?.bundleID,

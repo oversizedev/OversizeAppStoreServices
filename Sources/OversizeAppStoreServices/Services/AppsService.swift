@@ -3,10 +3,10 @@
 // AppsService.swift, created on 22.07.2024
 //
 
+import AppStoreAPI
 import AppStoreConnect
 import Foundation
 import OversizeModels
-import AppStoreAPI
 
 public actor AppsService {
     private let client: AppStoreConnectClient?

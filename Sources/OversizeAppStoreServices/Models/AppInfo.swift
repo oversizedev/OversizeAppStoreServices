@@ -3,8 +3,8 @@
 // AppInfo.swift, created on 23.07.2024
 //
 
-import AppStoreConnect
 import AppStoreAPI
+import AppStoreConnect
 import OversizeCore
 
 public struct AppInfo {

@@ -3,8 +3,8 @@
 // BundleID.swift, created on 23.07.2024
 //
 
-import AppStoreConnect
 import AppStoreAPI
+import AppStoreConnect
 
 public enum BundleID {
     public enum Platform {

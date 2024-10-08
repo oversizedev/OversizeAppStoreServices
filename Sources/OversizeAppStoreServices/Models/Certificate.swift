@@ -3,9 +3,9 @@
 // Certificate.swift, created on 23.07.2024
 //
 
+import AppStoreAPI
 import AppStoreConnect
 import Foundation
-import AppStoreAPI
 
 public struct Certificate {
     public let id: String

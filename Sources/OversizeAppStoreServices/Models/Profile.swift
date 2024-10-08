@@ -3,8 +3,8 @@
 // Profile.swift, created on 23.07.2024
 //
 
-import AppStoreConnect
 import AppStoreAPI
+import AppStoreConnect
 
 public struct Profile {
     public let name: String

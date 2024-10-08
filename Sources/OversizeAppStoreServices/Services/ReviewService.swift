@@ -3,9 +3,9 @@
 // ReviewService.swift, created on 23.07.2024
 //
 
+import AppStoreAPI
 import AppStoreConnect
 import OversizeModels
-import AppStoreAPI
 
 public actor ReviewService {
     private let client: AppStoreConnectClient?

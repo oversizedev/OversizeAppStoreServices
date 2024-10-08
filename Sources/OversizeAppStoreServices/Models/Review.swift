@@ -3,8 +3,8 @@
 // Review.swift, created on 23.07.2024
 //
 
-import AppStoreConnect
 import AppStoreAPI
+import AppStoreConnect
 
 public struct Review {
     public let rating: Int
