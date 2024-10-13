@@ -6,8 +6,8 @@
 import AppStoreAPI
 import AppStoreConnect
 
-public enum BundleID {
-    public enum Platform {
+public enum BundleID: Sendable {
+    public enum Platform: Sendable {
         case iOS
         case macOS
 

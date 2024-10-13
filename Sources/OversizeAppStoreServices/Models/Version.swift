@@ -8,7 +8,7 @@ import AppStoreConnect
 import Foundation
 import OversizeCore
 
-public struct Version {
+public struct Version: Sendable {
     public let id: String
     public let version: String
     public let platform: Platform

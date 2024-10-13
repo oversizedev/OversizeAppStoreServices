@@ -6,7 +6,7 @@
 import AppStoreAPI
 import AppStoreConnect
 
-public struct Profile {
+public struct Profile: Sendable {
     public let name: String
     public let platform: BundleID.Platform
     public let content: String

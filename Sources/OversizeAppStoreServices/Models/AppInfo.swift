@@ -7,7 +7,7 @@ import AppStoreAPI
 import AppStoreConnect
 import OversizeCore
 
-public struct AppInfo {
+public struct AppInfo: Sendable {
     public let id: String
     public let primaryCategoryId: String?
     public let secondaryCategoryId: String?

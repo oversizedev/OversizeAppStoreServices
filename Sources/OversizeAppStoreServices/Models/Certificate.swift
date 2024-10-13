@@ -7,7 +7,7 @@ import AppStoreAPI
 import AppStoreConnect
 import Foundation
 
-public struct Certificate {
+public struct Certificate: Sendable {
     public let id: String
     public let name: String
     public let platform: BundleID.Platform

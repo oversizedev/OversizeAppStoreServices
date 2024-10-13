@@ -7,7 +7,7 @@ import AppStoreAPI
 import AppStoreConnect
 import Foundation
 
-public struct App: Identifiable {
+public struct App: Identifiable, Sendable {
     public let id: String
     public let name: String
     public let bundleID: String
