@@ -8,13 +8,13 @@ import AppStoreConnect
 import Foundation
 import OversizeCore
 
-public struct Version: Sendable {
+public struct Version: Sendable, Identifiable {
     public let id: String
     public let version: String
     public let platform: Platform
     public let storeState: AppStoreVersionState
-    public let state: AppVersionState?
-    public let copyright: String?
+    public let state: AppVersionState
+    public let copyright: String
     public let reviewType: ReviewType?
     public let releaseType: ReviewType?
     public let earliestReleaseDate: Date?
@@ -34,7 +34,7 @@ public struct Version: Sendable {
         self.state = stateType
         self.platform = platformType
         self.version = version
-        copyright = schema.attributes?.copyright.valueOrEmpty
+        copyright = schema.attributes?.copyright ?? ""
         earliestReleaseDate = schema.attributes?.earliestReleaseDate
         isDownloadable = schema.attributes?.isDownloadable
         createdDate = schema.attributes?.createdDate

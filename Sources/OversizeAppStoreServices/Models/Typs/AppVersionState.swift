@@ -3,7 +3,7 @@
 // AppVersionState.swift, created on 06.10.2024
 //
 
-import Foundation
+import SwiftUI
 
 public enum AppVersionState: String, CaseIterable, Codable, Sendable {
     case accepted = "ACCEPTED"
@@ -21,4 +21,72 @@ public enum AppVersionState: String, CaseIterable, Codable, Sendable {
     case replacedWithNewVersion = "REPLACED_WITH_NEW_VERSION"
     case waitingForExportCompliance = "WAITING_FOR_EXPORT_COMPLIANCE"
     case waitingForReview = "WAITING_FOR_REVIEW"
+
+    // Computed property to return color based on the state
+    public var statusColor: Color {
+        switch self {
+        case .accepted, .readyForDistribution:
+            return .green
+        case .inReview, .readyForReview, .pendingAppleRelease, .pendingDeveloperRelease, .processingForDistribution, .waitingForReview, .waitingForExportCompliance:
+            return .yellow
+        case .developerRejected, .rejected, .metadataRejected, .invalidBinary, .replacedWithNewVersion:
+            return .red
+        case .prepareForSubmission:
+            return .gray
+        }
+    }
+
+    // Computed property to return display-friendly name
+    public var displayName: String {
+        switch self {
+        case .accepted:
+            return "Accepted"
+        case .developerRejected:
+            return "Developer Rejected"
+        case .inReview:
+            return "In Review"
+        case .invalidBinary:
+            return "Invalid Binary"
+        case .metadataRejected:
+            return "Metadata Rejected"
+        case .pendingAppleRelease:
+            return "Pending Apple Release"
+        case .pendingDeveloperRelease:
+            return "Pending Developer Release"
+        case .prepareForSubmission:
+            return "Prepare for Submission"
+        case .processingForDistribution:
+            return "Processing for Distribution"
+        case .readyForDistribution:
+            return "Ready for Distribution"
+        case .readyForReview:
+            return "Ready for Review"
+        case .rejected:
+            return "Rejected"
+        case .replacedWithNewVersion:
+            return "Replaced with New Version"
+        case .waitingForExportCompliance:
+            return "Waiting for Export Compliance"
+        case .waitingForReview:
+            return "Waiting for Review"
+        }
+    }
+
+    public var isCanBeHidden: Bool {
+        switch self {
+        case .replacedWithNewVersion:
+            return true
+        default:
+            return false
+        }
+    }
+
+    public var isEditable: Bool {
+        switch self {
+        case .prepareForSubmission, .metadataRejected, .developerRejected, .rejected, .invalidBinary:
+            return true
+        default:
+            return false
+        }
+    }
 }

@@ -42,7 +42,7 @@ public actor AppsService {
         }
     }
 
-    public func fetchAppVersion(appId: String) async -> Result<[Version], AppError> {
+    public func fetchAppVersions(appId: String) async -> Result<[Version], AppError> {
         guard let client = client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.apps.id(appId).appStoreVersions.get()
         do {
@@ -53,7 +53,7 @@ public actor AppsService {
         }
     }
 
-    public func fetchAppVersion(appId: String, platform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform) async -> Result<[Version], AppError> {
+    public func fetchAppVersions(appId: String, platform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform) async -> Result<[Version], AppError> {
         guard let client = client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.apps.id(appId).appStoreVersions.get(filterPlatform: [platform])
         do {
@@ -81,7 +81,7 @@ public actor AppsService {
         }
     }
 
-    public func fetchAppVersionLocalization(forVersion versionId: String) async -> Result<[VersionLocalization], AppError> {
+    public func fetchAppVersionLocalizations(forVersion versionId: String) async -> Result<[VersionLocalization], AppError> {
         guard let client = client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.appStoreVersions.id(versionId).appStoreVersionLocalizations.get()
         do {
@@ -92,7 +92,7 @@ public actor AppsService {
         }
     }
 
-    public func fetchAppInfo(forVersion versionId: String) async -> Result<[AppInfo], AppError> {
+    public func fetchAppInfos(forVersion versionId: String) async -> Result<[AppInfo], AppError> {
         guard let client = client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.apps.id(versionId).appInfos.get()
         do {
@@ -142,19 +142,19 @@ public extension AppsService {
         return await fetchAppBuilds(appId: app.id)
     }
 
-    func fetchAppVersion(_ app: App) async -> Result<[Version], AppError> {
-        return await fetchAppVersion(appId: app.id)
+    func fetchAppVersions(_ app: App) async -> Result<[Version], AppError> {
+        return await fetchAppVersions(appId: app.id)
     }
 
-    func fetchAppVersion(_ app: App, platform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform) async -> Result<[Version], AppError> {
-        return await fetchAppVersion(appId: app.id, platform: platform)
+    func fetchAppVersions(_ app: App, platform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform) async -> Result<[Version], AppError> {
+        return await fetchAppVersions(appId: app.id, platform: platform)
     }
 
     func fetchAppInfoLocalizations(_ info: AppInfo) async -> Result<[AppInfoLocalization], AppError> {
         return await fetchAppInfoLocalizations(forInfo: info.id)
     }
 
-    func fetchAppInfo(_ version: Version) async -> Result<[AppInfo], AppError> {
-        return await fetchAppInfo(forVersion: version.id)
+    func fetchAppInfos(_ version: Version) async -> Result<[AppInfo], AppError> {
+        return await fetchAppInfos(forVersion: version.id)
     }
 }
