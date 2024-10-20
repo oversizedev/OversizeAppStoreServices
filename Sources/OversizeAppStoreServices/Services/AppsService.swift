@@ -125,12 +125,52 @@ public actor AppsService {
         }
     }
 
-    public func fetchAppCategoryIds(categoryId _: String) async -> Result<[String], AppError> {
+    public func fetchAppCategoryIds() async -> Result<[String], AppError> {
         guard let client = client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.appCategories.get()
         do {
             let data = try await client.send(request).data
             return .success(data.compactMap { $0.id })
+        } catch {
+            return .failure(.network(type: .noResponse))
+        }
+    }
+    
+    public func updateVersionLocalization(
+        localizationId: String,
+        whatsNew: String? = nil,
+        description: String? = nil,
+        promotionalText: String? = nil,
+        keywords: String? = nil,
+        marketingURL: URL? = nil,
+        supportURL: URL? = nil
+    ) async -> Result<VersionLocalization, AppError> {
+        
+        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        
+        let requestAttributes: AppStoreVersionLocalizationUpdateRequest.Data.Attributes = .init(
+            description: description,
+            keywords: keywords,
+            marketingURL: marketingURL,
+            promotionalText: promotionalText,
+            supportURL: supportURL,
+            whatsNew: whatsNew
+        )
+        
+        let requestData: AppStoreVersionLocalizationUpdateRequest.Data = .init(
+            type: .appStoreVersionLocalizations,
+            id: localizationId,
+            attributes: requestAttributes
+        )
+        
+        let request = Resources.v1.appStoreVersionLocalizations.id(localizationId).patch(.init(data: requestData))
+        
+        do {
+            let data = try await client.send(request).data
+            guard let versionLocalization: VersionLocalization = .init(schema: data) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(versionLocalization)
         } catch {
             return .failure(.network(type: .noResponse))
         }
