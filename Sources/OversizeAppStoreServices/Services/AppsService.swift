@@ -135,7 +135,7 @@ public actor AppsService {
             return .failure(.network(type: .noResponse))
         }
     }
-    
+
     public func updateVersionLocalization(
         localizationId: String,
         whatsNew: String? = nil,
@@ -145,9 +145,8 @@ public actor AppsService {
         marketingURL: URL? = nil,
         supportURL: URL? = nil
     ) async -> Result<VersionLocalization, AppError> {
-        
         guard let client = client else { return .failure(.network(type: .unauthorized)) }
-        
+
         let requestAttributes: AppStoreVersionLocalizationUpdateRequest.Data.Attributes = .init(
             description: description,
             keywords: keywords,
@@ -156,21 +155,48 @@ public actor AppsService {
             supportURL: supportURL,
             whatsNew: whatsNew
         )
-        
+
         let requestData: AppStoreVersionLocalizationUpdateRequest.Data = .init(
             type: .appStoreVersionLocalizations,
             id: localizationId,
             attributes: requestAttributes
         )
-        
+
         let request = Resources.v1.appStoreVersionLocalizations.id(localizationId).patch(.init(data: requestData))
-        
+
         do {
             let data = try await client.send(request).data
             guard let versionLocalization: VersionLocalization = .init(schema: data) else {
                 return .failure(.network(type: .decode))
             }
             return .success(versionLocalization)
+        } catch {
+            return .failure(.network(type: .noResponse))
+        }
+    }
+
+    func createBundleId(
+        name: String,
+        platform: BundleIDPlatform,
+        identifier: String,
+        seedID: String? = nil
+    ) async -> Result<Bool, AppError> {
+        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+
+        let requestData: BundleIDCreateRequest.Data = .init(
+            type: .bundleIDs,
+            attributes: .init(
+                name: name,
+                platform: platform,
+                identifier: identifier,
+                seedID: seedID
+            )
+        )
+
+        let request = Resources.v1.bundleIDs.post(.init(data: requestData))
+        do {
+            let data = try await client.send(request).data
+            return .success(true)
         } catch {
             return .failure(.network(type: .noResponse))
         }
