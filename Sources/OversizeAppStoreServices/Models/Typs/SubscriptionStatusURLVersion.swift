@@ -2,6 +2,7 @@
 // Copyright © 2024 Alexander Romanov
 // SubscriptionStatusURLVersion.swift, created on 28.08.2024
 //
+
 import Foundation
 
 public enum SubscriptionStatusURLVersion: String, CaseIterable, Codable, Sendable {

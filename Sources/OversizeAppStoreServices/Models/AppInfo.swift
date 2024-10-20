@@ -3,10 +3,11 @@
 // AppInfo.swift, created on 23.07.2024
 //
 
+import AppStoreAPI
 import AppStoreConnect
 import OversizeCore
 
-public struct AppInfo {
+public struct AppInfo: Sendable {
     public let id: String
     public let primaryCategoryId: String?
     public let secondaryCategoryId: String?
@@ -14,7 +15,7 @@ public struct AppInfo {
         return primaryCategoryId?.capitalizingFirstLetter() ?? ""
     }
 
-    public init?(schema: AppStoreConnect.AppInfo) {
+    public init?(schema: AppStoreAPI.AppInfo) {
         id = schema.id
         primaryCategoryId = schema.relationships?.primaryCategory?.data?.id
         secondaryCategoryId = schema.relationships?.secondaryCategory?.data?.id

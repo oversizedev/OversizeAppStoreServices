@@ -3,10 +3,11 @@
 // Build.swift, created on 22.07.2024
 //
 
+import AppStoreAPI
 import AppStoreConnect
 import Foundation
 
-public struct Build {
+public struct Build: Sendable {
     public let id: String
     public let version: String
     public let uploadedDate: Date
@@ -19,7 +20,7 @@ public struct Build {
     public let processingState: ProcessingState?
     public let buildAudienceType: BuildAudienceType?
 
-    public init?(schema: AppStoreConnect.Build) {
+    public init?(schema: AppStoreAPI.Build) {
         guard let version = schema.attributes?.version,
               let uploadedDate = schema.attributes?.uploadedDate,
               let expirationDate = schema.attributes?.expirationDate

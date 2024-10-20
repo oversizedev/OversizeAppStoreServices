@@ -3,10 +3,11 @@
 // App.swift, created on 21.07.2024
 //
 
+import AppStoreAPI
 import AppStoreConnect
 import Foundation
 
-public struct App: Identifiable {
+public struct App: Identifiable, Sendable {
     public let id: String
     public let name: String
     public let bundleID: String
@@ -18,9 +19,8 @@ public struct App: Identifiable {
     public let subscriptionStatusURLVersion: SubscriptionStatusURLVersion?
     public let subscriptionStatusURLForSandbox: URL?
     public let subscriptionStatusURLVersionForSandbox: SubscriptionStatusURLVersion?
-    public let isAvailableInNewTerritories: Bool?
 
-    public init?(schema: AppStoreConnect.App) {
+    public init?(schema: AppStoreAPI.App) {
         guard let bundleID = schema.attributes?.bundleID,
               let name = schema.attributes?.name,
               let sku = schema.attributes?.sku,
@@ -40,7 +40,6 @@ public struct App: Identifiable {
         isOrEverWasMadeForKids = schema.attributes?.isOrEverWasMadeForKids
         subscriptionStatusURL = schema.attributes?.subscriptionStatusURL
         subscriptionStatusURLForSandbox = schema.attributes?.subscriptionStatusURLForSandbox
-        isAvailableInNewTerritories = schema.attributes?.isAvailableInNewTerritories
         if let subscriptionStatusURLVersion = schema.attributes?.subscriptionStatusURLVersion?.rawValue {
             self.subscriptionStatusURLVersion = .init(rawValue: subscriptionStatusURLVersion)
         } else {

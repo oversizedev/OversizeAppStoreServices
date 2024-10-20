@@ -11,7 +11,12 @@ public struct EnvAuthenticator: Authenticator {
 
     private var jwt: JWT
 
-    public init() throws {
+    public var api: API { jwt.api }
+
+    public init(
+        api: API = .appStoreConnect
+
+    ) throws {
         guard let keyLabel = UserDefaults.standard.string(forKey: "AppStore.Account") else {
             throw Error.missingEnvironmentVariable("AppStore.Account")
         }
@@ -23,6 +28,7 @@ public struct EnvAuthenticator: Authenticator {
         let privateKey = try JWT.PrivateKey(pemRepresentation: appStoreCertificate.privateKey)
 
         jwt = JWT(
+            api: api,
             keyID: appStoreCertificate.keyId,
             issuerID: appStoreCertificate.issuerId,
             expiryDuration: 20 * 60,

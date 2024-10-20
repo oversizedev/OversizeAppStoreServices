@@ -3,6 +3,7 @@
 // CertificateService.swift, created on 23.07.2024
 //
 
+import AppStoreAPI
 import AppStoreConnect
 import Foundation
 import OversizeModels

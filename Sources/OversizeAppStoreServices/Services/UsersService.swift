@@ -3,6 +3,7 @@
 // UsersService.swift, created on 22.09.2024
 //
 
+import AppStoreAPI
 import AppStoreConnect
 import OversizeModels
 

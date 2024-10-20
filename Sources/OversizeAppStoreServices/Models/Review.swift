@@ -3,11 +3,12 @@
 // Review.swift, created on 23.07.2024
 //
 
+import AppStoreAPI
 import AppStoreConnect
 
-public struct Review {
+public struct Review: Sendable {
     public let rating: Int
-    init?(schema: AppStoreConnect.CustomerReview) {
+    init?(schema: AppStoreAPI.CustomerReview) {
         guard let rating = schema.attributes?.rating else { return nil }
         self.rating = rating
     }
