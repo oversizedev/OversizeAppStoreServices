@@ -138,112 +138,12 @@ public actor AppsService {
         }
     }
 
-    func fetchAllVersionLocalizations(forVersion versionId: String) async throws -> Result<[(String, AppStoreLanguage)], AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
-        let request = Resources.v1.appStoreVersions.id(versionId).appStoreVersionLocalizations.get()
-        do {
-            let data = try await client.send(request).data
-            return .success(data.compactMap { localization in
-                guard let locale = localization.attributes?.locale, let language = AppStoreLanguage(rawValue: locale) else {
-                    return nil
-                }
-                return (localization.id, language)
-            }
-            )
-        } catch {
-            return .failure(.network(type: .noResponse))
-        }
-    }
-
-    public func fetchAppVersionLocalizations(forVersion versionId: String) async -> Result<[VersionLocalization], AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
-        let request = Resources.v1.appStoreVersions.id(versionId).appStoreVersionLocalizations.get()
-        do {
-            let data = try await client.send(request).data
-            return .success(data.compactMap { .init(schema: $0) })
-        } catch {
-            return .failure(.network(type: .noResponse))
-        }
-    }
-
-    public func fetchAppInfos(forVersion versionId: String) async -> Result<[AppInfo], AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
-        let request = Resources.v1.apps.id(versionId).appInfos.get()
-        do {
-            let data = try await client.send(request).data
-            return .success(data.compactMap { .init(schema: $0) })
-        } catch {
-            return .failure(.network(type: .noResponse))
-        }
-    }
-
-    public func fetchAppInfoWithCategory(forVersion versionId: String) async -> Result<[AppInfo], AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
-        let request = Resources.v1.apps.id(versionId).appInfos.get(include: [.primaryCategory, .secondaryCategory, .ageRatingDeclaration])
-        do {
-            let data = try await client.send(request).data
-            return .success(data.compactMap { .init(schema: $0) })
-        } catch {
-            return .failure(.network(type: .noResponse))
-        }
-    }
-
-    public func fetchAppInfoLocalizations(forInfo infoId: String) async -> Result<[AppInfoLocalization], AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
-        let request = Resources.v1.appInfos.id(infoId).appInfoLocalizations.get()
-        do {
-            let data = try await client.send(request).data
-            return .success(data.compactMap { .init(schema: $0) })
-        } catch {
-            return .failure(.network(type: .noResponse))
-        }
-    }
-
     public func fetchAppCategoryIds() async -> Result<[String], AppError> {
         guard let client = client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.appCategories.get()
         do {
             let data = try await client.send(request).data
             return .success(data.compactMap { $0.id })
-        } catch {
-            return .failure(.network(type: .noResponse))
-        }
-    }
-
-    public func updateVersionLocalization(
-        localizationId: String,
-        whatsNew: String? = nil,
-        description: String? = nil,
-        promotionalText: String? = nil,
-        keywords: String? = nil,
-        marketingURL: URL? = nil,
-        supportURL: URL? = nil
-    ) async -> Result<VersionLocalization, AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
-
-        let requestAttributes: AppStoreVersionLocalizationUpdateRequest.Data.Attributes = .init(
-            description: description,
-            keywords: keywords,
-            marketingURL: marketingURL,
-            promotionalText: promotionalText,
-            supportURL: supportURL,
-            whatsNew: whatsNew
-        )
-
-        let requestData: AppStoreVersionLocalizationUpdateRequest.Data = .init(
-            type: .appStoreVersionLocalizations,
-            id: localizationId,
-            attributes: requestAttributes
-        )
-
-        let request = Resources.v1.appStoreVersionLocalizations.id(localizationId).patch(.init(data: requestData))
-
-        do {
-            let data = try await client.send(request).data
-            guard let versionLocalization: VersionLocalization = .init(schema: data) else {
-                return .failure(.network(type: .decode))
-            }
-            return .success(versionLocalization)
         } catch {
             return .failure(.network(type: .noResponse))
         }
@@ -284,13 +184,5 @@ public extension AppsService {
 
     func fetchAppVersions(_ app: App, platform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform) async -> Result<[AppStoreVersion], AppError> {
         return await fetchAppVersions(appId: app.id, platform: platform)
-    }
-
-    func fetchAppInfoLocalizations(_ info: AppInfo) async -> Result<[AppInfoLocalization], AppError> {
-        return await fetchAppInfoLocalizations(forInfo: info.id)
-    }
-
-    func fetchAppInfos(_ version: AppStoreVersion) async -> Result<[AppInfo], AppError> {
-        return await fetchAppInfos(forVersion: version.id)
     }
 }
