@@ -7,7 +7,7 @@ import AppStoreAPI
 import AppStoreConnect
 import Foundation
 
-public struct Build: Sendable {
+public struct Build: Sendable, Identifiable, Equatable {
     public let id: String
     public let version: String
     public let uploadedDate: Date

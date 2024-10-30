@@ -9,6 +9,7 @@ import OversizeCore
 
 public struct AppInfo: Sendable {
     public let id: String
+
     public let primaryCategoryId: String?
     public let secondaryCategoryId: String?
     public var primaryCategory: String {

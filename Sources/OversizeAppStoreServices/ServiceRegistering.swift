@@ -29,4 +29,12 @@ public extension Container {
     var usersService: Factory<UsersService> {
         self { UsersService() }
     }
+
+    var buildsService: Factory<BuildsService> {
+        self { BuildsService() }
+    }
+
+    var versionsService: Factory<VersionsService> {
+        self { VersionsService() }
+    }
 }

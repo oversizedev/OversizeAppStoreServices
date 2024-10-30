@@ -18,11 +18,11 @@ public actor ReviewService {
         }
     }
 
-    public func fetchCustomerReviews(version: Version) async -> Result<[Review], AppError> {
+    public func fetchCustomerReviews(version: AppStoreVersion) async -> Result<[CustomerReview], AppError> {
         return await fetchCustomerReviews(versionId: version.id)
     }
 
-    public func fetchCustomerReviews(versionId: String) async -> Result<[Review], AppError> {
+    public func fetchCustomerReviews(versionId: String) async -> Result<[CustomerReview], AppError> {
         guard let client = client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.appStoreVersions.id(versionId).customerReviews.get()
         do {
@@ -33,7 +33,7 @@ public actor ReviewService {
         }
     }
 
-    public func fetchComputeRatings(for version: Version) async -> Result<Double, AppError> {
+    public func fetchComputeRatings(for version: AppStoreVersion) async -> Result<Double, AppError> {
         let result = await fetchCustomerReviews(version: version)
         switch result {
         case let .success(reviews):

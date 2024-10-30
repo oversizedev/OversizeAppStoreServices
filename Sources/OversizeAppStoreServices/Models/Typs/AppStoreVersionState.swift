@@ -99,4 +99,13 @@ public enum AppStoreVersionState: String, CaseIterable, Codable, Sendable {
             return false
         }
     }
+
+    public var isCanBeHidden: Bool {
+        switch self {
+        case .replacedWithNewVersion:
+            return true
+        default:
+            return false
+        }
+    }
 }

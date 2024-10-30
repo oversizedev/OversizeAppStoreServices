@@ -6,6 +6,7 @@
 import AppStoreAPI
 import AppStoreConnect
 import Foundation
+import OversizeCore
 import OversizeModels
 
 public actor AppsService {
@@ -31,34 +32,107 @@ public actor AppsService {
         }
     }
 
-    public func fetchAppBuilds(appId: String) async -> Result<[Build], AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
-        let request = Resources.v1.builds.get(filterApp: [appId])
+    public func fetchAppsIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions() async -> Result<[App], AppError> {
         do {
-            let data = try await client.send(request).data
-            return .success(data.compactMap { .init(schema: $0) })
+            guard let client = client else {
+                return .failure(.network(type: .unauthorized))
+            }
+            let request = Resources.v1.apps.get(
+                include: [
+                    .builds,
+                    .appStoreVersions,
+                    .preReleaseVersions,
+                ]
+            )
+            let result = try await client.send(request)
+            let apps: [App] = result.data.compactMap { schema in
+                let filteredIncluded = result.included?.filter { includedItem in
+                    switch includedItem {
+                    case let .appStoreVersion(appStoreVersion):
+                        return schema.relationships?.appStoreVersions?.data?.first(where: { $0.id == appStoreVersion.id }) != nil
+                    case let .build(build):
+                        return schema.relationships?.builds?.data?.first(where: { $0.id == build.id }) != nil
+                    case let .prereleaseVersion(prereleaseVersion):
+                        return schema.relationships?.preReleaseVersions?.data?.first(where: { $0.id == prereleaseVersion.id }) != nil
+                    default:
+                        return false
+                    }
+                }
+                return App(schema: schema, included: filteredIncluded)
+            }
+            return .success(apps)
         } catch {
             return .failure(.network(type: .noResponse))
         }
     }
 
-    public func fetchAppVersions(appId: String) async -> Result<[Version], AppError> {
+    public func fetchAppsIncludeActualAppStoreVersionsAndBuilds() async -> Result<[App], AppError> {
+        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        let request = Resources.v1.apps.get(
+            filterAppStoreVersionsAppStoreState: [
+                .accepted,
+                .developerRemovedFromSale,
+                .developerRejected,
+                .inReview,
+                .invalidBinary,
+                .metadataRejected,
+                .pendingAppleRelease,
+                .pendingContract,
+                .pendingDeveloperRelease,
+                .prepareForSubmission,
+                .preorderReadyForSale,
+                .processingForAppStore,
+                .readyForReview,
+                .readyForSale,
+                .rejected,
+                .removedFromSale,
+                .waitingForExportCompliance,
+                .waitingForReview,
+                .notApplicable,
+            ],
+            include: [
+                .builds,
+                .appStoreVersions,
+            ]
+        )
+        do {
+            let result = try await client.send(request)
+            let apps: [App] = result.data.compactMap { schema in
+                let filteredIncluded = result.included?.filter { includedItem in
+                    switch includedItem {
+                    case let .appStoreVersion(appStoreVersion):
+                        return schema.relationships?.appStoreVersions?.data?.first(where: { $0.id == appStoreVersion.id }) != nil
+                    case let .build(build):
+                        return schema.relationships?.builds?.data?.first(where: { $0.id == build.id }) != nil
+                    default:
+                        return false
+                    }
+                }
+                return App(schema: schema, included: filteredIncluded)
+            }
+            return .success(apps)
+        } catch {
+            return .failure(.network(type: .noResponse))
+        }
+    }
+
+    public func fetchAppVersions(appId: String) async -> Result<[AppStoreVersion], AppError> {
         guard let client = client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.apps.id(appId).appStoreVersions.get()
         do {
             let data = try await client.send(request).data
-            return .success(data.compactMap { .init(schema: $0) })
+            return .success(data.compactMap { .init(schema: $0, builds: []) })
         } catch {
             return .failure(.network(type: .noResponse))
         }
     }
 
-    public func fetchAppVersions(appId: String, platform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform) async -> Result<[Version], AppError> {
+    public func fetchAppVersions(appId: String, platform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform) async -> Result<[AppStoreVersion], AppError> {
         guard let client = client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.apps.id(appId).appStoreVersions.get(filterPlatform: [platform])
         do {
             let data = try await client.send(request).data
-            return .success(data.compactMap { .init(schema: $0) })
+            return .success(data.compactMap { .init(schema: $0, builds: []) })
         } catch {
             return .failure(.network(type: .noResponse))
         }
@@ -204,15 +278,11 @@ public actor AppsService {
 }
 
 public extension AppsService {
-    func fetchAppBuilds(_ app: App) async -> Result<[Build], AppError> {
-        return await fetchAppBuilds(appId: app.id)
-    }
-
-    func fetchAppVersions(_ app: App) async -> Result<[Version], AppError> {
+    func fetchAppVersions(_ app: App) async -> Result<[AppStoreVersion], AppError> {
         return await fetchAppVersions(appId: app.id)
     }
 
-    func fetchAppVersions(_ app: App, platform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform) async -> Result<[Version], AppError> {
+    func fetchAppVersions(_ app: App, platform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform) async -> Result<[AppStoreVersion], AppError> {
         return await fetchAppVersions(appId: app.id, platform: platform)
     }
 
@@ -220,7 +290,7 @@ public extension AppsService {
         return await fetchAppInfoLocalizations(forInfo: info.id)
     }
 
-    func fetchAppInfos(_ version: Version) async -> Result<[AppInfo], AppError> {
+    func fetchAppInfos(_ version: AppStoreVersion) async -> Result<[AppInfo], AppError> {
         return await fetchAppInfos(forVersion: version.id)
     }
 }

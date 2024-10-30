@@ -6,7 +6,7 @@
 import AppStoreAPI
 import AppStoreConnect
 
-public struct Review: Sendable {
+public struct CustomerReview: Sendable {
     public let rating: Int
     init?(schema: AppStoreAPI.CustomerReview) {
         guard let rating = schema.attributes?.rating else { return nil }
