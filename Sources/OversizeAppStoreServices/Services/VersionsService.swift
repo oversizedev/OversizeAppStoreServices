@@ -18,7 +18,7 @@ public actor VersionsService {
             client = nil
         }
     }
-    
+
     public func fetchAllVersionLocalizations(forVersion versionId: String) async throws -> Result<[(String, AppStoreLanguage)], AppError> {
         guard let client = client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.appStoreVersions.id(versionId).appStoreVersionLocalizations.get()
@@ -47,8 +47,7 @@ public actor VersionsService {
         }
     }
 
-
-    public func patchBuild(platform _: Platform, versionId: String, buildId: String) async -> Result<AppStoreVersion, AppError> {
+    public func patchBuild(versionId: String, buildId: String) async -> Result<AppStoreVersion, AppError> {
         guard let client = client else { return .failure(.network(type: .unauthorized)) }
 
         let relationships: AppStoreVersionUpdateRequest.Data.Relationships = .init(
@@ -73,7 +72,7 @@ public actor VersionsService {
             return .failure(.network(type: .noResponse))
         }
     }
-    
+
     public func patchVersionLocalization(
         localizationId: String,
         whatsNew: String? = nil,

@@ -9,7 +9,7 @@ import OversizeCore
 
 public struct AppInfo: Sendable {
     public let id: String
-    
+
     public let appStoreAgeRating: AppStoreAgeRating
     public let australiaAgeRating: AustraliaAgeRating
     public let brazilAgeRating: BrazilAgeRating
@@ -18,7 +18,7 @@ public struct AppInfo: Sendable {
     public let kidsAgeBand: KidsAgeBand
 
     public let relationships: Relationships?
-    
+
     public init?(schema: AppStoreAPI.AppInfo) {
         guard let appStoreAgeRatingRaw = schema.attributes?.appStoreAgeRating?.rawValue,
               let appStoreAgeRating = AppStoreAgeRating(rawValue: appStoreAgeRatingRaw),
@@ -31,26 +31,26 @@ public struct AppInfo: Sendable {
               let koreaAgeRatingRaw = schema.attributes?.koreaAgeRating?.rawValue,
               let koreaAgeRating = KoreaAgeRating(rawValue: koreaAgeRatingRaw),
               let kidsAgeBandRaw = schema.attributes?.kidsAgeBand?.rawValue,
-              let kidsAgeBand = KidsAgeBand(rawValue: kidsAgeBandRaw) else {
+              let kidsAgeBand = KidsAgeBand(rawValue: kidsAgeBandRaw)
+        else {
             return nil
         }
-        
-        self.id = schema.id
+
+        id = schema.id
         self.appStoreAgeRating = appStoreAgeRating
         self.australiaAgeRating = australiaAgeRating
         self.brazilAgeRating = brazilAgeRating
         self.brazilAgeRatingV2 = brazilAgeRatingV2
         self.koreaAgeRating = koreaAgeRating
         self.kidsAgeBand = kidsAgeBand
-        
-        self.relationships = Relationships(
+
+        relationships = Relationships(
             primaryCategoryId: schema.relationships?.primaryCategory?.data?.id,
             secondaryCategoryId: schema.relationships?.secondaryCategory?.data?.id
         )
     }
-    
+
     public struct Relationships: Sendable {
-        
         public let primaryCategoryId: String?
         public let secondaryCategoryId: String?
         public var primaryCategory: String {

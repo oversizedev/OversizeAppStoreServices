@@ -19,7 +19,7 @@ public actor AppInfoService {
             client = nil
         }
     }
-    
+
     public func fetchAppInfos(forVersion versionId: String) async -> Result<[AppInfo], AppError> {
         guard let client = client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.apps.id(versionId).appInfos.get()
@@ -30,7 +30,7 @@ public actor AppInfoService {
             return .failure(.network(type: .noResponse))
         }
     }
-    
+
     public func fetchAppInfoWithCategory(forVersion versionId: String) async -> Result<[AppInfo], AppError> {
         guard let client = client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.apps.id(versionId).appInfos.get(include: [.primaryCategory, .secondaryCategory, .ageRatingDeclaration])
@@ -52,5 +52,4 @@ public actor AppInfoService {
             return .failure(.network(type: .noResponse))
         }
     }
-
 }

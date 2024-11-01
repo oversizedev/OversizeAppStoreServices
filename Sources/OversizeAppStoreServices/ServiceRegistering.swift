@@ -37,4 +37,12 @@ public extension Container {
     var versionsService: Factory<VersionsService> {
         self { VersionsService() }
     }
+
+    var appInfoService: Factory<AppInfoService> {
+        self { AppInfoService() }
+    }
+
+    var appStoreReviewService: Factory<AppStoreReviewService> {
+        self { AppStoreReviewService() }
+    }
 }

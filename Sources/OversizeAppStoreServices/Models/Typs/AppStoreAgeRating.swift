@@ -1,7 +1,7 @@
 //
 // Copyright © 2024 Alexander Romanov
 // AppStoreAgeRating.swift, created on 30.10.2024
-//  
+//
 
 import Foundation
 
@@ -18,7 +18,6 @@ public enum KidsAgeBand: String, CaseIterable, Codable, Sendable {
     case sixToEight = "SIX_TO_EIGHT"
     case nineToEleven = "NINE_TO_ELEVEN"
 }
-
 
 public enum AustraliaAgeRating: String, CaseIterable, Codable, Sendable {
     case fifteen = "FIFTEEN"
@@ -47,4 +46,3 @@ public enum KoreaAgeRating: String, CaseIterable, Codable, Sendable {
     case nineteen = "NINETEEN"
     case notApplicable = "NOT_APPLICABLE"
 }
-
