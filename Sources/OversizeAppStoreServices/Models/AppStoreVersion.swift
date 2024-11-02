@@ -21,7 +21,7 @@ public struct AppStoreVersion: Sendable, Identifiable {
     public let isDownloadable: Bool?
     public let createdDate: Date?
 
-    public var included: Included?
+    public let included: Included?
 
     init?(schema: AppStoreAPI.AppStoreVersion, builds: [AppStoreAPI.Build] = []) {
         guard let storeState = schema.attributes?.appStoreState?.rawValue,

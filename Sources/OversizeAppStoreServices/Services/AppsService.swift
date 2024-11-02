@@ -138,18 +138,7 @@ public actor AppsService {
         }
     }
 
-    public func fetchAppCategoryIds() async -> Result<[String], AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
-        let request = Resources.v1.appCategories.get()
-        do {
-            let data = try await client.send(request).data
-            return .success(data.compactMap { $0.id })
-        } catch {
-            return .failure(.network(type: .noResponse))
-        }
-    }
-
-    func createBundleId(
+    func postBundleId(
         name: String,
         platform: BundleIDPlatform,
         identifier: String,
