@@ -1,6 +1,6 @@
 //
 // Copyright © 2024 Alexander Romanov
-// InAppPurchasesService_2.swift, created on 31.10.2024
+// AppStoreReviewService.swift, created on 31.10.2024
 //
 
 import AppStoreAPI

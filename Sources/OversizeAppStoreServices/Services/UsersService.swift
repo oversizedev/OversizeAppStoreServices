@@ -18,7 +18,7 @@ public actor UsersService {
         }
     }
 
-    public func fetchCustomerReviews(versionId _: String) async -> Result<[User], AppError> {
+    public func fetchUsers(versionId _: String) async -> Result<[User], AppError> {
         guard let client = client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.users.get()
         do {

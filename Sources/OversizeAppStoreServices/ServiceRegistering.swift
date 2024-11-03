@@ -45,4 +45,8 @@ public extension Container {
     var appStoreReviewService: Factory<AppStoreReviewService> {
         self { AppStoreReviewService() }
     }
+    
+    var appCategoryService: Factory<AppCategoryService> {
+        self { AppCategoryService() }
+    }
 }

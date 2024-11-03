@@ -18,6 +18,29 @@ public actor VersionsService {
             client = nil
         }
     }
+    
+    public func fetchAppVersions(appId: String) async -> Result<[AppStoreVersion], AppError> {
+        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        let request = Resources.v1.apps.id(appId).appStoreVersions.get()
+        do {
+            let data = try await client.send(request).data
+            return .success(data.compactMap { .init(schema: $0) })
+        } catch {
+            return .failure(.network(type: .noResponse))
+        }
+    }
+
+    public func fetchAppVersions(appId: String, platform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform) async -> Result<[AppStoreVersion], AppError> {
+        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        let request = Resources.v1.apps.id(appId).appStoreVersions.get(filterPlatform: [platform])
+        do {
+            let data = try await client.send(request).data
+            return .success(data.compactMap { .init(schema: $0) })
+        } catch {
+            return .failure(.network(type: .noResponse))
+        }
+    }
+
 
     public func fetchAllVersionLocalizations(forVersion versionId: String) async throws -> Result<[(String, AppStoreLanguage)], AppError> {
         guard let client = client else { return .failure(.network(type: .unauthorized)) }
@@ -110,5 +133,15 @@ public actor VersionsService {
         } catch {
             return .failure(.network(type: .noResponse))
         }
+    }
+}
+
+public extension VersionsService {
+    func fetchAppVersions(_ app: App) async -> Result<[AppStoreVersion], AppError> {
+        return await fetchAppVersions(appId: app.id)
+    }
+
+    func fetchAppVersions(_ app: App, platform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform) async -> Result<[AppStoreVersion], AppError> {
+        return await fetchAppVersions(appId: app.id, platform: platform)
     }
 }

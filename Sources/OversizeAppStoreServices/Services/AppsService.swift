@@ -116,28 +116,6 @@ public actor AppsService {
         }
     }
 
-    public func fetchAppVersions(appId: String) async -> Result<[AppStoreVersion], AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
-        let request = Resources.v1.apps.id(appId).appStoreVersions.get()
-        do {
-            let data = try await client.send(request).data
-            return .success(data.compactMap { .init(schema: $0, builds: []) })
-        } catch {
-            return .failure(.network(type: .noResponse))
-        }
-    }
-
-    public func fetchAppVersions(appId: String, platform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform) async -> Result<[AppStoreVersion], AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
-        let request = Resources.v1.apps.id(appId).appStoreVersions.get(filterPlatform: [platform])
-        do {
-            let data = try await client.send(request).data
-            return .success(data.compactMap { .init(schema: $0, builds: []) })
-        } catch {
-            return .failure(.network(type: .noResponse))
-        }
-    }
-
     func postBundleId(
         name: String,
         platform: BundleIDPlatform,
@@ -163,15 +141,5 @@ public actor AppsService {
         } catch {
             return .failure(.network(type: .noResponse))
         }
-    }
-}
-
-public extension AppsService {
-    func fetchAppVersions(_ app: App) async -> Result<[AppStoreVersion], AppError> {
-        return await fetchAppVersions(appId: app.id)
-    }
-
-    func fetchAppVersions(_ app: App, platform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform) async -> Result<[AppStoreVersion], AppError> {
-        return await fetchAppVersions(appId: app.id, platform: platform)
     }
 }
