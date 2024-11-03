@@ -51,6 +51,51 @@ public actor AppStoreReviewService {
     }
 
     public func patchAppStoreReviewDetail(
+        appStoreReviewDetailId: String,
+        contactFirstName: String?,
+        contactLastName: String?,
+        contactPhone: String?,
+        contactEmail: String?,
+        demoAccountName: String?,
+        demoAccountPassword: String?,
+        isDemoAccountRequired: Bool?,
+        notes: String?
+    ) async -> Result<AppStoreReviewDetail, AppError> {
+        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+
+        let requestAttributes: AppStoreReviewDetailUpdateRequest.Data.Attributes = .init(
+            contactFirstName: contactFirstName?.isEmpty == true ? nil : contactFirstName,
+            contactLastName: contactLastName?.isEmpty == true ? nil : contactLastName,
+            contactPhone: contactPhone?.isEmpty == true ? nil : contactPhone,
+            contactEmail: contactEmail?.isEmpty == true ? nil : contactEmail,
+            demoAccountName: demoAccountName?.isEmpty == true ? nil : demoAccountName,
+            demoAccountPassword: demoAccountPassword?.isEmpty == true ? nil : demoAccountPassword,
+            isDemoAccountRequired: isDemoAccountRequired,
+            notes: notes?.isEmpty == true ? nil : notes
+        )
+
+        let requestData: AppStoreReviewDetailUpdateRequest.Data = .init(
+            type: .appStoreReviewDetails,
+            id: appStoreReviewDetailId,
+            attributes: requestAttributes
+        )
+
+        let request = Resources.v1.appStoreReviewDetails.id(appStoreReviewDetailId).patch(
+            .init(data: requestData)
+        )
+
+        do {
+            let data = try await client.send(request).data
+            guard let appStoreReviewDetail: AppStoreReviewDetail = .init(schema: data) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(appStoreReviewDetail)
+        } catch {
+            return .failure(.network(type: .noResponse))
+        }
+    }
+
+    public func postAppStoreReviewDetail(
         versionId: String,
         contactFirstName: String?,
         contactLastName: String?,
@@ -96,6 +141,7 @@ public actor AppStoreReviewService {
             }
             return .success(appStoreReviewDetail)
         } catch {
+            print(error)
             return .failure(.network(type: .noResponse))
         }
     }

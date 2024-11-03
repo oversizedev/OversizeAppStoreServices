@@ -18,7 +18,7 @@ public actor VersionsService {
             client = nil
         }
     }
-    
+
     public func fetchAppVersions(appId: String) async -> Result<[AppStoreVersion], AppError> {
         guard let client = client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.apps.id(appId).appStoreVersions.get()
@@ -40,7 +40,6 @@ public actor VersionsService {
             return .failure(.network(type: .noResponse))
         }
     }
-
 
     public func fetchAllVersionLocalizations(forVersion versionId: String) async throws -> Result<[(String, AppStoreLanguage)], AppError> {
         guard let client = client else { return .failure(.network(type: .unauthorized)) }

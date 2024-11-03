@@ -8,7 +8,7 @@ import AppStoreConnect
 import OversizeCore
 
 public struct AppInfo: Sendable {
-    public let id: String?
+    public let id: String
 
     public var appStoreState: AppStoreVersionState?
     public let appStoreAgeRating: AppStoreAgeRating?
@@ -79,5 +79,6 @@ public struct AppInfo: Sendable {
     public struct Included: Sendable {
         public let primaryCategory: AppCategory?
         public let secondaryCategory: AppCategory?
+        //public let ageRatingDeclaration: AgeRatingDeclaration?
     }
 }
