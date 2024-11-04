@@ -48,19 +48,19 @@ public enum KoreaAgeRating: String, CaseIterable, Codable, Sendable {
 }
 
 public enum AppStoreAgeRatingDeclaration: String, CaseIterable, Codable, Sendable {
-    case `none` = "NONE"
+    case none = "NONE"
     case infrequentOrMild = "INFREQUENT_OR_MILD"
     case frequentOrIntense = "FREQUENT_OR_INTENSE"
 }
 
 public enum AgeRatingOverride: String, CaseIterable, Codable, Sendable {
-    case `none` = "NONE"
+    case none = "NONE"
     case seventeenPlus = "SEVENTEEN_PLUS"
     case unrated = "UNRATED"
 }
 
 public enum KoreaAgeRatingOverride: String, CaseIterable, Codable, Sendable {
-    case `none` = "NONE"
+    case none = "NONE"
     case fifteenPlus = "FIFTEEN_PLUS"
     case nineteenPlus = "NINETEEN_PLUS"
 }

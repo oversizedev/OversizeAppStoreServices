@@ -133,6 +133,46 @@ public actor VersionsService {
             return .failure(.network(type: .noResponse))
         }
     }
+
+    public func patchVersion(
+        versionId: String,
+        versionString: String? = nil,
+        copyright: String? = nil,
+        reviewType: ReviewType? = nil,
+        releaseType: ReleaseType? = nil,
+        earliestReleaseDate _: Date? = nil,
+        isDownloadable: Bool? = nil
+    ) async -> Result<AppStoreVersion, AppError> {
+        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+
+        let requestAttributes: AppStoreVersionUpdateRequest.Data.Attributes = .init(
+            versionString: versionString,
+            copyright: copyright,
+            reviewType: .init(rawValue: reviewType?.rawValue ?? ""),
+            releaseType: .init(rawValue: releaseType?.rawValue ?? ""),
+            // earliestReleaseDate: earliestReleaseDate,
+            isDownloadable: isDownloadable
+        )
+
+        let requestData: AppStoreVersionUpdateRequest.Data = .init(
+            type: .appStoreVersions,
+            id: versionId,
+            attributes: requestAttributes
+        )
+
+        let request = Resources.v1.appStoreVersions.id(versionId).patch(.init(data: requestData))
+
+        do {
+            let data = try await client.send(request).data
+            guard let versionLocalization: AppStoreVersion = .init(schema: data) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(versionLocalization)
+        } catch {
+            print(error)
+            return .failure(.network(type: .noResponse))
+        }
+    }
 }
 
 public extension VersionsService {

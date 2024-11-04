@@ -34,16 +34,20 @@ public struct AppInfo: Sendable {
 
         relationships = .init(
             primaryCategoryId: schema.relationships?.primaryCategory?.data?.id,
-            secondaryCategoryId: schema.relationships?.secondaryCategory?.data?.id
+            secondaryCategoryId: schema.relationships?.secondaryCategory?.data?.id,
+            ageRatingDeclarationId: schema.relationships?.ageRatingDeclaration?.data?.id
         )
 
         var appCategories: [AppStoreAPI.AppCategory] = []
+        var ageRatingDeclarations: [AppStoreAPI.AgeRatingDeclaration] = []
 
         if let includedItems = included {
             for includedItem in includedItems {
                 switch includedItem {
                 case let .appCategory(appCategory):
                     appCategories.append(appCategory)
+                case let .ageRatingDeclaration(ageRatingDeclaration):
+                    ageRatingDeclarations.append(ageRatingDeclaration)
                 default:
                     continue
                 }
@@ -57,11 +61,15 @@ public struct AppInfo: Sendable {
                 .first {
                     $0.id == schema.relationships?.secondaryCategory?.data?.id
                 }
-
+            let ageRatingDeclaration: AppStoreAPI.AgeRatingDeclaration? = ageRatingDeclarations
+                .first {
+                    $0.id == schema.relationships?.ageRatingDeclaration?.data?.id
+                }
             if let primaryCategory, let seconaryCategory {
                 self.included = .init(
                     primaryCategory: .init(schema: primaryCategory),
-                    secondaryCategory: .init(schema: seconaryCategory)
+                    secondaryCategory: .init(schema: seconaryCategory),
+                    ageRatingDeclaration: ageRatingDeclaration != nil ? .init(schema: ageRatingDeclaration!) : nil
                 )
             } else {
                 self.included = nil
@@ -74,11 +82,12 @@ public struct AppInfo: Sendable {
     public struct Relationships: Sendable {
         public let primaryCategoryId: String?
         public let secondaryCategoryId: String?
+        public let ageRatingDeclarationId: String?
     }
 
     public struct Included: Sendable {
         public let primaryCategory: AppCategory?
         public let secondaryCategory: AppCategory?
-        //public let ageRatingDeclaration: AgeRatingDeclaration?
+        public let ageRatingDeclaration: AgeRatingDeclaration?
     }
 }

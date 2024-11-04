@@ -16,7 +16,7 @@ public struct AppStoreVersion: Sendable, Identifiable {
     public let state: AppVersionState
     public let copyright: String
     public let reviewType: ReviewType?
-    public let releaseType: ReviewType?
+    public let releaseType: ReleaseType?
     public let earliestReleaseDate: Date?
     public let isDownloadable: Bool?
     public let createdDate: Date?
