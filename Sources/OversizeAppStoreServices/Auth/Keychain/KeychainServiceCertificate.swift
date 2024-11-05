@@ -24,9 +24,8 @@ public extension KeychainService {
         query[kSecClass] = kSecClassGenericPassword
         query[kSecAttrLabel] = label
         query[kSecAttrAccount] = certificate.issuerId
-
-        let combinedData = "\(certificate.keyId):\(certificate.privateKey)"
-        query[kSecValueData] = combinedData.data(using: .utf8)
+        query[kSecAttrService] = certificate.keyId
+        query[kSecValueData] = certificate.privateKey.data(using: .utf8)
 
         do {
             try addItem(query: query)
@@ -54,15 +53,17 @@ public extension KeychainService {
         }
 
         if let issuerId = result?[kSecAttrAccount] as? String,
+           let keyId = result?[kSecAttrService] as? String,
            let data = result?[kSecValueData] as? Data,
-           let combinedString = String(data: data, encoding: .utf8)
+           let privateKey: String = .init(data: data, encoding: .utf8)
         {
-            let components = combinedString.split(separator: ":")
-            if components.count == 2 {
-                let keyId = String(components[0])
-                let privateKey = String(components[1])
-                return AppStoreCertificate(issuerId: issuerId, keyId: keyId, privateKey: privateKey)
-            }
+            return AppStoreCertificate(
+                issuerId: issuerId,
+                keyId: keyId,
+                privateKey: privateKey
+            )
+        } else {
+            return nil
         }
         return nil
     }
