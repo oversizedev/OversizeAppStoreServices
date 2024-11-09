@@ -40,18 +40,5 @@ public enum Platform: String, CaseIterable, Codable, Sendable, Identifiable {
         }
     }
 
-    private var title: String {
-        switch self {
-        case .ios:
-            return "iOS"
-        case .macOs:
-            return "macOS"
-        case .tvOs:
-            return "tvOS"
-        case .visionOs:
-            return "visionOS"
-        }
-    }
-
     public var id: String { rawValue }
 }

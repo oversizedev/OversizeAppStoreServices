@@ -110,6 +110,10 @@ public extension App {
         public let builds: [Build]
         public let prereleaseVersions: [PrereleaseVersion]
 
+        public var appStoreVersion: AppStoreVersion? {
+            appStoreVersions.last
+        }
+
         public var macOsAppStoreVersions: [AppStoreVersion] {
             appStoreVersions.filter { $0.platform == .macOs }
         }

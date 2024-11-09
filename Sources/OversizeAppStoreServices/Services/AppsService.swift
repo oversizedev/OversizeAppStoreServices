@@ -32,6 +32,37 @@ public actor AppsService {
         }
     }
 
+    public func fetchAppsIncludeAppStoreVersionsAndPreReleaseVersions() async -> Result<[App], AppError> {
+        do {
+            guard let client = client else {
+                return .failure(.network(type: .unauthorized))
+            }
+            let request = Resources.v1.apps.get(
+                include: [
+                    .appStoreVersions,
+                    .preReleaseVersions,
+                ]
+            )
+            let result = try await client.send(request)
+            let apps: [App] = result.data.compactMap { schema in
+                let filteredIncluded = result.included?.filter { includedItem in
+                    switch includedItem {
+                    case let .appStoreVersion(appStoreVersion):
+                        return schema.relationships?.appStoreVersions?.data?.first(where: { $0.id == appStoreVersion.id }) != nil
+                    case let .prereleaseVersion(prereleaseVersion):
+                        return schema.relationships?.preReleaseVersions?.data?.first(where: { $0.id == prereleaseVersion.id }) != nil
+                    default:
+                        return false
+                    }
+                }
+                return App(schema: schema, included: filteredIncluded)
+            }
+            return .success(apps)
+        } catch {
+            return .failure(.network(type: .noResponse))
+        }
+    }
+
     public func fetchAppsIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions() async -> Result<[App], AppError> {
         do {
             guard let client = client else {

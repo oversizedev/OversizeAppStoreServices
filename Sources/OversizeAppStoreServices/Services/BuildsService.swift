@@ -55,4 +55,28 @@ public actor BuildsService {
             return .failure(.network(type: .noResponse))
         }
     }
+
+    public func fetchAppStoreVersionsBuildImageUrl(versionId: String) async -> Result<URL?, AppError> {
+        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        let request = Resources.v1.appStoreVersions.id(versionId).build.get(
+            fieldsBuilds: [.iconAssetToken]
+        )
+        do {
+            let iconAssetToken = try await client.send(request).data.attributes?.iconAssetToken
+            guard let templateURL = iconAssetToken?.templateURL else {
+                return .success(nil)
+            }
+            let url = parseURL(
+                from: constructURLString(
+                    baseURL: templateURL,
+                    width: iconAssetToken?.width ?? 100,
+                    height: iconAssetToken?.height ?? 100,
+                    format: "png"
+                )
+            )
+            return .success(url)
+        } catch {
+            return .failure(.network(type: .noResponse))
+        }
+    }
 }

@@ -6,9 +6,9 @@
 import Factory
 
 public extension Container {
-    var keychainService: Factory<KeychainService> {
-        self { KeychainService() }
-    }
+//    var keychainService: Factory<KeychainService> {
+//        self { KeychainService() }
+//    }
 
     var appsService: Factory<AppsService> {
         self { AppsService() }
