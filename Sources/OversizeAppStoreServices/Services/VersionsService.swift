@@ -169,7 +169,51 @@ public actor VersionsService {
             }
             return .success(versionLocalization)
         } catch {
-            print(error)
+            return .failure(.network(type: .noResponse))
+        }
+    }
+
+    public func postVersion(
+        appId: String,
+        platform: Platform,
+        versionString: String,
+        copyright: String? = nil,
+        reviewType: ReviewType? = nil,
+        releaseType: ReleaseType? = nil,
+        earliestReleaseDate: Date? = nil
+    ) async -> Result<AppStoreVersion, AppError> {
+        guard let client = client, let platform: AppStoreAPI.Platform = .init(rawValue: platform.rawValue) else {
+            return .failure(.network(type: .unauthorized))
+        }
+
+        let requestAttributes: AppStoreVersionCreateRequest.Data.Attributes = .init(
+            platform: platform,
+            versionString: versionString,
+            copyright: copyright,
+            reviewType: .init(rawValue: reviewType?.rawValue ?? ""),
+            releaseType: .init(rawValue: releaseType?.rawValue ?? ""),
+            earliestReleaseDate: earliestReleaseDate
+        )
+
+        let requestData: AppStoreVersionCreateRequest.Data = .init(
+            type: .appStoreVersions,
+            attributes: requestAttributes,
+            relationships: .init(
+                app: .init(data: .init(id: appId)),
+                appStoreVersionLocalizations: nil,
+                build: nil
+            )
+        )
+
+        let request = Resources.v1.appStoreVersions.post(.init(data: requestData))
+
+        do {
+            let data = try await client.send(request).data
+            guard let versionLocalization: AppStoreVersion = .init(schema: data) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(versionLocalization)
+        } catch {
             return .failure(.network(type: .noResponse))
         }
     }
