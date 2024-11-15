@@ -102,6 +102,61 @@ public struct App: Identifiable, Sendable {
             self.included = nil
         }
     }
+
+    public init?(schema: AppStoreAPI.App, included: [AppStoreAPI.AppResponse.IncludedItem]? = nil) {
+        guard let attributes = schema.attributes,
+              let bundleID = attributes.bundleID,
+              let name = attributes.name,
+              let sku = attributes.sku,
+              let primaryLocaleRawValue = attributes.primaryLocale,
+              let primaryLocale = AppStoreLanguage(rawValue: primaryLocaleRawValue)
+        else { return nil }
+
+        id = schema.id
+        self.name = name
+        self.bundleID = bundleID
+        self.sku = sku
+        self.primaryLocale = primaryLocale
+        contentRightsDeclaration = attributes.contentRightsDeclaration
+            .flatMap { ContentRightsDeclaration(rawValue: $0.rawValue) }
+        isOrEverWasMadeForKids = attributes.isOrEverWasMadeForKids
+        subscriptionStatusURL = attributes.subscriptionStatusURL
+        subscriptionStatusURLForSandbox = attributes.subscriptionStatusURLForSandbox
+        subscriptionStatusURLVersion = attributes.subscriptionStatusURLVersion
+            .flatMap { SubscriptionStatusURLVersion(rawValue: $0.rawValue) } ?? .none
+        subscriptionStatusURLVersionForSandbox = attributes.subscriptionStatusURLVersionForSandbox
+            .flatMap { SubscriptionStatusURLVersion(rawValue: $0.rawValue) } ?? .none
+
+        if let includedItems = included {
+            var appStoreVersions: [AppStoreAPI.AppStoreVersion] = []
+            var builds: [AppStoreAPI.Build] = []
+            var prereleaseVersions: [AppStoreAPI.PrereleaseVersion] = []
+
+            for includedItem in includedItems {
+                switch includedItem {
+                case let .appStoreVersion(includedAppStoreVersion):
+                    appStoreVersions.append(includedAppStoreVersion)
+                case let .build(includedBuild):
+                    builds.append(includedBuild)
+                default:
+                    continue
+                }
+            }
+
+            self.included = Included(
+                appStoreVersions: appStoreVersions.compactMap { appStoreVersion in
+                    .init(
+                        schema: appStoreVersion,
+                        builds: []
+                    )
+                },
+                builds: builds.compactMap { .init(schema: $0) }.sorted(by: { $0.uploadedDate > $1.uploadedDate }),
+                prereleaseVersions: prereleaseVersions.compactMap { .init(schema: $0, builds: []) }
+            )
+        } else {
+            self.included = nil
+        }
+    }
 }
 
 public extension App {
