@@ -49,4 +49,8 @@ public extension Container {
     var appCategoryService: Factory<AppCategoryService> {
         self { AppCategoryService() }
     }
+
+    var appStoreVersionSubmissionsService: Factory<AppStoreVersionSubmissionsService> {
+        self { AppStoreVersionSubmissionsService() }
+    }
 }

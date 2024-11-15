@@ -52,7 +52,7 @@ public actor BuildsService {
             let data = try await client.send(request).data
             return .success(.init(schema: data))
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .success(nil)
         }
     }
 
