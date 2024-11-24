@@ -20,7 +20,7 @@ public actor AppStoreReviewService {
     }
 
     public func fetchAppStoreReviewDetail(versionId: String) async -> Result<AppStoreReviewDetail, AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.appStoreVersions.id(versionId).appStoreReviewDetail.get(
             include: [.appStoreReviewAttachments]
         )
@@ -37,7 +37,7 @@ public actor AppStoreReviewService {
     }
 
     public func fetchAppStoreReviewDetailAttachments(versionId: String) async -> Result<[AppStoreReviewAttachment], AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.appStoreReviewDetails.id(
             versionId
         ).appStoreReviewAttachments.get()
@@ -61,7 +61,7 @@ public actor AppStoreReviewService {
         isDemoAccountRequired: Bool?,
         notes: String?
     ) async -> Result<AppStoreReviewDetail, AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
 
         let requestAttributes: AppStoreReviewDetailUpdateRequest.Data.Attributes = .init(
             contactFirstName: contactFirstName?.isEmpty == true ? nil : contactFirstName,
@@ -106,7 +106,7 @@ public actor AppStoreReviewService {
         isDemoAccountRequired: Bool?,
         notes: String?
     ) async -> Result<AppStoreReviewDetail, AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
 
         let requestAttributes: AppStoreReviewDetailCreateRequest.Data.Attributes = .init(
             contactFirstName: contactFirstName,

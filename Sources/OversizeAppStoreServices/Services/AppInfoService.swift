@@ -21,7 +21,7 @@ public actor AppInfoService {
     }
 
     public func fetchAppInfos(appId: String) async -> Result<[AppInfo], AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.apps.id(appId).appInfos.get()
         do {
             let data = try await client.send(request).data
@@ -32,7 +32,7 @@ public actor AppInfoService {
     }
 
     public func fetchAppInfoIncludedCategory(appId: String) async -> Result<[AppInfo], AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.apps.id(appId).appInfos.get(include: [.primaryCategory, .secondaryCategory, .ageRatingDeclaration])
         do {
             let responce = try await client.send(request)
@@ -47,7 +47,7 @@ public actor AppInfoService {
     }
 
     public func fetchAppInfoLocalizations(appInfoId: String) async -> Result<[AppInfoLocalization], AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.appInfos.id(appInfoId).appInfoLocalizations.get()
         do {
             let data = try await client.send(request).data
@@ -58,7 +58,7 @@ public actor AppInfoService {
     }
 
     public func fetchAppInfoLocalization(appInfoId: String, locale: String) async -> Result<AppInfoLocalization?, AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.appInfos.id(appInfoId).appInfoLocalizations.get(
             filterLocale: [locale]
         )
@@ -96,7 +96,7 @@ public actor AppInfoService {
         koreaAgeRatingOverride: AgeRatingDeclarationUpdateRequest.Data.Attributes.KoreaAgeRatingOverride?,
         isSeventeenPlus: Bool?
     ) async -> Result<AgeRatingDeclaration, AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
 
         let requestAttributes: AgeRatingDeclarationUpdateRequest.Data.Attributes = .init(
             alcoholTobaccoOrDrugUseOrReferences: alcoholTobaccoOrDrugUseOrReferences,

@@ -21,7 +21,7 @@ public actor BuildsService {
     }
 
     public func fetchAppBuilds(appId: String) async -> Result<[Build], AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.builds.get(filterApp: [appId])
         do {
             let data = try await client.send(request).data
@@ -32,7 +32,7 @@ public actor BuildsService {
     }
 
     public func fetchPreReleaseVersionBuilds(appId: String, versionString: String, platfrom: Platform) async -> Result<[Build], AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
         guard let preReleaseVersionPlatform: Resources.V1.Builds.FilterPreReleaseVersionPlatform = .init(rawValue: platfrom.rawValue) else {
             return .failure(.network(type: .invalidURL))
         }
@@ -46,7 +46,7 @@ public actor BuildsService {
     }
 
     public func fetchAppStoreVersionsBuild(versionId: String) async -> Result<Build?, AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.appStoreVersions.id(versionId).build.get()
         do {
             let data = try await client.send(request).data
@@ -57,7 +57,7 @@ public actor BuildsService {
     }
 
     public func fetchAppStoreVersionsBuildImageUrl(versionId: String) async -> Result<URL?, AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.appStoreVersions.id(versionId).build.get(
             fieldsBuilds: [.iconAssetToken]
         )

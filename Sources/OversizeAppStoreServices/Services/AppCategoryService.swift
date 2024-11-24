@@ -25,7 +25,7 @@ public actor AppCategoryService {
             return .failure(.network(type: .invalidURL))
         }
 
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.appCategories.get(
             filterPlatforms: [appCategoriesPlatform],
             isExistsParent: false
@@ -43,7 +43,7 @@ public actor AppCategoryService {
             return .failure(.network(type: .invalidURL))
         }
 
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.appCategories.get(
             filterPlatforms: [appCategoriesPlatform],
             isExistsParent: false,
@@ -70,7 +70,7 @@ public actor AppCategoryService {
         secondarySubcategoryOneId: String? = nil,
         secondarySubcategoryTwoId: String? = nil
     ) async -> Result<AppInfo, AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
 
         let primaryCategory: AppInfoUpdateRequest.Data.Relationships.PrimaryCategory? = primaryCategoryId != nil ? .init(data: .init(id: primaryCategoryId!)) : nil
         let primarySubcategoryOne: AppInfoUpdateRequest.Data.Relationships.PrimarySubcategoryOne? = primarySubcategoryOneId != nil ? .init(data: .init(id: primarySubcategoryOneId!)) : nil

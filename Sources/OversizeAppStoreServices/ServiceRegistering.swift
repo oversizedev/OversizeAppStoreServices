@@ -22,8 +22,8 @@ public extension Container {
         self { CertificateService() }
     }
 
-    var reviewService: Factory<ReviewService> {
-        self { ReviewService() }
+    var customerReviewService: Factory<CustomerReviewService> {
+        self { CustomerReviewService() }
     }
 
     var usersService: Factory<UsersService> {

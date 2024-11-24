@@ -16,13 +16,13 @@ public enum Platform: String, CaseIterable, Codable, Sendable, Identifiable {
     public var displayName: String {
         switch self {
         case .ios:
-            return "iOS"
+            "iOS"
         case .macOs:
-            return "macOS"
+            "macOS"
         case .tvOs:
-            return "tvOS"
+            "tvOS"
         case .visionOs:
-            return "visionOS"
+            "visionOS"
         }
     }
 
@@ -30,13 +30,13 @@ public enum Platform: String, CaseIterable, Codable, Sendable, Identifiable {
     public var icon: Image {
         switch self {
         case .ios:
-            return Image(systemName: "iphone")
+            Image(systemName: "iphone")
         case .macOs:
-            return Image(systemName: "laptopcomputer")
+            Image(systemName: "laptopcomputer")
         case .tvOs:
-            return Image(systemName: "appletv.fill")
+            Image(systemName: "appletv.fill")
         case .visionOs:
-            return Image(systemName: "vision.pro")
+            Image(systemName: "vision.pro")
         }
     }
 

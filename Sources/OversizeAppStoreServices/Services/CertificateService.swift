@@ -20,7 +20,7 @@ public actor CertificateService {
     }
 
     public func fetchProfiles() async -> Result<[Profile], AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.profiles.get()
         do {
             let data = try await client.send(request)
@@ -31,7 +31,7 @@ public actor CertificateService {
     }
 
     func fetchActiveCertificates() async throws -> Result<[Certificate], AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.certificates.get()
         do {
             let data = try await client.send(request)

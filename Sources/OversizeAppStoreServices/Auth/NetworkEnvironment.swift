@@ -16,7 +16,7 @@ public struct NetworkEnvironment {
         public var description: String {
             switch self {
             case let .unreadableEntry(context):
-                return """
+                """
                 \(context.url.relativePath):\(context.line): Unreadable entry in "\(context.content)"
                 """
             }
@@ -72,7 +72,7 @@ public struct NetworkEnvironment {
             loadedEnvironment[name] ?? processInfo.environment[name]
         }
         set {
-            guard let newValue = newValue else { return }
+            guard let newValue else { return }
             loadedEnvironment[name] = newValue
         }
     }

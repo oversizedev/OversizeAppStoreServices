@@ -31,17 +31,17 @@ public enum AppStoreVersionState: String, CaseIterable, Codable, Sendable {
     public var statusColor: Color {
         switch self {
         case .accepted, .readyForSale, .preorderReadyForSale:
-            return .green
+            .green
         case .inReview, .readyForReview, .pendingAppleRelease, .pendingDeveloperRelease, .processingForAppStore, .waitingForReview, .waitingForExportCompliance:
-            return .yellow
+            .yellow
         case .developerRemovedFromSale, .removedFromSale:
-            return .orange
+            .orange
         case .developerRejected, .rejected, .metadataRejected, .invalidBinary, .replacedWithNewVersion:
-            return .red
+            .red
         case .pendingContract:
-            return .purple
+            .purple
         case .prepareForSubmission, .notApplicable:
-            return .gray
+            .gray
         }
     }
 
@@ -49,63 +49,63 @@ public enum AppStoreVersionState: String, CaseIterable, Codable, Sendable {
     public var displayName: String {
         switch self {
         case .accepted:
-            return "Accepted"
+            "Accepted"
         case .developerRemovedFromSale:
-            return "Developer Removed from Sale"
+            "Developer Removed from Sale"
         case .developerRejected:
-            return "Developer Rejected"
+            "Developer Rejected"
         case .inReview:
-            return "In Review"
+            "In Review"
         case .invalidBinary:
-            return "Invalid Binary"
+            "Invalid Binary"
         case .metadataRejected:
-            return "Metadata Rejected"
+            "Metadata Rejected"
         case .pendingAppleRelease:
-            return "Pending Apple Release"
+            "Pending Apple Release"
         case .pendingContract:
-            return "Pending Contract"
+            "Pending Contract"
         case .pendingDeveloperRelease:
-            return "Pending Developer Release"
+            "Pending Developer Release"
         case .prepareForSubmission:
-            return "Prepare for Submission"
+            "Prepare for Submission"
         case .preorderReadyForSale:
-            return "Preorder Ready for Sale"
+            "Preorder Ready for Sale"
         case .processingForAppStore:
-            return "Processing for App Store"
+            "Processing for App Store"
         case .readyForReview:
-            return "Ready for Review"
+            "Ready for Review"
         case .readyForSale:
-            return "Ready for Sale"
+            "Ready for Sale"
         case .rejected:
-            return "Rejected"
+            "Rejected"
         case .removedFromSale:
-            return "Removed from Sale"
+            "Removed from Sale"
         case .waitingForExportCompliance:
-            return "Waiting for Export Compliance"
+            "Waiting for Export Compliance"
         case .waitingForReview:
-            return "Waiting for Review"
+            "Waiting for Review"
         case .replacedWithNewVersion:
-            return "Replaced with New Version"
+            "Replaced with New Version"
         case .notApplicable:
-            return "Not Applicable"
+            "Not Applicable"
         }
     }
 
     public var isEditable: Bool {
         switch self {
         case .prepareForSubmission, .metadataRejected, .developerRejected, .rejected, .invalidBinary:
-            return true
+            true
         default:
-            return false
+            false
         }
     }
 
     public var isCanBeHidden: Bool {
         switch self {
         case .replacedWithNewVersion:
-            return true
+            true
         default:
-            return false
+            false
         }
     }
 }

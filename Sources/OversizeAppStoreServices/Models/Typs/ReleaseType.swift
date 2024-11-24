@@ -15,11 +15,11 @@ public enum ReleaseType: String, CaseIterable, Codable, Sendable, Identifiable {
     public var displayName: String {
         switch self {
         case .manual:
-            return "Manually release this version"
+            "Manually release this version"
         case .afterApproval:
-            return "Automatically release this version"
+            "Automatically release this version"
         case .scheduled:
-            return "Automatically release this version after App Review, no earlier than"
+            "Automatically release this version after App Review, no earlier than"
         }
     }
 }

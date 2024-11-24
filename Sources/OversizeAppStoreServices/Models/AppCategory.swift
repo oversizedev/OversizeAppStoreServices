@@ -53,121 +53,121 @@ public struct AppCategory: Identifiable, Sendable {
 public extension AppCategory {
     var displayName: String {
         switch id {
-        case "STICKERS_EMOJI_AND_EXPRESSIONS": return "Emoji & Expressions"
-        case "GAMES_ACTION": return "Action Games"
-        case "BUSINESS": return "Business"
-        case "SOCIAL_NETWORKING": return "Social Networking"
-        case "GAMES_STRATEGY": return "Strategy Games"
-        case "GAMES_SPORTS": return "Sports Games"
-        case "STICKERS_CELEBRATIONS": return "Celebrations"
-        case "STICKERS": return "Stickers"
-        case "GAMES": return "Games"
-        case "GAMES_CASUAL": return "Casual Games"
-        case "STICKERS_SPORTS_AND_ACTIVITIES": return "Sports & Activities"
-        case "GAMES_TRIVIA": return "Trivia Games"
-        case "STICKERS_EATING_AND_DRINKING": return "Eating & Drinking"
-        case "STICKERS_CHARACTERS": return "Characters"
-        case "MEDICAL": return "Medical"
-        case "GAMES_PUZZLE": return "Puzzle Games"
-        case "GAMES_CASINO": return "Casino Games"
-        case "GAMES_FAMILY": return "Family Games"
-        case "STICKERS_PLACES_AND_OBJECTS": return "Places & Objects"
-        case "FOOD_AND_DRINK": return "Food & Drink"
-        case "GAMES_ADVENTURE": return "Adventure Games"
-        case "GAMES_BOARD": return "Board Games"
-        case "EDUCATION": return "Education"
-        case "BOOKS": return "Books"
-        case "SPORTS": return "Sports"
-        case "FINANCE": return "Finance"
-        case "REFERENCE": return "Reference"
-        case "GAMES_RACING": return "Racing Games"
-        case "DEVELOPER_TOOLS": return "Developer Tools"
-        case "GRAPHICS_AND_DESIGN": return "Graphics & Design"
-        case "HEALTH_AND_FITNESS": return "Health & Fitness"
-        case "MUSIC": return "Music"
-        case "ENTERTAINMENT": return "Entertainment"
-        case "TRAVEL": return "Travel"
-        case "WEATHER": return "Weather"
-        case "GAMES_WORD": return "Word Games"
-        case "STICKERS_CELEBRITIES": return "Celebrities"
-        case "LIFESTYLE": return "Lifestyle"
-        case "GAMES_MUSIC": return "Music Games"
-        case "GAMES_ROLE_PLAYING": return "Role Playing Games"
-        case "STICKERS_MOVIES_AND_TV": return "Movies & TV"
-        case "GAMES_CARD": return "Card Games"
-        case "STICKERS_ANIMALS": return "Animals"
-        case "MAGAZINES_AND_NEWSPAPERS": return "Magazines & Newspapers"
-        case "STICKERS_ART": return "Art"
-        case "STICKERS_FASHION": return "Fashion"
-        case "UTILITIES": return "Utilities"
-        case "STICKERS_GAMING": return "Gaming"
-        case "SHOPPING": return "Shopping"
-        case "NEWS": return "News"
-        case "PRODUCTIVITY": return "Productivity"
-        case "GAMES_SIMULATION": return "Simulation Games"
-        case "NAVIGATION": return "Navigation"
-        case "PHOTO_AND_VIDEO": return "Photo & Video"
-        default: return "Other"
+        case "STICKERS_EMOJI_AND_EXPRESSIONS": "Emoji & Expressions"
+        case "GAMES_ACTION": "Action Games"
+        case "BUSINESS": "Business"
+        case "SOCIAL_NETWORKING": "Social Networking"
+        case "GAMES_STRATEGY": "Strategy Games"
+        case "GAMES_SPORTS": "Sports Games"
+        case "STICKERS_CELEBRATIONS": "Celebrations"
+        case "STICKERS": "Stickers"
+        case "GAMES": "Games"
+        case "GAMES_CASUAL": "Casual Games"
+        case "STICKERS_SPORTS_AND_ACTIVITIES": "Sports & Activities"
+        case "GAMES_TRIVIA": "Trivia Games"
+        case "STICKERS_EATING_AND_DRINKING": "Eating & Drinking"
+        case "STICKERS_CHARACTERS": "Characters"
+        case "MEDICAL": "Medical"
+        case "GAMES_PUZZLE": "Puzzle Games"
+        case "GAMES_CASINO": "Casino Games"
+        case "GAMES_FAMILY": "Family Games"
+        case "STICKERS_PLACES_AND_OBJECTS": "Places & Objects"
+        case "FOOD_AND_DRINK": "Food & Drink"
+        case "GAMES_ADVENTURE": "Adventure Games"
+        case "GAMES_BOARD": "Board Games"
+        case "EDUCATION": "Education"
+        case "BOOKS": "Books"
+        case "SPORTS": "Sports"
+        case "FINANCE": "Finance"
+        case "REFERENCE": "Reference"
+        case "GAMES_RACING": "Racing Games"
+        case "DEVELOPER_TOOLS": "Developer Tools"
+        case "GRAPHICS_AND_DESIGN": "Graphics & Design"
+        case "HEALTH_AND_FITNESS": "Health & Fitness"
+        case "MUSIC": "Music"
+        case "ENTERTAINMENT": "Entertainment"
+        case "TRAVEL": "Travel"
+        case "WEATHER": "Weather"
+        case "GAMES_WORD": "Word Games"
+        case "STICKERS_CELEBRITIES": "Celebrities"
+        case "LIFESTYLE": "Lifestyle"
+        case "GAMES_MUSIC": "Music Games"
+        case "GAMES_ROLE_PLAYING": "Role Playing Games"
+        case "STICKERS_MOVIES_AND_TV": "Movies & TV"
+        case "GAMES_CARD": "Card Games"
+        case "STICKERS_ANIMALS": "Animals"
+        case "MAGAZINES_AND_NEWSPAPERS": "Magazines & Newspapers"
+        case "STICKERS_ART": "Art"
+        case "STICKERS_FASHION": "Fashion"
+        case "UTILITIES": "Utilities"
+        case "STICKERS_GAMING": "Gaming"
+        case "SHOPPING": "Shopping"
+        case "NEWS": "News"
+        case "PRODUCTIVITY": "Productivity"
+        case "GAMES_SIMULATION": "Simulation Games"
+        case "NAVIGATION": "Navigation"
+        case "PHOTO_AND_VIDEO": "Photo & Video"
+        default: "Other"
         }
     }
 
     var image: Image {
         switch id {
-        case "STICKERS_EMOJI_AND_EXPRESSIONS": return Image(systemName: "face.smiling.fill")
-        case "GAMES_ACTION": return Image(systemName: "gamecontroller.fill")
-        case "BUSINESS": return Image(systemName: "briefcase.fill")
-        case "SOCIAL_NETWORKING": return Image(systemName: "person.2.fill")
-        case "GAMES_STRATEGY": return Image(systemName: "puzzlepiece.fill")
-        case "GAMES_SPORTS": return Image(systemName: "sportscourt.fill")
-        case "STICKERS_CELEBRATIONS": return Image(systemName: "party.popper.fill")
-        case "STICKERS": return Image(systemName: "face.smiling.fill")
-        case "GAMES": return Image(systemName: "gamecontroller.fill")
-        case "GAMES_CASUAL": return Image(systemName: "die.face.4.fill")
-        case "STICKERS_SPORTS_AND_ACTIVITIES": return Image(systemName: "bicycle.circle.fill")
-        case "GAMES_TRIVIA": return Image(systemName: "questionmark.circle.fill")
-        case "STICKERS_EATING_AND_DRINKING": return Image(systemName: "fork.knife.circle.fill")
-        case "STICKERS_CHARACTERS": return Image(systemName: "person.crop.circle.fill")
-        case "MEDICAL": return Image(systemName: "cross.case.fill")
-        case "GAMES_PUZZLE": return Image(systemName: "puzzlepiece.extension.fill")
-        case "GAMES_CASINO": return Image(systemName: "suit.club.fill")
-        case "GAMES_FAMILY": return Image(systemName: "person.3.fill")
-        case "STICKERS_PLACES_AND_OBJECTS": return Image(systemName: "location.circle.fill")
-        case "FOOD_AND_DRINK": return Image(systemName: "fork.knife")
-        case "GAMES_ADVENTURE": return Image(systemName: "star.circle.fill")
-        case "GAMES_BOARD": return Image(systemName: "checkerboard.rectangle")
-        case "EDUCATION": return Image(systemName: "book.fill")
-        case "BOOKS": return Image(systemName: "books.vertical.fill")
-        case "SPORTS": return Image(systemName: "sportscourt.fill")
-        case "FINANCE": return Image(systemName: "banknote.fill")
-        case "REFERENCE": return Image(systemName: "magnifyingglass.circle.fill")
-        case "GAMES_RACING": return Image(systemName: "car.fill")
-        case "DEVELOPER_TOOLS": return Image(systemName: "hammer.fill")
-        case "GRAPHICS_AND_DESIGN": return Image(systemName: "paintpalette.fill")
-        case "HEALTH_AND_FITNESS": return Image(systemName: "heart.fill")
-        case "MUSIC": return Image(systemName: "music.note")
-        case "ENTERTAINMENT": return Image(systemName: "tv.fill")
-        case "TRAVEL": return Image(systemName: "airplane")
-        case "WEATHER": return Image(systemName: "cloud.sun.fill")
-        case "GAMES_WORD": return Image(systemName: "textformat.abc")
-        case "STICKERS_CELEBRITIES": return Image(systemName: "person.crop.circle.badge.checkmark")
-        case "LIFESTYLE": return Image(systemName: "leaf.fill")
-        case "GAMES_MUSIC": return Image(systemName: "guitars.fill")
-        case "GAMES_ROLE_PLAYING": return Image(systemName: "shield.fill")
-        case "STICKERS_MOVIES_AND_TV": return Image(systemName: "film.fill")
-        case "GAMES_CARD": return Image(systemName: "suit.heart.fill")
-        case "STICKERS_ANIMALS": return Image(systemName: "pawprint.fill")
-        case "MAGAZINES_AND_NEWSPAPERS": return Image(systemName: "newspaper.fill")
-        case "STICKERS_ART": return Image(systemName: "paintbrush.fill")
-        case "STICKERS_FASHION": return Image(systemName: "tshirt.fill")
-        case "UTILITIES": return Image(systemName: "gearshape.fill")
-        case "STICKERS_GAMING": return Image(systemName: "gamecontroller.fill")
-        case "SHOPPING": return Image(systemName: "cart.fill")
-        case "NEWS": return Image(systemName: "newspaper.fill")
-        case "PRODUCTIVITY": return Image(systemName: "calendar")
-        case "GAMES_SIMULATION": return Image(systemName: "simcard.fill")
-        case "NAVIGATION": return Image(systemName: "location.north.line.fill")
-        case "PHOTO_AND_VIDEO": return Image(systemName: "camera.fill")
-        default: return Image(systemName: "questionmark.circle.fill")
+        case "STICKERS_EMOJI_AND_EXPRESSIONS": Image(systemName: "face.smiling.fill")
+        case "GAMES_ACTION": Image(systemName: "gamecontroller.fill")
+        case "BUSINESS": Image(systemName: "briefcase.fill")
+        case "SOCIAL_NETWORKING": Image(systemName: "person.2.fill")
+        case "GAMES_STRATEGY": Image(systemName: "puzzlepiece.fill")
+        case "GAMES_SPORTS": Image(systemName: "sportscourt.fill")
+        case "STICKERS_CELEBRATIONS": Image(systemName: "party.popper.fill")
+        case "STICKERS": Image(systemName: "face.smiling.fill")
+        case "GAMES": Image(systemName: "gamecontroller.fill")
+        case "GAMES_CASUAL": Image(systemName: "die.face.4.fill")
+        case "STICKERS_SPORTS_AND_ACTIVITIES": Image(systemName: "bicycle.circle.fill")
+        case "GAMES_TRIVIA": Image(systemName: "questionmark.circle.fill")
+        case "STICKERS_EATING_AND_DRINKING": Image(systemName: "fork.knife.circle.fill")
+        case "STICKERS_CHARACTERS": Image(systemName: "person.crop.circle.fill")
+        case "MEDICAL": Image(systemName: "cross.case.fill")
+        case "GAMES_PUZZLE": Image(systemName: "puzzlepiece.extension.fill")
+        case "GAMES_CASINO": Image(systemName: "suit.club.fill")
+        case "GAMES_FAMILY": Image(systemName: "person.3.fill")
+        case "STICKERS_PLACES_AND_OBJECTS": Image(systemName: "location.circle.fill")
+        case "FOOD_AND_DRINK": Image(systemName: "fork.knife")
+        case "GAMES_ADVENTURE": Image(systemName: "star.circle.fill")
+        case "GAMES_BOARD": Image(systemName: "checkerboard.rectangle")
+        case "EDUCATION": Image(systemName: "book.fill")
+        case "BOOKS": Image(systemName: "books.vertical.fill")
+        case "SPORTS": Image(systemName: "sportscourt.fill")
+        case "FINANCE": Image(systemName: "banknote.fill")
+        case "REFERENCE": Image(systemName: "magnifyingglass.circle.fill")
+        case "GAMES_RACING": Image(systemName: "car.fill")
+        case "DEVELOPER_TOOLS": Image(systemName: "hammer.fill")
+        case "GRAPHICS_AND_DESIGN": Image(systemName: "paintpalette.fill")
+        case "HEALTH_AND_FITNESS": Image(systemName: "heart.fill")
+        case "MUSIC": Image(systemName: "music.note")
+        case "ENTERTAINMENT": Image(systemName: "tv.fill")
+        case "TRAVEL": Image(systemName: "airplane")
+        case "WEATHER": Image(systemName: "cloud.sun.fill")
+        case "GAMES_WORD": Image(systemName: "textformat.abc")
+        case "STICKERS_CELEBRITIES": Image(systemName: "person.crop.circle.badge.checkmark")
+        case "LIFESTYLE": Image(systemName: "leaf.fill")
+        case "GAMES_MUSIC": Image(systemName: "guitars.fill")
+        case "GAMES_ROLE_PLAYING": Image(systemName: "shield.fill")
+        case "STICKERS_MOVIES_AND_TV": Image(systemName: "film.fill")
+        case "GAMES_CARD": Image(systemName: "suit.heart.fill")
+        case "STICKERS_ANIMALS": Image(systemName: "pawprint.fill")
+        case "MAGAZINES_AND_NEWSPAPERS": Image(systemName: "newspaper.fill")
+        case "STICKERS_ART": Image(systemName: "paintbrush.fill")
+        case "STICKERS_FASHION": Image(systemName: "tshirt.fill")
+        case "UTILITIES": Image(systemName: "gearshape.fill")
+        case "STICKERS_GAMING": Image(systemName: "gamecontroller.fill")
+        case "SHOPPING": Image(systemName: "cart.fill")
+        case "NEWS": Image(systemName: "newspaper.fill")
+        case "PRODUCTIVITY": Image(systemName: "calendar")
+        case "GAMES_SIMULATION": Image(systemName: "simcard.fill")
+        case "NAVIGATION": Image(systemName: "location.north.line.fill")
+        case "PHOTO_AND_VIDEO": Image(systemName: "camera.fill")
+        default: Image(systemName: "questionmark.circle.fill")
         }
     }
 }

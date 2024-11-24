@@ -21,7 +21,7 @@ public actor AppsService {
     }
 
     public func fetchApps() async -> Result<[App], AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.apps.get()
         do {
             let data = try await client.send(request).data
@@ -34,7 +34,7 @@ public actor AppsService {
 
     public func fetchAppsIncludeAppStoreVersionsAndPreReleaseVersions() async -> Result<[App], AppError> {
         do {
-            guard let client = client else {
+            guard let client else {
                 return .failure(.network(type: .unauthorized))
             }
             let request = Resources.v1.apps.get(
@@ -48,11 +48,11 @@ public actor AppsService {
                 let filteredIncluded = result.included?.filter { includedItem in
                     switch includedItem {
                     case let .appStoreVersion(appStoreVersion):
-                        return schema.relationships?.appStoreVersions?.data?.first(where: { $0.id == appStoreVersion.id }) != nil
+                        schema.relationships?.appStoreVersions?.data?.first(where: { $0.id == appStoreVersion.id }) != nil
                     case let .prereleaseVersion(prereleaseVersion):
-                        return schema.relationships?.preReleaseVersions?.data?.first(where: { $0.id == prereleaseVersion.id }) != nil
+                        schema.relationships?.preReleaseVersions?.data?.first(where: { $0.id == prereleaseVersion.id }) != nil
                     default:
-                        return false
+                        false
                     }
                 }
                 return App(schema: schema, included: filteredIncluded)
@@ -65,7 +65,7 @@ public actor AppsService {
 
     public func fetchAppsIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions() async -> Result<[App], AppError> {
         do {
-            guard let client = client else {
+            guard let client else {
                 return .failure(.network(type: .unauthorized))
             }
             let request = Resources.v1.apps.get(
@@ -80,13 +80,13 @@ public actor AppsService {
                 let filteredIncluded = result.included?.filter { includedItem in
                     switch includedItem {
                     case let .appStoreVersion(appStoreVersion):
-                        return schema.relationships?.appStoreVersions?.data?.first(where: { $0.id == appStoreVersion.id }) != nil
+                        schema.relationships?.appStoreVersions?.data?.first(where: { $0.id == appStoreVersion.id }) != nil
                     case let .build(build):
-                        return schema.relationships?.builds?.data?.first(where: { $0.id == build.id }) != nil
+                        schema.relationships?.builds?.data?.first(where: { $0.id == build.id }) != nil
                     case let .prereleaseVersion(prereleaseVersion):
-                        return schema.relationships?.preReleaseVersions?.data?.first(where: { $0.id == prereleaseVersion.id }) != nil
+                        schema.relationships?.preReleaseVersions?.data?.first(where: { $0.id == prereleaseVersion.id }) != nil
                     default:
-                        return false
+                        false
                     }
                 }
                 return App(schema: schema, included: filteredIncluded)
@@ -99,7 +99,7 @@ public actor AppsService {
 
     public func fetchAppIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions(appId: String) async -> Result<App, AppError> {
         do {
-            guard let client = client else {
+            guard let client else {
                 return .failure(.network(type: .unauthorized))
             }
             let request = Resources.v1.apps.id(appId).get(
@@ -120,7 +120,7 @@ public actor AppsService {
     }
 
     public func fetchAppsIncludeActualAppStoreVersionsAndBuilds() async -> Result<[App], AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.apps.get(
             filterAppStoreVersionsAppStoreState: [
                 .accepted,
@@ -154,11 +154,11 @@ public actor AppsService {
                 let filteredIncluded = result.included?.filter { includedItem in
                     switch includedItem {
                     case let .appStoreVersion(appStoreVersion):
-                        return schema.relationships?.appStoreVersions?.data?.first(where: { $0.id == appStoreVersion.id }) != nil
+                        schema.relationships?.appStoreVersions?.data?.first(where: { $0.id == appStoreVersion.id }) != nil
                     case let .build(build):
-                        return schema.relationships?.builds?.data?.first(where: { $0.id == build.id }) != nil
+                        schema.relationships?.builds?.data?.first(where: { $0.id == build.id }) != nil
                     default:
-                        return false
+                        false
                     }
                 }
                 return App(schema: schema, included: filteredIncluded)
@@ -175,7 +175,7 @@ public actor AppsService {
         identifier: String,
         seedID: String? = nil
     ) async -> Result<Bool, AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
 
         let requestData: BundleIDCreateRequest.Data = .init(
             type: .bundleIDs,

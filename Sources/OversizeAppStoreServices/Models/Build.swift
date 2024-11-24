@@ -58,7 +58,7 @@ public struct Build: Sendable, Identifiable, Equatable {
 func parseURL(from urlString: String) -> URL? {
     if let url = URL(string: urlString), let components = URLComponents(url: url, resolvingAgainstBaseURL: true) {
         if let scheme = components.scheme, let host = components.host {
-            if !scheme.isEmpty && !host.isEmpty {
+            if !scheme.isEmpty, !host.isEmpty {
                 return url
             }
         }
