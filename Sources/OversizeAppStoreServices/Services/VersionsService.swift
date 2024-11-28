@@ -46,6 +46,39 @@ public actor VersionsService {
         }
     }
 
+    public func fetchActualAppStoreVersions(appId: String) async -> Result<[AppStoreVersion], AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        let request = Resources.v1.apps.id(appId).appStoreVersions.get(
+            filterAppStoreState: [
+                .accepted,
+                .developerRemovedFromSale,
+                .developerRejected,
+                .inReview,
+                .invalidBinary,
+                .metadataRejected,
+                .pendingAppleRelease,
+                .pendingContract,
+                .pendingDeveloperRelease,
+                .prepareForSubmission,
+                .preorderReadyForSale,
+                .processingForAppStore,
+                .readyForReview,
+                .readyForSale,
+                .rejected,
+                .removedFromSale,
+                .waitingForExportCompliance,
+                .waitingForReview,
+                .notApplicable,
+            ]
+        )
+        do {
+            let data = try await client.send(request).data
+            return .success(data.compactMap { .init(schema: $0) })
+        } catch {
+            return .failure(.network(type: .noResponse))
+        }
+    }
+
     public func fetchAppVersions(appId: String, platform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform) async -> Result<[AppStoreVersion], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.apps.id(appId).appStoreVersions.get(filterPlatform: [platform])

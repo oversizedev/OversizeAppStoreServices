@@ -5,11 +5,13 @@
 
 import AppStoreAPI
 import AppStoreConnect
+import Factory
 import Foundation
 import OversizeCore
 import OversizeModels
 
 public actor AppsService {
+    @Injected(\.cacheService) private var cacheService: СacheService
     private let client: AppStoreConnectClient?
 
     public init() {
@@ -17,6 +19,20 @@ public actor AppsService {
             client = try AppStoreConnectClient(authenticator: EnvAuthenticator())
         } catch {
             client = nil
+        }
+    }
+    
+    public func fetchApp(id: String) async -> Result<App, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        let request = Resources.v1.apps.id(id).get()
+        do {
+            let data = try await client.send(request).data
+            guard let app: App = .init(schema: data) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(app)
+        } catch {
+            return .failure(.network(type: .noResponse))
         }
     }
 
@@ -31,18 +47,18 @@ public actor AppsService {
             return .failure(.network(type: .noResponse))
         }
     }
-
+    
     public func fetchAppsIncludeAppStoreVersionsAndPreReleaseVersions() async -> Result<[App], AppError> {
+        guard let client else {
+            return .failure(.network(type: .unauthorized))
+        }
+        let request = Resources.v1.apps.get(
+            include: [
+                .appStoreVersions,
+                .preReleaseVersions,
+            ]
+        )
         do {
-            guard let client else {
-                return .failure(.network(type: .unauthorized))
-            }
-            let request = Resources.v1.apps.get(
-                include: [
-                    .appStoreVersions,
-                    .preReleaseVersions,
-                ]
-            )
             let result = try await client.send(request)
             let apps: [App] = result.data.compactMap { schema in
                 let filteredIncluded = result.included?.filter { includedItem in
@@ -64,34 +80,23 @@ public actor AppsService {
     }
 
     public func fetchAppsIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions() async -> Result<[App], AppError> {
+        if let cachedData: AppsResponse = cacheService.load(as: AppsResponse.self) {
+            return .success(processAppsResponse(cachedData))
+        }
+        guard let client else {
+            return .failure(.network(type: .unauthorized))
+        }
+        let request = Resources.v1.apps.get(
+            include: [
+                .builds,
+                .appStoreVersions,
+                .preReleaseVersions,
+            ]
+        )
         do {
-            guard let client else {
-                return .failure(.network(type: .unauthorized))
-            }
-            let request = Resources.v1.apps.get(
-                include: [
-                    .builds,
-                    .appStoreVersions,
-                    .preReleaseVersions,
-                ]
-            )
             let result = try await client.send(request)
-            let apps: [App] = result.data.compactMap { schema in
-                let filteredIncluded = result.included?.filter { includedItem in
-                    switch includedItem {
-                    case let .appStoreVersion(appStoreVersion):
-                        schema.relationships?.appStoreVersions?.data?.first(where: { $0.id == appStoreVersion.id }) != nil
-                    case let .build(build):
-                        schema.relationships?.builds?.data?.first(where: { $0.id == build.id }) != nil
-                    case let .prereleaseVersion(prereleaseVersion):
-                        schema.relationships?.preReleaseVersions?.data?.first(where: { $0.id == prereleaseVersion.id }) != nil
-                    default:
-                        false
-                    }
-                }
-                return App(schema: schema, included: filteredIncluded)
-            }
-            return .success(apps)
+            cacheService.save(result)
+            return .success(processAppsResponse(result))
         } catch {
             return .failure(.network(type: .noResponse))
         }
@@ -193,6 +198,26 @@ public actor AppsService {
             return .success(true)
         } catch {
             return .failure(.network(type: .noResponse))
+        }
+    }
+}
+
+private extension AppsService {
+    func processAppsResponse(_ response: AppsResponse) -> [App] {
+        response.data.compactMap { schema in
+            let filteredIncluded = response.included?.filter { includedItem in
+                switch includedItem {
+                case let .appStoreVersion(appStoreVersion):
+                    schema.relationships?.appStoreVersions?.data?.contains(where: { $0.id == appStoreVersion.id }) ?? false
+                case let .build(build):
+                    schema.relationships?.builds?.data?.contains(where: { $0.id == build.id }) ?? false
+                case let .prereleaseVersion(prereleaseVersion):
+                    schema.relationships?.preReleaseVersions?.data?.contains(where: { $0.id == prereleaseVersion.id }) ?? false
+                default:
+                    false
+                }
+            }
+            return App(schema: schema, included: filteredIncluded)
         }
     }
 }
