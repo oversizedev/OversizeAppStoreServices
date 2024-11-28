@@ -4,27 +4,37 @@
 //
 
 import AppStoreConnect
+import Factory
 import Foundation
+import OversizeServices
 
 public struct EnvAuthenticator: Authenticator {
-    private let secureStorage: KeychainService = .init()
-
+    private let storage: SecureStorageService = .init()
     private var jwt: JWT
+    public var api: API { jwt.api }
 
-    public init() throws {
+    public init(
+        api: API = .appStoreConnect
+
+    ) throws {
         guard let keyLabel = UserDefaults.standard.string(forKey: "AppStore.Account") else {
             throw Error.missingEnvironmentVariable("AppStore.Account")
         }
 
-        guard let appStoreCertificate = secureStorage.getAppStoreCertificate(with: keyLabel) else {
+        guard let appStoreCertificate = storage.getPassword(for: "AppConnector-Certificate-" + keyLabel) else {
             throw Error.missingEnvironmentVariable("AppStore.Key.Default")
         }
 
-        let privateKey = try JWT.PrivateKey(pemRepresentation: appStoreCertificate.privateKey)
+        guard let appStoreCredentials = storage.getCredentials(with: "AppConnector-" + keyLabel) else {
+            throw Error.missingEnvironmentVariable("AppStore.Key.Default")
+        }
+
+        let privateKey = try JWT.PrivateKey(pemRepresentation: appStoreCertificate)
 
         jwt = JWT(
-            keyID: appStoreCertificate.keyId,
-            issuerID: appStoreCertificate.issuerId,
+            api: api,
+            keyID: appStoreCredentials.password,
+            issuerID: appStoreCredentials.login,
             expiryDuration: 20 * 60,
             privateKey: privateKey
         )

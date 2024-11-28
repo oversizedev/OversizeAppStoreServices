@@ -5,7 +5,7 @@
 
 import Foundation
 
-public enum AppStoreLanguage: String, CaseIterable, Codable {
+public enum AppStoreLanguage: String, CaseIterable, Codable, Sendable {
     case arabic = "ar-SA"
     case catalan = "ca"
     case chineseSimplified = "zh-Hans"
@@ -46,4 +46,49 @@ public enum AppStoreLanguage: String, CaseIterable, Codable {
     case turkish = "tr"
     case ukrainian = "uk"
     case vietnamese = "vi"
+
+    public var displayName: String {
+        switch self {
+        case .arabic: "Arabic"
+        case .catalan: "Catalan"
+        case .chineseSimplified: "Chinese (Simplified)"
+        case .chineseTraditional: "Chinese (Traditional)"
+        case .croatian: "Croatian"
+        case .czech: "Czech"
+        case .danish: "Danish"
+        case .dutch: "Dutch"
+        case .englishUS: "English (US)"
+        case .englishAUS: "English (Australia)"
+        case .englishCAN: "English (Canada)"
+        case .englishUK: "English (UK)"
+        case .finnish: "Finnish"
+        case .french: "French"
+        case .frenchCAN: "French (Canada)"
+        case .german: "German"
+        case .greek: "Greek"
+        case .hebrew: "Hebrew"
+        case .hindi: "Hindi"
+        case .hungarian: "Hungarian"
+        case .indonesian: "Indonesian"
+        case .italian: "Italian"
+        case .japanese: "Japanese"
+        case .korean: "Korean"
+        case .malay: "Malay"
+        case .macedonian: "Macedonian"
+        case .norwegian: "Norwegian"
+        case .polish: "Polish"
+        case .portuguese: "Portuguese (Portugal)"
+        case .portugueseBRA: "Portuguese (Brazil)"
+        case .romanian: "Romanian"
+        case .russian: "Russian"
+        case .slovak: "Slovak"
+        case .spanish: "Spanish (Spain)"
+        case .spanishMEX: "Spanish (Mexico)"
+        case .swedish: "Swedish"
+        case .thai: "Thai"
+        case .turkish: "Turkish"
+        case .ukrainian: "Ukrainian"
+        case .vietnamese: "Vietnamese"
+        }
+    }
 }

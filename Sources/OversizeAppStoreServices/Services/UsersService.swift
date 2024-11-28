@@ -3,6 +3,7 @@
 // UsersService.swift, created on 22.09.2024
 //
 
+import AppStoreAPI
 import AppStoreConnect
 import OversizeModels
 
@@ -17,8 +18,8 @@ public actor UsersService {
         }
     }
 
-    public func fetchCustomerReviews(versionId _: String) async -> Result<[User], AppError> {
-        guard let client = client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchUsers(versionId _: String) async -> Result<[User], AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.users.get()
         do {
             let data = try await client.send(request).data

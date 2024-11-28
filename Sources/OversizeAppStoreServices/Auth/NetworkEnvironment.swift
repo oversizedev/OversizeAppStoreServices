@@ -16,14 +16,14 @@ public struct NetworkEnvironment {
         public var description: String {
             switch self {
             case let .unreadableEntry(context):
-                return """
+                """
                 \(context.url.relativePath):\(context.line): Unreadable entry in "\(context.content)"
                 """
             }
         }
 
         /// Context for the error thrown.
-        public struct ParseContext: Equatable {
+        public struct ParseContext: Equatable, Sendable {
             /// The content of the line the error occurred at.
             public var content: String
             /// The line number.
@@ -72,7 +72,7 @@ public struct NetworkEnvironment {
             loadedEnvironment[name] ?? processInfo.environment[name]
         }
         set {
-            guard let newValue = newValue else { return }
+            guard let newValue else { return }
             loadedEnvironment[name] = newValue
         }
     }

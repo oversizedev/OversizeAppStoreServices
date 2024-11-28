@@ -6,10 +6,6 @@
 import Factory
 
 public extension Container {
-    var keychainService: Factory<KeychainService> {
-        self { KeychainService() }
-    }
-
     var appsService: Factory<AppsService> {
         self { AppsService() }
     }
@@ -22,11 +18,47 @@ public extension Container {
         self { CertificateService() }
     }
 
-    var reviewService: Factory<ReviewService> {
-        self { ReviewService() }
+    var customerReviewService: Factory<CustomerReviewService> {
+        self { CustomerReviewService() }
     }
 
     var usersService: Factory<UsersService> {
         self { UsersService() }
+    }
+
+    var buildsService: Factory<BuildsService> {
+        self { BuildsService() }
+    }
+
+    var versionsService: Factory<VersionsService> {
+        self { VersionsService() }
+    }
+
+    var appInfoService: Factory<AppInfoService> {
+        self { AppInfoService() }
+    }
+
+    var appStoreReviewService: Factory<AppStoreReviewService> {
+        self { AppStoreReviewService() }
+    }
+
+    var appCategoryService: Factory<AppCategoryService> {
+        self { AppCategoryService() }
+    }
+
+    var appStoreVersionSubmissionsService: Factory<AppStoreVersionSubmissionsService> {
+        self { AppStoreVersionSubmissionsService() }
+    }
+
+    var analyticsService: Factory<AnalyticsService> {
+        self { AnalyticsService() }
+    }
+
+    var salesAndFinanceService: Factory<SalesAndFinanceService> {
+        self { SalesAndFinanceService() }
+    }
+
+    var cacheService: Factory<СacheService> {
+        self { СacheService() }
     }
 }

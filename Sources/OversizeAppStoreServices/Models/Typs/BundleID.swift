@@ -3,15 +3,16 @@
 // BundleID.swift, created on 23.07.2024
 //
 
+import AppStoreAPI
 import AppStoreConnect
 
-public enum BundleID {
-    public enum Platform {
-        case ios
+public enum BundleID: Sendable {
+    public enum Platform: Sendable {
+        case iOS
         case macOS
 
-        init(schema: AppStoreConnect.BundleIDPlatform) {
-            self = schema == .ios ? .ios : .macOS
+        init(schema: AppStoreAPI.BundleIDPlatform) {
+            self = schema == .iOS ? .iOS : .macOS
         }
     }
 }
