@@ -84,6 +84,7 @@ public actor AppsService {
             return .success(processAppsResponse(cachedData))
         }
         guard let client else { return .failure(.network(type: .unauthorized)) }
+
         let request = Resources.v1.apps.get(
             include: [
                 .builds,

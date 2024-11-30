@@ -19,7 +19,7 @@ public struct Build: Sendable, Identifiable, Equatable {
     public let computedMinMacOsVersion: String?
     public let processingState: ProcessingState?
     public let buildAudienceType: BuildAudienceType?
-
+ 
     public let relationships: Relationships
 
     public init?(schema: AppStoreAPI.Build) {
