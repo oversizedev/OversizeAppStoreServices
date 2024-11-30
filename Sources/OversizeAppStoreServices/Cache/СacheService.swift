@@ -20,8 +20,9 @@ public final class СacheService {
         cacheDirectory.appendingPathComponent(key)
     }
 
-    func save(_ data: some Encodable, for key: String = #function) {
-        let fileURL = cacheFilePath(for: key)
+    func save(_ data: some Encodable, key: String = #function) {
+        let trimmedKey = key.hasSuffix("()") ? String(key.dropLast(2)) : key
+        let fileURL = cacheFilePath(for: trimmedKey)
         do {
             let jsonData = try JSONEncoder().encode(data)
             try jsonData.write(to: fileURL, options: .atomic)
@@ -31,8 +32,9 @@ public final class СacheService {
         }
     }
 
-    func load<T: Decodable>(for key: String = #function, as _: T.Type) -> T? {
-        let fileURL = cacheFilePath(for: key)
+    func load<T: Decodable>(key: String = #function, as _: T.Type) -> T? {
+        let trimmedKey = key.hasSuffix("()") ? String(key.dropLast(2)) : key
+        let fileURL = cacheFilePath(for: trimmedKey)
 
         guard FileManager.default.fileExists(atPath: fileURL.path),
               isCacheValid(for: fileURL)
@@ -51,6 +53,7 @@ public final class СacheService {
     }
 
     func remove(for key: String = #function) {
+        let trimmedKey = key.hasSuffix("()") ? String(key.dropLast(2)) : key
         let fileURL = cacheFilePath(for: key)
         try? FileManager.default.removeItem(at: fileURL)
     }

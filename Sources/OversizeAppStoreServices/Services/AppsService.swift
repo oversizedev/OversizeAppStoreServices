@@ -21,7 +21,7 @@ public actor AppsService {
             client = nil
         }
     }
-    
+
     public func fetchApp(id: String) async -> Result<App, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.apps.id(id).get()
@@ -47,7 +47,7 @@ public actor AppsService {
             return .failure(.network(type: .noResponse))
         }
     }
-    
+
     public func fetchAppsIncludeAppStoreVersionsAndPreReleaseVersions() async -> Result<[App], AppError> {
         guard let client else {
             return .failure(.network(type: .unauthorized))
@@ -83,9 +83,7 @@ public actor AppsService {
         if let cachedData: AppsResponse = cacheService.load(as: AppsResponse.self) {
             return .success(processAppsResponse(cachedData))
         }
-        guard let client else {
-            return .failure(.network(type: .unauthorized))
-        }
+        guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.apps.get(
             include: [
                 .builds,
@@ -94,9 +92,9 @@ public actor AppsService {
             ]
         )
         do {
-            let result = try await client.send(request)
-            cacheService.save(result)
-            return .success(processAppsResponse(result))
+            let response = try await client.send(request)
+            cacheService.save(response)
+            return .success(processAppsResponse(response))
         } catch {
             return .failure(.network(type: .noResponse))
         }

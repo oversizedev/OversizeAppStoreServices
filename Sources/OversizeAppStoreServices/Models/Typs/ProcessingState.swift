@@ -10,4 +10,17 @@ public enum ProcessingState: String, CaseIterable, Codable, Sendable {
     case failed = "FAILED"
     case invalid = "INVALID"
     case valid = "VALID"
+
+    public var displayName: String {
+        switch self {
+        case .processing:
+            "Processing"
+        case .failed:
+            "Failed"
+        case .invalid:
+            "Invalid"
+        case .valid:
+            "Valid"
+        }
+    }
 }
