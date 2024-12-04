@@ -20,6 +20,8 @@ public struct Build: Sendable, Identifiable, Equatable {
     public let processingState: ProcessingState?
     public let buildAudienceType: BuildAudienceType?
 
+    public let relationships: Relationships
+
     public init?(schema: AppStoreAPI.Build) {
         guard let version = schema.attributes?.version,
               let uploadedDate = schema.attributes?.uploadedDate,
@@ -52,6 +54,13 @@ public struct Build: Sendable, Identifiable, Equatable {
                 format: "png"
             )
         )
+        relationships = .init(
+            buildBundlesIds: schema.relationships?.buildBundles?.data?.compactMap { $0.id }
+        )
+    }
+
+    public struct Relationships: Sendable, Equatable {
+        public let buildBundlesIds: [String]?
     }
 }
 

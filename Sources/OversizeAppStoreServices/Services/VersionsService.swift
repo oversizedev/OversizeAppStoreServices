@@ -30,6 +30,25 @@ public actor VersionsService {
         }
     }
 
+    public func fetchEditableAppVersions(appId: String) async -> Result<[AppStoreVersion], AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        let request = Resources.v1.apps.id(appId).appStoreVersions.get(
+            filterAppVersionState: [
+                .prepareForSubmission,
+                .metadataRejected,
+                .developerRejected,
+                .rejected,
+                .invalidBinary,
+            ]
+        )
+        do {
+            let data = try await client.send(request).data
+            return .success(data.compactMap { .init(schema: $0) })
+        } catch {
+            return .failure(.network(type: .noResponse))
+        }
+    }
+
     public func fetchRelisedAppVersions(appId: String) async -> Result<[AppStoreVersion], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.apps.id(appId).appStoreVersions.get(
@@ -107,7 +126,7 @@ public actor VersionsService {
         }
     }
 
-    public func fetchAppVersionLocalizations(forVersion versionId: String) async -> Result<[VersionLocalization], AppError> {
+    public func fetchAppVersionLocalizations(versionId: String) async -> Result<[VersionLocalization], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.appStoreVersions.id(versionId).appStoreVersionLocalizations.get()
         do {
