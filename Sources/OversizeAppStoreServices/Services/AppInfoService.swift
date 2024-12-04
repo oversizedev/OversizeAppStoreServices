@@ -141,4 +141,43 @@ public actor AppInfoService {
             return .failure(.network(type: .noResponse))
         }
     }
+
+    public func patchAppInfoLocalization(
+        localizationId: String,
+        name: String? = nil,
+        subtitle: String? = nil,
+        privacyPolicyURL: String? = nil,
+        privacyChoicesURL: String? = nil,
+        privacyPolicyText: String? = nil
+    ) async -> Result<AppInfoLocalization, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+
+        let requestAttributes: AppInfoLocalizationUpdateRequest.Data.Attributes = .init(
+            name: name,
+            subtitle: subtitle,
+            privacyPolicyURL: privacyPolicyURL,
+            privacyChoicesURL: privacyChoicesURL,
+            privacyPolicyText: privacyPolicyText
+        )
+
+        let requestData: AppInfoLocalizationUpdateRequest.Data = .init(
+            type: .appInfoLocalizations,
+            id: localizationId,
+            attributes: requestAttributes
+        )
+
+        let request = Resources.v1.appInfoLocalizations.id(localizationId).patch(
+            .init(data: requestData)
+        )
+
+        do {
+            let data = try await client.send(request).data
+            guard let versionLocalization: AppInfoLocalization = .init(schema: data) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(versionLocalization)
+        } catch {
+            return .failure(.network(type: .noResponse))
+        }
+    }
 }

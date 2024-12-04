@@ -11,6 +11,7 @@ public struct AppInfo: Sendable {
     public let id: String
 
     public var appStoreState: AppStoreVersionState?
+    public var state: State?
     public let appStoreAgeRating: AppStoreAgeRating?
     public let australiaAgeRating: AustraliaAgeRating?
     public let brazilAgeRating: BrazilAgeRating?
@@ -25,6 +26,7 @@ public struct AppInfo: Sendable {
         guard let attributes = schema.attributes else { return nil }
         id = schema.id
         appStoreState = attributes.appStoreState.flatMap { .init(rawValue: $0.rawValue) }
+        state = attributes.state.flatMap { .init(rawValue: $0.rawValue) }
         appStoreAgeRating = attributes.appStoreAgeRating.flatMap { AppStoreAgeRating(rawValue: $0.rawValue) }
         australiaAgeRating = attributes.australiaAgeRating.flatMap { AustraliaAgeRating(rawValue: $0.rawValue) }
         brazilAgeRating = attributes.brazilAgeRating.flatMap { BrazilAgeRating(rawValue: $0.rawValue) }
@@ -89,5 +91,18 @@ public struct AppInfo: Sendable {
         public let primaryCategory: AppCategory?
         public let secondaryCategory: AppCategory?
         public let ageRatingDeclaration: AgeRatingDeclaration?
+    }
+
+    public enum State: String, CaseIterable, Codable, Sendable {
+        case accepted = "ACCEPTED"
+        case developerRejected = "DEVELOPER_REJECTED"
+        case inReview = "IN_REVIEW"
+        case pendingRelease = "PENDING_RELEASE"
+        case prepareForSubmission = "PREPARE_FOR_SUBMISSION"
+        case readyForDistribution = "READY_FOR_DISTRIBUTION"
+        case readyForReview = "READY_FOR_REVIEW"
+        case rejected = "REJECTED"
+        case replacedWithNewInfo = "REPLACED_WITH_NEW_INFO"
+        case waitingForReview = "WAITING_FOR_REVIEW"
     }
 }
