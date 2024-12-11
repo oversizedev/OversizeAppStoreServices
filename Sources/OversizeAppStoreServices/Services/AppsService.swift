@@ -11,7 +11,7 @@ import OversizeCore
 import OversizeModels
 
 public actor AppsService {
-    @Injected(\.cacheService) private var cacheService: СacheService
+    @Injected(\.cacheService) private var cacheService: CacheService
     private let client: AppStoreConnectClient?
 
     public init() {
@@ -22,17 +22,17 @@ public actor AppsService {
         }
     }
 
-    public func fetchApp(id: String) async -> Result<App, AppError> {
+    public func fetchApp(id: String, force: Bool = false) async -> Result<App, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
-        let request = Resources.v1.apps.id(id).get()
-        do {
-            let data = try await client.send(request).data
-            guard let app: App = .init(schema: data) else {
+        return await cacheService.fetchWithCache(key: "fetchApp\(id)", force: force) {
+            let request = Resources.v1.apps.id(id).get()
+            let response = try await client.send(request)
+            return response.data
+        }.flatMap { data in
+            guard let app = App(schema: data) else {
                 return .failure(.network(type: .decode))
             }
             return .success(app)
-        } catch {
-            return .failure(.network(type: .noResponse))
         }
     }
 
@@ -79,25 +79,19 @@ public actor AppsService {
         }
     }
 
-    public func fetchAppsIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions() async -> Result<[App], AppError> {
-        if let cachedData: AppsResponse = cacheService.load(as: AppsResponse.self) {
-            return .success(processAppsResponse(cachedData))
-        }
+    public func fetchAppsIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions(forse: Bool = false) async -> Result<[App], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
-
-        let request = Resources.v1.apps.get(
-            include: [
-                .builds,
-                .appStoreVersions,
-                .preReleaseVersions,
-            ]
-        )
-        do {
-            let response = try await client.send(request)
-            cacheService.save(response)
-            return .success(processAppsResponse(response))
-        } catch {
-            return .failure(.network(type: .noResponse))
+        return await cacheService.fetchWithCache(key: "fetchAppsIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions", force: forse) {
+            let request = Resources.v1.apps.get(
+                include: [
+                    .builds,
+                    .appStoreVersions,
+                    .preReleaseVersions,
+                ]
+            )
+            return try await client.send(request)
+        }.flatMap {
+            .success(processAppsResponse($0))
         }
     }
 
@@ -199,6 +193,30 @@ public actor AppsService {
             return .failure(.network(type: .noResponse))
         }
     }
+
+    public func patchPrimaryLanguage(
+        appId: String,
+        locale: AppStoreLanguage
+    ) async -> Result<App, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+
+        let requestData: AppUpdateRequest.Data = .init(
+            type: .apps,
+            id: appId,
+            attributes: .init(primaryLocale: locale.rawValue)
+        )
+        let request = Resources.v1.apps.id(appId).patch(.init(data: requestData))
+        do {
+            let data = try await client.send(request).data
+            guard let app = App(schema: data) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(app)
+        } catch {
+            let replacements = ["@@LANGUAGE_VALUE@@": locale.displayName]
+            return handleRequestFailure(error: error, replaces: replacements)
+        }
+    }
 }
 
 private extension AppsService {
@@ -218,5 +236,28 @@ private extension AppsService {
             }
             return App(schema: schema, included: filteredIncluded)
         }
+    }
+
+    func handleRequestFailure<T>(error: Error, replaces: [String: String] = [:]) -> Result<T, AppError> {
+        if let responseError = error as? ResponseError {
+            switch responseError {
+            case let .requestFailure(errorResponse, _, _):
+                if let errors = errorResponse?.errors, let firstError = errors.first {
+                    var title = firstError.title
+                    var detail = firstError.detail
+
+                    for (placeholder, replacement) in replaces {
+                        title = title.replacingOccurrences(of: placeholder, with: replacement)
+                        detail = detail.replacingOccurrences(of: placeholder, with: replacement)
+                    }
+
+                    return .failure(AppError.network(type: .apiError(title, detail)))
+                }
+                return .failure(AppError.network(type: .unknown))
+            default:
+                return .failure(AppError.network(type: .unknown))
+            }
+        }
+        return .failure(AppError.network(type: .unknown))
     }
 }

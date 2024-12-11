@@ -5,7 +5,9 @@
 
 import Foundation
 
-public enum AppStoreLanguage: String, CaseIterable, Codable, Sendable {
+public enum AppStoreLanguage: String, CaseIterable, Codable, Sendable, Identifiable {
+    public var id: String { rawValue }
+
     case arabic = "ar-SA"
     case catalan = "ca"
     case chineseSimplified = "zh-Hans"

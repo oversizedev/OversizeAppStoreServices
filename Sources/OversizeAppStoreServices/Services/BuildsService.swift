@@ -11,7 +11,7 @@ import OversizeCore
 import OversizeModels
 
 public actor BuildsService {
-    @Injected(\.cacheService) private var cacheService: СacheService
+    @Injected(\.cacheService) private var cacheService: CacheService
     private let client: AppStoreConnectClient?
 
     public init() {
@@ -22,40 +22,27 @@ public actor BuildsService {
         }
     }
 
-    public func fetchBuild(buildId: String) async -> Result<Build, AppError> {
-        let pathKey = "fetchBuild\(buildId)"
-        if let cachedData: BuildResponse = cacheService.load(key: pathKey, as: BuildResponse.self),
-           let build: Build = .init(schema: cachedData.data)
-        {
-            return .success(build)
-        }
+    public func fetchBuild(buildId: String, forse: Bool = false) async -> Result<Build, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
-        let request = Resources.v1.builds.id(buildId).get()
-        do {
-            let response = try await client.send(request)
-            guard let build: Build = .init(schema: response.data) else {
+        return await cacheService.fetchWithCache(key: "fetchBuild\(buildId)", force: forse) {
+            let request = Resources.v1.builds.id(buildId).get()
+            return try await client.send(request)
+        }.flatMap {
+            guard let build: Build = .init(schema: $0.data) else {
                 return .failure(.network(type: .decode))
             }
-            cacheService.save(response, key: pathKey)
             return .success(build)
-        } catch {
-            return .failure(.network(type: .noResponse))
         }
     }
 
-    public func fetchBuildBundlesId(buildBundlesId: String) async -> Result<[BuildBundleFileSize], AppError> {
-        let pathKey = "buildBundlesId\(buildBundlesId)"
-        if let cachedResponse = cacheService.load(key: pathKey, as: BuildBundleFileSizesResponse.self) {
-            return .success(cachedResponse.data.compactMap { .init(schema: $0) })
-        }
+    public func fetchBuildBundlesId(buildBundlesId: String, forse: Bool = false) async -> Result<[BuildBundleFileSize], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
-        let request = Resources.v1.buildBundles.id(buildBundlesId).buildBundleFileSizes.get()
-        do {
-            let response = try await client.send(request)
-            cacheService.save(response, key: pathKey)
-            return .success(response.data.compactMap { .init(schema: $0) })
-        } catch {
-            return .failure(.network(type: .noResponse))
+        let pathKey = "buildBundlesId\(buildBundlesId)"
+        return await cacheService.fetchWithCache(key: "buildBundlesId\(buildBundlesId)", force: forse) {
+            let request = Resources.v1.buildBundles.id(buildBundlesId).buildBundleFileSizes.get()
+            return try await client.send(request).data
+        }.map { data in
+            data.compactMap { .init(schema: $0) }
         }
     }
 

@@ -8,7 +8,7 @@ import AppStoreConnect
 import Foundation
 import OversizeCore
 
-public struct VersionLocalization: Identifiable, Hashable, Sendable {
+public struct AppStoreVersionLocalization: Identifiable, Hashable, Sendable {
     public let id: String
     public let locale: AppStoreLanguage
     public let description: String?
