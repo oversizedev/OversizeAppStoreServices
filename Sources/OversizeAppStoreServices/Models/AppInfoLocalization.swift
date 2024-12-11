@@ -7,7 +7,7 @@ import AppStoreAPI
 import AppStoreConnect
 import Foundation
 
-public struct AppInfoLocalization: Sendable {
+public struct AppInfoLocalization: Sendable, Hashable, Identifiable {
     public let id: String
     public let locale: AppStoreLanguage?
     public let name: String?

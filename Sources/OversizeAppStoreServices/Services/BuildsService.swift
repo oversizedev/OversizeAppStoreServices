@@ -5,11 +5,13 @@
 
 import AppStoreAPI
 import AppStoreConnect
+import Factory
 import Foundation
 import OversizeCore
 import OversizeModels
 
 public actor BuildsService {
+    @Injected(\.cacheService) private var cacheService: CacheService
     private let client: AppStoreConnectClient?
 
     public init() {
@@ -17,6 +19,30 @@ public actor BuildsService {
             client = try AppStoreConnectClient(authenticator: EnvAuthenticator())
         } catch {
             client = nil
+        }
+    }
+
+    public func fetchBuild(buildId: String, forse: Bool = false) async -> Result<Build, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        return await cacheService.fetchWithCache(key: "fetchBuild\(buildId)", force: forse) {
+            let request = Resources.v1.builds.id(buildId).get()
+            return try await client.send(request)
+        }.flatMap {
+            guard let build: Build = .init(schema: $0.data) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(build)
+        }
+    }
+
+    public func fetchBuildBundlesId(buildBundlesId: String, forse: Bool = false) async -> Result<[BuildBundleFileSize], AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        let pathKey = "buildBundlesId\(buildBundlesId)"
+        return await cacheService.fetchWithCache(key: "buildBundlesId\(buildBundlesId)", force: forse) {
+            let request = Resources.v1.buildBundles.id(buildBundlesId).buildBundleFileSizes.get()
+            return try await client.send(request).data
+        }.map { data in
+            data.compactMap { .init(schema: $0) }
         }
     }
 
