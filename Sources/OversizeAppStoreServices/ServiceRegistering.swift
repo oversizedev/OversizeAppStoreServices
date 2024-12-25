@@ -58,7 +58,11 @@ public extension Container {
         self { SalesAndFinanceService() }
     }
 
-    var cacheService: Factory<СacheService> {
-        self { СacheService() }
+    var cacheService: Factory<CacheService> {
+        self { CacheService() }
+    }
+
+    var perfPowerMetricsService: Factory<PerfPowerMetricsService> {
+        self { PerfPowerMetricsService() }
     }
 }

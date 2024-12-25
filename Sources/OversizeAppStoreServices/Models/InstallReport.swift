@@ -1,7 +1,7 @@
 //
 // Copyright © 2024 Alexander Romanov
 // InstallReport.swift, created on 28.11.2024
-//  
+//
 
 import Foundation
 

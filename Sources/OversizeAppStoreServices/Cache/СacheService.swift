@@ -5,8 +5,9 @@
 
 import Foundation
 import OversizeCore
+import OversizeModels
 
-public final class СacheService {
+public actor CacheService {
     private let cacheDirectory: URL
     private let cacheExpiration: TimeInterval
 
@@ -20,7 +21,7 @@ public final class СacheService {
         cacheDirectory.appendingPathComponent(key)
     }
 
-    func save(_ data: some Encodable, for key: String = #function) {
+    public func save(_ data: some Encodable, key: String) async {
         let fileURL = cacheFilePath(for: key)
         do {
             let jsonData = try JSONEncoder().encode(data)
@@ -31,18 +32,15 @@ public final class СacheService {
         }
     }
 
-    func load<T: Decodable>(for key: String = #function, as _: T.Type) -> T? {
+    public func load<T: Decodable>(key: String, as _: T.Type) async -> T? {
         let fileURL = cacheFilePath(for: key)
-
-        guard FileManager.default.fileExists(atPath: fileURL.path),
-              isCacheValid(for: fileURL)
-        else {
+        guard FileManager.default.fileExists(atPath: fileURL.path), await isCacheValid(for: fileURL) else {
             return nil
         }
 
         do {
             let data = try Data(contentsOf: fileURL)
-            logNotice("Readed cache: \(key)")
+            logNotice("Read cache: \(key)")
             return try JSONDecoder().decode(T.self, from: data)
         } catch {
             logError("Failed to load cache for key \(key): \(error)")
@@ -50,21 +48,49 @@ public final class СacheService {
         }
     }
 
-    func remove(for key: String = #function) {
+    public func remove(for key: String) async {
         let fileURL = cacheFilePath(for: key)
         try? FileManager.default.removeItem(at: fileURL)
     }
 
-    func clearAll() {
+    public func clearAll() async {
         try? FileManager.default.removeItem(at: cacheDirectory)
     }
 
-    private func isCacheValid(for fileURL: URL) -> Bool {
+    private func isCacheValid(for fileURL: URL) async -> Bool {
         guard let attributes = try? FileManager.default.attributesOfItem(atPath: fileURL.path),
               let modificationDate = attributes[.modificationDate] as? Date
         else {
             return false
         }
         return Date().timeIntervalSince(modificationDate) < cacheExpiration
+    }
+}
+
+public extension CacheService {
+    func fetchWithCache<T: Codable & Sendable>(
+        key: String,
+        force: Bool = false,
+        fetcher: () async throws -> T
+    ) async -> Result<T, AppError> {
+        if !force {
+            if let cachedData: T = await load(key: key, as: T.self) {
+                logNotice("Returning cached data for key: \(key)")
+                return .success(cachedData)
+            }
+        }
+
+        do {
+            logNetwork(force ? "Force fetching: \(key)" : "Fetching: \(key)")
+            let fetchedData = try await fetcher()
+            await save(fetchedData, key: key) // Save new data to cache
+            return .success(fetchedData)
+        } catch let error as AppError {
+            logError("Failed to fetch data for key \(key): \(error)")
+            return .failure(error)
+        } catch {
+            logError("Unexpected error during fetch for key \(key): \(error)")
+            return .failure(.network(type: .noResponse))
+        }
     }
 }

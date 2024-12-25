@@ -5,7 +5,9 @@
 
 import Foundation
 
-public enum AppStoreLanguage: String, CaseIterable, Codable, Sendable {
+public enum AppStoreLanguage: String, CaseIterable, Codable, Sendable, Identifiable {
+    public var id: String { rawValue }
+
     case arabic = "ar-SA"
     case catalan = "ca"
     case chineseSimplified = "zh-Hans"
@@ -89,6 +91,50 @@ public enum AppStoreLanguage: String, CaseIterable, Codable, Sendable {
         case .turkish: "Turkish"
         case .ukrainian: "Ukrainian"
         case .vietnamese: "Vietnamese"
+        }
+    }
+
+    public var flagEmoji: String {
+        switch self {
+        case .arabic: "🇸🇦"
+        case .catalan: "🇪🇸"
+        case .chineseSimplified, .chineseTraditional: "🇨🇳"
+        case .croatian: "🇭🇷"
+        case .czech: "🇨🇿"
+        case .danish: "🇩🇰"
+        case .dutch: "🇳🇱"
+        case .englishUS: "🇺🇸"
+        case .englishAUS: "🇦🇺"
+        case .englishCAN: "🇨🇦"
+        case .englishUK: "🇬🇧"
+        case .finnish: "🇫🇮"
+        case .french: "🇫🇷"
+        case .frenchCAN: "🇨🇦"
+        case .german: "🇩🇪"
+        case .greek: "🇬🇷"
+        case .hebrew: "🇮🇱"
+        case .hindi: "🇮🇳"
+        case .hungarian: "🇭🇺"
+        case .indonesian: "🇮🇩"
+        case .italian: "🇮🇹"
+        case .japanese: "🇯🇵"
+        case .korean: "🇰🇷"
+        case .malay: "🇲🇾"
+        case .macedonian: "🇲🇰"
+        case .norwegian: "🇳🇴"
+        case .polish: "🇵🇱"
+        case .portuguese: "🇵🇹"
+        case .portugueseBRA: "🇧🇷"
+        case .romanian: "🇷🇴"
+        case .russian: "🇷🇺"
+        case .slovak: "🇸🇰"
+        case .spanish: "🇪🇸"
+        case .spanishMEX: "🇲🇽"
+        case .swedish: "🇸🇪"
+        case .thai: "🇹🇭"
+        case .turkish: "🇹🇷"
+        case .ukrainian: "🇺🇦"
+        case .vietnamese: "🇻🇳"
         }
     }
 }

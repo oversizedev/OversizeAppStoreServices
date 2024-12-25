@@ -8,11 +8,11 @@ import AppStoreConnect
 import Foundation
 import OversizeCore
 
-public struct VersionLocalization: Identifiable, Hashable, Sendable {
+public struct AppStoreVersionLocalization: Identifiable, Hashable, Sendable {
     public let id: String
     public let locale: AppStoreLanguage
     public let description: String?
-    public let keywords: String?
+    public let keywords: String
     public let marketingURL: URL?
     public let promotionalText: String?
     public let supportURL: URL?
@@ -24,7 +24,7 @@ public struct VersionLocalization: Identifiable, Hashable, Sendable {
         id = schema.id
         self.locale = locale
         description = schema.attributes?.description
-        keywords = schema.attributes?.keywords
+        keywords = schema.attributes?.keywords ?? ""
         marketingURL = schema.attributes?.marketingURL
         promotionalText = schema.attributes?.promotionalText
         supportURL = schema.attributes?.supportURL
