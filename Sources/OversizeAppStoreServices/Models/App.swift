@@ -91,8 +91,7 @@ public struct App: Identifiable, Sendable {
             self.included = Included(
                 appStoreVersions: appStoreVersions.compactMap { appStoreVersion in
                     .init(
-                        schema: appStoreVersion,
-                        builds: []
+                        schema: appStoreVersion
                     )
                 },
                 builds: builds.compactMap { .init(schema: $0) }.sorted(by: { $0.uploadedDate > $1.uploadedDate }),
@@ -146,8 +145,7 @@ public struct App: Identifiable, Sendable {
             self.included = Included(
                 appStoreVersions: appStoreVersions.compactMap { appStoreVersion in
                     .init(
-                        schema: appStoreVersion,
-                        builds: []
+                        schema: appStoreVersion
                     )
                 },
                 builds: builds.compactMap { .init(schema: $0) }.sorted(by: { $0.uploadedDate > $1.uploadedDate }),
@@ -184,5 +182,32 @@ public extension App {
         public var visionOsAppStoreVersions: [AppStoreVersion] {
             appStoreVersions.filter { $0.platform == .visionOs }
         }
+        
+        public var appStoreVersionsPlatforms: [Platform] {
+            var platforms: [Platform] = []
+
+            if !macOsAppStoreVersions.isEmpty {
+                platforms.append(.macOs)
+            }
+            if !iOsAppStoreVersions.isEmpty {
+                platforms.append(.ios)
+            }
+            if !tvOsAppStoreVersions.isEmpty {
+                platforms.append(.tvOs)
+            }
+            if !visionOsAppStoreVersions.isEmpty {
+                platforms.append(.visionOs)
+            }
+
+            return platforms
+        }
+    }
+
+    var firstNamePath: String {
+        name.components(separatedBy: [".", "-", "—"]).first ?? ""
+    }
+
+    var lastNamePath: String {
+        name.components(separatedBy: [".", "-", "—"]).last ?? ""
     }
 }

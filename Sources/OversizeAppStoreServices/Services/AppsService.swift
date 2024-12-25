@@ -117,7 +117,7 @@ public actor AppsService {
         }
     }
 
-    public func fetchAppsIncludeActualAppStoreVersionsAndBuilds() async -> Result<[App], AppError> {
+    public func fetchAppsIncludeActualAppStoreVersionsAndBuilds(limitAppStoreVersions: Int? = nil) async -> Result<[App], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.apps.get(
             filterAppStoreVersionsAppStoreState: [
@@ -144,7 +144,8 @@ public actor AppsService {
             include: [
                 .builds,
                 .appStoreVersions,
-            ]
+            ],
+            limitAppStoreVersions: limitAppStoreVersions
         )
         do {
             let result = try await client.send(request)

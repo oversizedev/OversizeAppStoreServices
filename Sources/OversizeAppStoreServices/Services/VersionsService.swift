@@ -46,10 +46,16 @@ public actor VersionsService {
         }
     }
 
-    public func fetchEditableAppStoreVersion(appId: String, force: Bool = false) async -> Result<[AppStoreVersion], AppError> {
+    public func fetchEditableAppStoreVersion(appId: String, platform: Platform? = nil, force: Bool = false) async -> Result<[AppStoreVersion], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
-        return await cacheService.fetchWithCache(key: "fetchEditableAppStoreVersion\(appId)", force: force) {
+        let filterPlatforms: [Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform]? = if let platform, let filteredPlatform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform = .init(rawValue: platform.rawValue) {
+            [filteredPlatform]
+        } else {
+            nil
+        }
+        return await cacheService.fetchWithCache(key: "fetchEditableAppStoreVersion\(appId)\(platform?.rawValue ?? "")", force: force) {
             let request = Resources.v1.apps.id(appId).appStoreVersions.get(
+                filterPlatform: filterPlatforms,
                 filterAppVersionState: [
                     .prepareForSubmission,
                     .metadataRejected,
@@ -81,36 +87,76 @@ public actor VersionsService {
         }
     }
 
-    public func fetchActualAppStoreVersions(appId: String) async -> Result<[AppStoreVersion], AppError> {
+    public func fetchActualAppStoreVersions(appId: String, platform: Platform? = nil, force: Bool = false) async -> Result<[AppStoreVersion], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
-        let request = Resources.v1.apps.id(appId).appStoreVersions.get(
-            filterAppStoreState: [
-                .accepted,
-                .developerRemovedFromSale,
-                .developerRejected,
-                .inReview,
-                .invalidBinary,
-                .metadataRejected,
-                .pendingAppleRelease,
-                .pendingContract,
-                .pendingDeveloperRelease,
-                .prepareForSubmission,
-                .preorderReadyForSale,
-                .processingForAppStore,
-                .readyForReview,
-                .readyForSale,
-                .rejected,
-                .removedFromSale,
-                .waitingForExportCompliance,
-                .waitingForReview,
-                .notApplicable,
-            ]
-        )
-        do {
-            let data = try await client.send(request).data
-            return .success(data.compactMap { .init(schema: $0) })
-        } catch {
-            return .failure(.network(type: .noResponse))
+        let filterPlatforms: [Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform]? = if let platform, let filteredPlatform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform = .init(rawValue: platform.rawValue) {
+            [filteredPlatform]
+        } else {
+            nil
+        }
+        return await cacheService.fetchWithCache(key: "fetchActualAppStoreVersions\(appId)\(platform?.rawValue ?? "")", force: force) {
+            let request = Resources.v1.apps.id(appId).appStoreVersions.get(
+                filterPlatform: filterPlatforms,
+                filterAppVersionState: [
+                    .accepted,
+                    .developerRejected,
+                    .inReview,
+                    .invalidBinary,
+                    .metadataRejected,
+                    .pendingAppleRelease,
+                    .pendingDeveloperRelease,
+                    .prepareForSubmission,
+                    .processingForDistribution,
+                    .readyForDistribution,
+                    .readyForReview,
+                    .rejected,
+                    .waitingForExportCompliance,
+                    .waitingForReview,
+                ]
+            )
+            let response = try await client.send(request)
+            return response.data
+        }.map { data in
+            data.compactMap { .init(schema: $0) }
+        }
+    }
+
+    public func fetchActualAppStoreVersionsIncludeBuilds(appId: String, platform: Platform? = nil, limit: Int? = nil, force: Bool = false) async -> Result<[AppStoreVersion], AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        let filterPlatforms: [Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform]? = if let platform, let filteredPlatform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform = .init(rawValue: platform.rawValue) {
+            [filteredPlatform]
+        } else {
+            nil
+        }
+        return await cacheService.fetchWithCache(key: "fetchActualAppStoreVersionsIncludeBuilds\(appId)\(platform?.rawValue ?? "")", force: force) {
+            let request = Resources.v1.apps.id(appId).appStoreVersions.get(
+                filterPlatform: filterPlatforms,
+                filterAppVersionState: [
+                    .accepted,
+                    .developerRejected,
+                    .inReview,
+                    .invalidBinary,
+                    .metadataRejected,
+                    .pendingAppleRelease,
+                    .pendingDeveloperRelease,
+                    .prepareForSubmission,
+                    .processingForDistribution,
+                    .readyForDistribution,
+                    .readyForReview,
+                    .rejected,
+                    .waitingForExportCompliance,
+                    .waitingForReview,
+                ],
+                limit: limit,
+                include: [
+                    .build,
+                    .appStoreVersionLocalizations,
+                ]
+            )
+
+            return try await client.send(request)
+        }.map { data in
+            data.data.compactMap { .init(schema: $0, included: data.included) }
         }
     }
 

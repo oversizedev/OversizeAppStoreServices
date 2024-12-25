@@ -61,4 +61,8 @@ public extension Container {
     var cacheService: Factory<CacheService> {
         self { CacheService() }
     }
+
+    var perfPowerMetricsService: Factory<PerfPowerMetricsService> {
+        self { PerfPowerMetricsService() }
+    }
 }

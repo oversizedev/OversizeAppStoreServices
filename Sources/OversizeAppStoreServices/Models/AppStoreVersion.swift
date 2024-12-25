@@ -22,8 +22,9 @@ public struct AppStoreVersion: Sendable, Identifiable {
     public let createdDate: Date?
 
     public let included: Included?
+    public let relationships: Relationships?
 
-    init?(schema: AppStoreAPI.AppStoreVersion, builds: [AppStoreAPI.Build] = []) {
+    init?(schema: AppStoreAPI.AppStoreVersion, included: [AppStoreAPI.AppStoreVersionsResponse.IncludedItem]? = nil) {
         guard let storeState = schema.attributes?.appStoreState?.rawValue,
               let storeStateType: AppStoreVersionState = .init(rawValue: storeState),
               let state = schema.attributes?.appVersionState?.rawValue,
@@ -44,22 +45,56 @@ public struct AppStoreVersion: Sendable, Identifiable {
         reviewType = .init(rawValue: schema.attributes?.createdDate?.rawValue ?? "")
         releaseType = .init(rawValue: schema.attributes?.releaseType?.rawValue ?? "")
 
-        if let build = builds.first(where: { $0.id == schema.relationships?.build?.data?.id ?? "" }) {
-            included = .init(
-                builds: builds.compactMap { .init(schema: $0) }.sorted(by: { $0.uploadedDate > $1.uploadedDate }),
-                build: .init(schema: build)
-            )
+        var includedApp: AppStoreAPI.App?
+        var includedAgeRatingDeclaration: AppStoreAPI.AgeRatingDeclaration?
+        var includedAppStoreVersionLocalizations: [AppStoreAPI.AppStoreVersionLocalization]?
+        var includedBuild: AppStoreAPI.Build?
+        var includedAppStoreReviewDetail: [AppStoreAPI.AppStoreReviewDetail]?
 
-        } else {
-            included = .init(
-                builds: builds.compactMap { .init(schema: $0) }.sorted(by: { $0.uploadedDate > $1.uploadedDate }),
-                build: nil
-            )
+        if let includedItems = included {
+            for includedItem in includedItems {
+                switch includedItem {
+                case let .app(app):
+                    includedApp = app
+                case let .ageRatingDeclaration(ageRatingDeclaration):
+                    includedAgeRatingDeclaration = ageRatingDeclaration
+                case let .appStoreVersionLocalization(appStoreVersionLocalization):
+                    includedAppStoreVersionLocalizations?.append(appStoreVersionLocalization)
+                case let .build(build):
+                    includedBuild = build
+                case let .appStoreReviewDetail(appStoreReviewDetail):
+                    includedAppStoreReviewDetail?.append(appStoreReviewDetail)
+                default: continue
+                }
+            }
         }
+
+        self.included = Included(
+            app: includedApp.flatMap { .init(schema: $0) },
+            build: includedBuild.flatMap { .init(schema: $0) },
+            ageRatingDeclaration: includedAgeRatingDeclaration.flatMap { .init(schema: $0) },
+            appStoreVersionLocalizations: includedAppStoreVersionLocalizations.flatMap { localizations in
+                localizations.flatMap(AppStoreVersionLocalization.init)
+            },
+            appStoreReviewDetail: includedAppStoreReviewDetail.flatMap { reviewDetails in
+                reviewDetails.flatMap(AppStoreReviewDetail.init)
+            }
+        )
+
+        relationships = .init(
+            appStoreVersionLocalizationsIds: schema.relationships?.appStoreVersionLocalizations?.data?.compactMap { $0.id }
+        )
     }
 
     public struct Included: Sendable {
-        public let builds: [Build]
+        public let app: App?
         public let build: Build?
+        public let ageRatingDeclaration: AgeRatingDeclaration?
+        public let appStoreVersionLocalizations: [AppStoreVersionLocalization]?
+        public let appStoreReviewDetail: [AppStoreReviewDetail]?
+    }
+
+    public struct Relationships: Sendable {
+        public let appStoreVersionLocalizationsIds: [String]?
     }
 }
