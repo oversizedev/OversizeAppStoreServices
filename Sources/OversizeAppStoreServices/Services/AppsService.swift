@@ -36,6 +36,46 @@ public actor AppsService {
         }
     }
 
+    public func fetchAppIncludeBuildsAndAppStoreVersions(id: String, force: Bool = false) async -> Result<App, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        return await cacheService.fetchWithCache(key: "fetchApp\(id)", force: force) {
+            let request = Resources.v1.apps.id(id).get(
+                include: [
+                    .builds,
+                    .appStoreVersions,
+                ]
+            )
+            return try await client.send(request)
+        }.flatMap {
+            guard let app = App(schema: $0.data, included: $0.included) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(app)
+        }
+    }
+
+    public func fetchAppIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions(appId: String) async -> Result<App, AppError> {
+        do {
+            guard let client else {
+                return .failure(.network(type: .unauthorized))
+            }
+            let request = Resources.v1.apps.id(appId).get(
+                include: [
+                    .builds,
+                    .appStoreVersions,
+                    .preReleaseVersions,
+                ]
+            )
+            let result = try await client.send(request)
+            guard let app: App = .init(schema: result.data, included: result.included) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(app)
+        } catch {
+            return .failure(.network(type: .noResponse))
+        }
+    }
+
     public func fetchApps() async -> Result<[App], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.apps.get()
@@ -92,28 +132,6 @@ public actor AppsService {
             return try await client.send(request)
         }.flatMap {
             .success(processAppsResponse($0))
-        }
-    }
-
-    public func fetchAppIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions(appId: String) async -> Result<App, AppError> {
-        do {
-            guard let client else {
-                return .failure(.network(type: .unauthorized))
-            }
-            let request = Resources.v1.apps.id(appId).get(
-                include: [
-                    .builds,
-                    .appStoreVersions,
-                    .preReleaseVersions,
-                ]
-            )
-            let result = try await client.send(request)
-            guard let app: App = .init(schema: result.data, included: result.included) else {
-                return .failure(.network(type: .decode))
-            }
-            return .success(app)
-        } catch {
-            return .failure(.network(type: .noResponse))
         }
     }
 

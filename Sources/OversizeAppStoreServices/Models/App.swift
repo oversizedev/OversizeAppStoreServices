@@ -182,7 +182,7 @@ public extension App {
         public var visionOsAppStoreVersions: [AppStoreVersion] {
             appStoreVersions.filter { $0.platform == .visionOs }
         }
-        
+
         public var appStoreVersionsPlatforms: [Platform] {
             var platforms: [Platform] = []
 
