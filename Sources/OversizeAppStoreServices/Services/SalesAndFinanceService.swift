@@ -36,7 +36,6 @@ public actor SalesAndFinanceService {
                 .subscriptionOfferCodeRedemption,
                 .installs,
                 .firstAnnual,
-                .winBackEligibility,
             ],
             filterReportSubType: [
                 .summary,
