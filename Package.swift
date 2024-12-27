@@ -23,10 +23,10 @@ let localDependencies: [PackageDescription.Package.Dependency] = commonDependenc
     .package(name: "OversizeServices", path: "../OversizeServices"),
 ]
 
-var dependencies: [PackageDescription.Package.Dependency] = localDependencies
+var dependencies: [PackageDescription.Package.Dependency] = remoteDependencies
 
-if ProcessInfo.processInfo.environment["BUILD_MODE"] == "PRODUCTION" {
-    dependencies = remoteDependencies
+if ProcessInfo.processInfo.environment["BUILD_MODE"] == "DEV" {
+    dependencies = localDependencies
 }
 
 let package = Package(
