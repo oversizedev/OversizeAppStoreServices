@@ -21,20 +21,20 @@ public struct EnvAuthenticator: Authenticator {
             throw Error.missingEnvironmentVariable("AppStore.Account")
         }
 
-        guard let appStoreCertificate = storage.getPassword(for: "AppConnector-Certificate-" + keyLabel) else {
+        guard let appStoreIssuerID = storage.getPassword(for: "AppConnector-IssuerID-" + keyLabel) else {
             throw Error.missingEnvironmentVariable("AppStore.Key.Default")
         }
 
-        guard let appStoreCredentials = storage.getCredentials(with: "AppConnector-" + keyLabel) else {
+        guard let appStoreCertificate = storage.getCredentials(with: "AppConnector-Certificate-" + keyLabel) else {
             throw Error.missingEnvironmentVariable("AppStore.Key.Default")
         }
 
-        let privateKey = try JWT.PrivateKey(pemRepresentation: appStoreCertificate)
+        let privateKey = try JWT.PrivateKey(pemRepresentation: appStoreCertificate.password)
 
         jwt = JWT(
             api: api,
-            keyID: appStoreCredentials.password,
-            issuerID: appStoreCredentials.login,
+            keyID: appStoreCertificate.login,
+            issuerID: appStoreIssuerID,
             expiryDuration: 20 * 60,
             privateKey: privateKey
         )

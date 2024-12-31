@@ -23,11 +23,7 @@ let localDependencies: [PackageDescription.Package.Dependency] = commonDependenc
     .package(name: "OversizeServices", path: "../OversizeServices"),
 ]
 
-var dependencies: [PackageDescription.Package.Dependency] = remoteDependencies
-
-if ProcessInfo.processInfo.environment["BUILD_MODE"] == "DEV" {
-    dependencies = localDependencies
-}
+let dependencies: [PackageDescription.Package.Dependency] = remoteDependencies
 
 let package = Package(
     name: "OversizeAppStoreServices",
