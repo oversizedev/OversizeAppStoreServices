@@ -90,9 +90,7 @@ public struct App: Identifiable, Sendable {
 
             self.included = Included(
                 appStoreVersions: appStoreVersions.compactMap { appStoreVersion in
-                    .init(
-                        schema: appStoreVersion
-                    )
+                    .init(schema: appStoreVersion)
                 },
                 builds: builds.compactMap { .init(schema: $0) }.sorted(by: { $0.uploadedDate > $1.uploadedDate }),
                 prereleaseVersions: prereleaseVersions.compactMap { .init(schema: $0, builds: []) }
