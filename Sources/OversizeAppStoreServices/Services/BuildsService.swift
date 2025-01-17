@@ -89,18 +89,11 @@ public actor BuildsService {
         )
         do {
             let iconAssetToken = try await client.send(request).data.attributes?.iconAssetToken
-            guard let templateURL = iconAssetToken?.templateURL else {
+            guard let iconAssetToken else {
                 return .success(nil)
             }
-            let url = parseURL(
-                from: constructURLString(
-                    baseURL: templateURL,
-                    width: iconAssetToken?.width ?? 100,
-                    height: iconAssetToken?.height ?? 100,
-                    format: "png"
-                )
-            )
-            return .success(url)
+            let imageAsset = ImageAsset(schema: iconAssetToken)
+            return .success(imageAsset.imageURL)
         } catch {
             return .failure(.network(type: .noResponse))
         }

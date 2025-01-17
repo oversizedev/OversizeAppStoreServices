@@ -5,11 +5,15 @@
 
 import Foundation
 
-public enum InAppPurchaseType: String, CaseIterable, Codable, Sendable {
+public enum InAppPurchaseType: String, CaseIterable, Codable, Sendable, Identifiable {
     case consumable = "CONSUMABLE"
     case nonConsumable = "NON_CONSUMABLE"
     case nonRenewingSubscription = "NON_RENEWING_SUBSCRIPTION"
-    
+
+    public var id: String {
+        rawValue
+    }
+
     public var displayName: String {
         switch self {
         case .consumable:

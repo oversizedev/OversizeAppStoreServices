@@ -106,7 +106,7 @@ public struct Subscription: Sendable, Hashable, Identifiable {
         case threeMonths = "THREE_MONTHS"
         case sixMonths = "SIX_MONTHS"
         case oneYear = "ONE_YEAR"
-        
+
         public var displayName: String {
             switch self {
             case .oneWeek:

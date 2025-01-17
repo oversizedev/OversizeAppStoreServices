@@ -4,6 +4,7 @@
 //
 
 import AppStoreAPI
+import AppStoreConnect
 import Foundation
 
 public struct InAppPurchaseLocalization: Identifiable, Equatable, Hashable, Sendable {
