@@ -60,10 +60,10 @@ public actor InAppPurchasesService {
             ])
             return try await client.send(request)
         }.flatMap {
-            guard let build: InAppPurchaseV2 = .init(schema: $0.data) else {
+            guard let inAppPurchaseV2: InAppPurchaseV2 = .init(schema: $0.data, included: $0.included) else {
                 return .failure(.network(type: .decode))
             }
-            return .success(build)
+            return .success(inAppPurchaseV2)
         }
     }
 

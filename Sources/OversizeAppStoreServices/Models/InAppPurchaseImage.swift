@@ -6,7 +6,8 @@
 import AppStoreAPI
 import Foundation
 
-public struct InAppPurchaseImage: Sendable {
+public struct InAppPurchaseImage: Sendable, Identifiable {
+    public let id: String
     public let fileSize: Int?
     public let fileName: String?
     public let sourceFileChecksum: String?
@@ -17,6 +18,7 @@ public struct InAppPurchaseImage: Sendable {
 
     public init?(schema: AppStoreAPI.InAppPurchaseImage) {
         guard let attributes = schema.attributes else { return nil }
+        id = schema.id
         fileSize = attributes.fileSize
         fileName = attributes.fileName
         sourceFileChecksum = attributes.sourceFileChecksum

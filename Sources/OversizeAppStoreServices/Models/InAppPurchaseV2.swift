@@ -102,13 +102,13 @@ public struct InAppPurchaseV2: Identifiable, Sendable {
     }
 
     public struct Included: Sendable {
-        let inAppPurchaseLocalization: [InAppPurchaseLocalization]?
-        let inAppPurchasePricePoint: [InAppPurchasePricePoint]?
-        let inAppPurchaseContent: InAppPurchaseContent?
-        let inAppPurchaseAppStoreReviewScreenshot: ImageAsset?
-        let promotedPurchase: PromotedPurchase?
-        let inAppPurchasePriceSchedule: InAppPurchasePriceSchedule?
-        let inAppPurchaseAvailability: Bool?
-        let inAppPurchaseImage: [InAppPurchaseImage]?
+        public let inAppPurchaseLocalization: [InAppPurchaseLocalization]?
+        public let inAppPurchasePricePoint: [InAppPurchasePricePoint]?
+        public let inAppPurchaseContent: InAppPurchaseContent?
+        public let inAppPurchaseAppStoreReviewScreenshot: ImageAsset?
+        public let promotedPurchase: PromotedPurchase?
+        public let inAppPurchasePriceSchedule: InAppPurchasePriceSchedule?
+        public let inAppPurchaseAvailability: Bool?
+        public let inAppPurchaseImage: [InAppPurchaseImage]?
     }
 }
