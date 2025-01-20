@@ -67,6 +67,27 @@ public actor InAppPurchasesService {
         }
     }
 
+    public func fetchAppInAppPurchaseIncludAllWithoutAvailability(inAppPurchaseId: String, force: Bool = false) async -> Result<InAppPurchaseV2, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        return await cacheService.fetchWithCache(key: "fetchAppInAppPurchaseIncludAllWithoutAvailability\(inAppPurchaseId)", force: force) {
+            let request = Resources.v2.inAppPurchases.id(inAppPurchaseId).get(include: [
+                .appStoreReviewScreenshot,
+                .content,
+                .iapPriceSchedule,
+                .images,
+                .inAppPurchaseLocalizations,
+                .pricePoints,
+                .promotedPurchase,
+            ])
+            return try await client.send(request)
+        }.flatMap {
+            guard let inAppPurchaseV2: InAppPurchaseV2 = .init(schema: $0.data, included: $0.included) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(inAppPurchaseV2)
+        }
+    }
+
     public func postInAppPurchase(
         appId: String,
         name: String,
@@ -96,6 +117,39 @@ public actor InAppPurchasesService {
         do {
             let data = try await client.send(request).data
             guard let app = InAppPurchaseV2(schema: data) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(app)
+        } catch {
+            let replacements: [String: String] = [:] /* ["@@LANGUAGE_VALUE@@": locale.displayName] */
+            return handleRequestFailure(error: error, replaces: replacements)
+        }
+    }
+
+    public func postInAppPurchaseLocalization(
+        inAppPurchaseV2Id: String,
+        name: String,
+        description: String?,
+        locale: AppStoreLanguage
+    ) async -> Result<InAppPurchaseLocalization, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+
+        let requestData: InAppPurchaseLocalizationCreateRequest.Data = .init(
+            type: .inAppPurchaseLocalizations,
+            attributes: .init(
+                name: name,
+                locale: locale.rawValue,
+                description: description
+            ),
+            relationships: .init(inAppPurchaseV2: .init(data: .init(
+                type: .inAppPurchases,
+                id: inAppPurchaseV2Id
+            )))
+        )
+        let request = Resources.v1.inAppPurchaseLocalizations.post(.init(data: requestData))
+        do {
+            let data = try await client.send(request).data
+            guard let app = InAppPurchaseLocalization(schema: data) else {
                 return .failure(.network(type: .decode))
             }
             return .success(app)

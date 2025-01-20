@@ -26,12 +26,10 @@ public enum InAppPurchaseState: String, CaseIterable, Codable, Sendable {
         switch self {
         case .approved:
             .green
-        case .waitingForUpload, .processingContent, .readyToSubmit, .waitingForReview, .inReview, .pendingBinaryApproval:
+        case .waitingForUpload, .processingContent, .readyToSubmit, .waitingForReview, .inReview, .pendingBinaryApproval, .missingMetadata:
             .yellow
         case .developerActionNeeded, .developerRemovedFromSale, .removedFromSale, .rejected:
             .red
-        case .missingMetadata:
-            .gray
         }
     }
 

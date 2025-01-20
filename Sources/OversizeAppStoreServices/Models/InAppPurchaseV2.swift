@@ -47,11 +47,11 @@ public struct InAppPurchaseV2: Identifiable, Sendable {
         )
 
         self.included = .init(
-            inAppPurchaseLocalization: included?.compactMap {
+            inAppPurchaseLocalizations: included?.compactMap {
                 if case let .inAppPurchaseLocalization(value) = $0 { return .init(schema: value) }
                 return nil
             },
-            inAppPurchasePricePoint: included?.compactMap {
+            inAppPurchasePricePoints: included?.compactMap {
                 if case let .inAppPurchasePricePoint(value) = $0 { return .init(schema: value) }
                 return nil
             },
@@ -83,7 +83,7 @@ public struct InAppPurchaseV2: Identifiable, Sendable {
                 if case let .inAppPurchaseAvailability(value) = $0 { return value.attributes?.isAvailableInNewTerritories }
                 return nil
             }.first,
-            inAppPurchaseImage: included?.compactMap {
+            inAppPurchaseImages: included?.compactMap {
                 if case let .inAppPurchaseImage(value) = $0 { return .init(schema: value) }
                 return nil
             }
@@ -102,13 +102,13 @@ public struct InAppPurchaseV2: Identifiable, Sendable {
     }
 
     public struct Included: Sendable {
-        public let inAppPurchaseLocalization: [InAppPurchaseLocalization]?
-        public let inAppPurchasePricePoint: [InAppPurchasePricePoint]?
+        public let inAppPurchaseLocalizations: [InAppPurchaseLocalization]?
+        public let inAppPurchasePricePoints: [InAppPurchasePricePoint]?
         public let inAppPurchaseContent: InAppPurchaseContent?
         public let inAppPurchaseAppStoreReviewScreenshot: ImageAsset?
         public let promotedPurchase: PromotedPurchase?
         public let inAppPurchasePriceSchedule: InAppPurchasePriceSchedule?
         public let inAppPurchaseAvailability: Bool?
-        public let inAppPurchaseImage: [InAppPurchaseImage]?
+        public let inAppPurchaseImages: [InAppPurchaseImage]?
     }
 }
