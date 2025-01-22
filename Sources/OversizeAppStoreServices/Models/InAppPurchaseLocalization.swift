@@ -6,6 +6,7 @@
 import AppStoreAPI
 import AppStoreConnect
 import Foundation
+import SwiftUI
 
 public struct InAppPurchaseLocalization: Identifiable, Equatable, Hashable, Sendable {
     public let id: String
@@ -33,5 +34,31 @@ public struct InAppPurchaseLocalization: Identifiable, Equatable, Hashable, Send
         case waitingForReview = "WAITING_FOR_REVIEW"
         case approved = "APPROVED"
         case rejected = "REJECTED"
+
+        public var displayName: String {
+            switch self {
+            case .prepareForSubmission:
+                "Prepare for Submission"
+            case .waitingForReview:
+                "Waiting for Review"
+            case .approved:
+                "Approved"
+            case .rejected:
+                "Rejected"
+            }
+        }
+
+        public var statusColor: Color {
+            switch self {
+            case .prepareForSubmission:
+                .orange
+            case .waitingForReview:
+                .yellow
+            case .approved:
+                .green
+            case .rejected:
+                .red
+            }
+        }
     }
 }
