@@ -4,7 +4,6 @@
 //
 
 import AppStoreAPI
-import Foundation
 import OversizeCore
 
 public struct InAppPurchasePricePoint: Identifiable, Sendable {

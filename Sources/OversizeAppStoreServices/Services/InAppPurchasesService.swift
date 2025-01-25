@@ -88,6 +88,114 @@ public actor InAppPurchasesService {
         }
     }
 
+    public func fetchTerritories(force: Bool = false) async -> Result<[Territory], AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        return await cacheService.fetchWithCache(key: "fetchTerritories", force: force) {
+            let request = Resources.v1.territories.get(limit: 200)
+            return try await client.send(request).data
+        }.map { data in
+            data.compactMap { .init(schema: $0) }
+        }
+    }
+
+    public func fetchPricePoints(
+        inAppPurchaseId: String,
+        filterTerritory: [Territory]? = nil,
+        force: Bool = false
+    ) async -> Result<[InAppPurchasePricePoint], AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+
+        var filterTerritorIds: [String]? = nil
+        if let filterTerritory { filterTerritorIds = filterTerritory.compactMap { $0.id } }
+
+        return await cacheService.fetchWithCache(key: "fetchTerritories\(inAppPurchaseId)\(filterTerritorIds ?? [])", force: force) {
+            let request = Resources.v2.inAppPurchases.id(inAppPurchaseId).pricePoints.get(filterTerritory: filterTerritorIds, limit: 200)
+            return try await client.send(request).data
+        }.map { data in
+            data.compactMap { .init(schema: $0) }
+        }
+    }
+
+    public func fetchInAppPurchaseAvailabilityIncludedAvailableTerritories(
+        inAppPurchaseId: String,
+        force: Bool = false
+    ) async -> Result<InAppPurchaseAvailability, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        return await cacheService.fetchWithCache(key: "fetchInAppPurchaseAvailabilityIncludedAvailableTerritories\(inAppPurchaseId)", force: force) {
+            let request = Resources.v2.inAppPurchases.id(inAppPurchaseId).inAppPurchaseAvailability.get(
+                include: [.availableTerritories],
+                limitAvailableTerritories: 50
+            )
+            return try await client.send(request)
+        }.flatMap {
+            guard let inAppPurchaseAvailability: InAppPurchaseAvailability = .init(schema: $0.data, included: $0.included) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(inAppPurchaseAvailability)
+        }
+    }
+
+    public func fetchInAppPurchaseAvailability(
+        inAppPurchaseId: String,
+        force: Bool = false
+    ) async -> Result<InAppPurchaseAvailability, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        return await cacheService.fetchWithCache(key: "fetchInAppPurchaseAvailability\(inAppPurchaseId)", force: force) {
+            let request = Resources.v2.inAppPurchases.id(inAppPurchaseId).inAppPurchaseAvailability.get()
+            return try await client.send(request)
+        }.flatMap {
+            guard let inAppPurchaseAvailability: InAppPurchaseAvailability = .init(schema: $0.data) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(inAppPurchaseAvailability)
+        }
+    }
+
+    public func fetchInAppPurchaseAvailabilitiesAvailableTerritories(
+        inAppPurchaseAvailabilityId: String,
+        force: Bool = false
+    ) async -> Result<[Territory], AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        return await cacheService.fetchWithCache(key: "fetchInAppPurchaseAvailabilityIncludedAvailableTerritories\(inAppPurchaseAvailabilityId)", force: force) {
+            let request = Resources.v1.inAppPurchaseAvailabilities.id(inAppPurchaseAvailabilityId).availableTerritories.get(limit: 200)
+            return try await client.send(request).data
+        }.map { data in
+            data.compactMap { .init(schema: $0) }
+        }
+    }
+
+    public func fetchAppPriceScheduleBaseTerritory(
+        inAppPurchaseId: String,
+        force: Bool = false
+    ) async -> Result<Territory, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        return await cacheService.fetchWithCache(key: "fetchAppPriceScheduleBaseTerritory\(inAppPurchaseId)", force: force) {
+            let request = Resources.v1.appPriceSchedules.id(inAppPurchaseId).baseTerritory.get()
+            return try await client.send(request)
+        }.flatMap {
+            guard let territory: Territory = .init(schema: $0.data) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(territory)
+        }
+    }
+
+    public func fetchInAppPurchasePriceSchedulesBaseTerritory(
+        inAppPurchaseId: String,
+        force: Bool = false
+    ) async -> Result<Territory, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        return await cacheService.fetchWithCache(key: "fetchInAppPurchasePriceSchedulesBaseTerritory\(inAppPurchaseId)", force: force) {
+            let request = Resources.v1.inAppPurchasePriceSchedules.id(inAppPurchaseId).baseTerritory.get()
+            return try await client.send(request)
+        }.flatMap {
+            guard let territory: Territory = .init(schema: $0.data) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(territory)
+        }
+    }
+
     public func postInAppPurchase(
         appId: String,
         name: String,
@@ -121,8 +229,7 @@ public actor InAppPurchasesService {
             }
             return .success(app)
         } catch {
-            let replacements: [String: String] = [:] /* ["@@LANGUAGE_VALUE@@": locale.displayName] */
-            return handleRequestFailure(error: error, replaces: replacements)
+            return handleRequestFailure(error: error, replaces: [:])
         }
     }
 
@@ -154,8 +261,41 @@ public actor InAppPurchasesService {
             }
             return .success(app)
         } catch {
-            let replacements: [String: String] = [:] /* ["@@LANGUAGE_VALUE@@": locale.displayName] */
-            return handleRequestFailure(error: error, replaces: replacements)
+            return handleRequestFailure(error: error, replaces: [:])
+        }
+    }
+
+    public func postInAppPurchaseLocalization(
+        inAppPurchaseV2Id: String,
+        territories: [Territory],
+        isAvailableInNewTerritories: Bool
+    ) async -> Result<InAppPurchaseAvailability, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+
+        let requestData: InAppPurchaseAvailabilityCreateRequest.Data = .init(
+            type: .inAppPurchaseAvailabilities,
+            attributes: .init(isAvailableInNewTerritories: isAvailableInNewTerritories),
+            relationships: .init(
+                inAppPurchase: .init(
+                    data: .init(
+                        type: .inAppPurchases,
+                        id: inAppPurchaseV2Id
+                    )
+                ),
+                availableTerritories: .init(data: territories.compactMap {
+                    .init(type: .territories, id: $0.id)
+                })
+            )
+        )
+        let request = Resources.v1.inAppPurchaseAvailabilities.post(.init(data: requestData))
+        do {
+            let data = try await client.send(request).data
+            guard let app = InAppPurchaseAvailability(schema: data) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(app)
+        } catch {
+            return handleRequestFailure(error: error, replaces: [:])
         }
     }
 }

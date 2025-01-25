@@ -50,9 +50,7 @@ public struct InAppPurchaseLocalization: Identifiable, Equatable, Hashable, Send
 
         public var statusColor: Color {
             switch self {
-            case .prepareForSubmission:
-                .orange
-            case .waitingForReview:
+            case .waitingForReview, .prepareForSubmission:
                 .yellow
             case .approved:
                 .green
