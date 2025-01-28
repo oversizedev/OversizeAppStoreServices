@@ -6,7 +6,7 @@
 import AppStoreAPI
 import OversizeCore
 
-public struct InAppPurchaseAvailability: Sendable {
+public struct InAppPurchaseAvailability: Sendable, Identifiable {
     public let id: String
     public let isAvailableInNewTerritories: Bool
 

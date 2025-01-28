@@ -4,16 +4,32 @@
 //
 
 import AppStoreAPI
-import AppStoreConnect
 import OversizeCore
 
-public struct Territory: Sendable {
+public struct Territory: Sendable, Identifiable {
     public let id: String
     public let currency: String
+    public let region: TerritoryRegion
+    public let code: TerritoryCode
 
     public init?(schema: AppStoreAPI.Territory) {
-        guard let currency = schema.attributes?.currency else { return nil }
+        guard let currency = schema.attributes?.currency,
+              let territoryCode = TerritoryCode(rawValue: schema.id)
+        else {
+            return nil
+        }
+
         id = schema.id
         self.currency = currency
+        code = territoryCode
+        region = TerritoryRegion(countryID: schema.id) ?? .unknown
+    }
+
+    public var displayName: String {
+        code.displayName
+    }
+
+    public var displayFlag: String {
+        code.flagEmoji
     }
 }

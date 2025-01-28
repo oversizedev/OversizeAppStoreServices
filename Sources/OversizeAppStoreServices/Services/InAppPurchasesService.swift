@@ -265,6 +265,41 @@ public actor InAppPurchasesService {
         }
     }
 
+    public func postInAppPurchaseAvailabilities(
+        inAppPurchaseV2Id: String,
+        isAvailableInNewTerritories: Bool,
+        availableTerritories: [Territory]
+    ) async -> Result<InAppPurchaseAvailability, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+
+        let requestData: InAppPurchaseAvailabilityCreateRequest.Data = .init(
+            type: .inAppPurchaseAvailabilities,
+            attributes: .init(
+                isAvailableInNewTerritories: isAvailableInNewTerritories
+            ),
+            relationships: .init(
+                inAppPurchase: .init(data: .init(type: .inAppPurchases, id: inAppPurchaseV2Id)),
+                availableTerritories: .init(
+                    data: availableTerritories.compactMap { .init(
+                        type: .territories,
+                        id: $0.id
+                    ) }
+                )
+            )
+        )
+
+        let request = Resources.v1.inAppPurchaseAvailabilities.post(.init(data: requestData))
+        do {
+            let data = try await client.send(request).data
+            guard let inAppPurchaseAvailability = InAppPurchaseAvailability(schema: data) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(inAppPurchaseAvailability)
+        } catch {
+            return handleRequestFailure(error: error, replaces: [:])
+        }
+    }
+
     public func postInAppPurchaseLocalization(
         inAppPurchaseV2Id: String,
         territories: [Territory],
