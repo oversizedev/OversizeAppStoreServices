@@ -165,12 +165,12 @@ public actor InAppPurchasesService {
     }
 
     public func fetchAppPriceScheduleBaseTerritory(
-        inAppPurchaseId: String,
+        appPriceSchedulesId: String,
         force: Bool = false
     ) async -> Result<Territory, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
-        return await cacheService.fetchWithCache(key: "fetchAppPriceScheduleBaseTerritory\(inAppPurchaseId)", force: force) {
-            let request = Resources.v1.appPriceSchedules.id(inAppPurchaseId).baseTerritory.get()
+        return await cacheService.fetchWithCache(key: "fetchAppPriceScheduleBaseTerritory\(appPriceSchedulesId)", force: force) {
+            let request = Resources.v1.appPriceSchedules.id(appPriceSchedulesId).baseTerritory.get()
             return try await client.send(request)
         }.flatMap {
             guard let territory: Territory = .init(schema: $0.data) else {
@@ -193,6 +193,48 @@ public actor InAppPurchasesService {
                 return .failure(.network(type: .decode))
             }
             return .success(territory)
+        }
+    }
+
+    public func fetchInAppPurchasePriceSchedule(
+        inAppPurchasePriceSchedulesId: String,
+        force: Bool = false
+    ) async -> Result<InAppPurchasePriceSchedule, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        return await cacheService.fetchWithCache(key: "fetchInAppPurchasePriceSchedule\(inAppPurchasePriceSchedulesId)", force: force) {
+            let request = Resources.v1.inAppPurchasePriceSchedules.id(inAppPurchasePriceSchedulesId).get(include: [.automaticPrices, .manualPrices, .baseTerritory])
+            return try await client.send(request)
+        }.flatMap {
+            guard let territory: InAppPurchasePriceSchedule = .init(schema: $0.data, included: $0.included) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(territory)
+        }
+    }
+
+    public func fetchInAppPurchasePriceScheduleAutomaticPrices(
+        inAppPurchasePriceSchedulesId: String,
+        force: Bool = false
+    ) async -> Result<[InAppPurchasePrice], AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        return await cacheService.fetchWithCache(key: "fetchInAppPurchasePriceScheduleAutomaticPrices\(inAppPurchasePriceSchedulesId)", force: force) {
+            let request = Resources.v1.inAppPurchasePriceSchedules.id(inAppPurchasePriceSchedulesId).automaticPrices.get(limit: 200, include: [.inAppPurchasePricePoint, .territory])
+            return try await client.send(request)
+        }.map { data in
+            data.data.compactMap { .init(schema: $0, included: data.included) }
+        }
+    }
+
+    public func fetchInAppPurchasePriceScheduleManualPrices(
+        inAppPurchasePriceSchedulesId: String,
+        force: Bool = false
+    ) async -> Result<[InAppPurchasePrice], AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        return await cacheService.fetchWithCache(key: "fetchInAppPurchasePriceScheduleManualPrices\(inAppPurchasePriceSchedulesId)", force: force) {
+            let request = Resources.v1.inAppPurchasePriceSchedules.id(inAppPurchasePriceSchedulesId).manualPrices.get(limit: 200, include: [.inAppPurchasePricePoint, .territory])
+            return try await client.send(request)
+        }.map { data in
+            data.data.compactMap { .init(schema: $0, included: data.included) }
         }
     }
 

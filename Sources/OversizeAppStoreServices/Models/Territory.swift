@@ -6,7 +6,7 @@
 import AppStoreAPI
 import OversizeCore
 
-public struct Territory: Sendable, Identifiable {
+public struct Territory: Sendable, Identifiable, Hashable {
     public let id: String
     public let currency: String
     public let region: TerritoryRegion
