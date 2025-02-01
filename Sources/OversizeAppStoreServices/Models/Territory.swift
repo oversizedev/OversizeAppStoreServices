@@ -4,11 +4,12 @@
 //
 
 import AppStoreAPI
+import Foundation
 import OversizeCore
 
 public struct Territory: Sendable, Identifiable, Hashable {
     public let id: String
-    public let currency: String
+    public let currency: Locale.Currency
     public let region: TerritoryRegion
     public let code: TerritoryCode
 
@@ -20,7 +21,7 @@ public struct Territory: Sendable, Identifiable, Hashable {
         }
 
         id = schema.id
-        self.currency = currency
+        self.currency = .init(currency)
         code = territoryCode
         region = TerritoryRegion(countryID: schema.id) ?? .unknown
     }

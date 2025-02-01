@@ -239,11 +239,17 @@ public actor InAppPurchasesService {
 
     public func fetchInAppPurchasePriceScheduleAutomaticPrices(
         inAppPurchasePriceSchedulesId: String,
+        filterTerritory: [Territory]? = nil,
         force: Bool = false
     ) async -> Result<[InAppPurchasePrice], AppError> {
+        let filterTerritoryIds: [String]? = filterTerritory?.compactMap { $0.id }
         guard let client else { return .failure(.network(type: .unauthorized)) }
-        return await cacheService.fetchWithCache(key: "fetchInAppPurchasePriceScheduleAutomaticPrices\(inAppPurchasePriceSchedulesId)", force: force) {
-            let request = Resources.v1.inAppPurchasePriceSchedules.id(inAppPurchasePriceSchedulesId).automaticPrices.get(limit: 200, include: [.inAppPurchasePricePoint, .territory])
+        return await cacheService.fetchWithCache(key: "fetchInAppPurchasePriceScheduleAutomaticPrices\(inAppPurchasePriceSchedulesId)\(filterTerritoryIds)", force: force) {
+            let request = Resources.v1.inAppPurchasePriceSchedules.id(inAppPurchasePriceSchedulesId).automaticPrices.get(
+                filterTerritory: filterTerritoryIds,
+                limit: 200,
+                include: [.inAppPurchasePricePoint, .territory]
+            )
             return try await client.send(request)
         }.map { data in
             data.data.compactMap { .init(schema: $0, included: data.included) }
@@ -252,11 +258,17 @@ public actor InAppPurchasesService {
 
     public func fetchInAppPurchasePriceScheduleManualPrices(
         inAppPurchasePriceSchedulesId: String,
+        filterTerritory: [Territory]? = nil,
         force: Bool = false
     ) async -> Result<[InAppPurchasePrice], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
-        return await cacheService.fetchWithCache(key: "fetchInAppPurchasePriceScheduleManualPrices\(inAppPurchasePriceSchedulesId)", force: force) {
-            let request = Resources.v1.inAppPurchasePriceSchedules.id(inAppPurchasePriceSchedulesId).manualPrices.get(limit: 200, include: [.inAppPurchasePricePoint, .territory])
+        let filterTerritoryIds: [String]? = filterTerritory?.compactMap { $0.id }
+        return await cacheService.fetchWithCache(key: "fetchInAppPurchasePriceScheduleManualPrices\(inAppPurchasePriceSchedulesId)\(filterTerritoryIds)", force: force) {
+            let request = Resources.v1.inAppPurchasePriceSchedules.id(inAppPurchasePriceSchedulesId).manualPrices.get(
+                filterTerritory: filterTerritoryIds,
+                limit: 200,
+                include: [.inAppPurchasePricePoint, .territory]
+            )
             return try await client.send(request)
         }.map { data in
             data.data.compactMap { .init(schema: $0, included: data.included) }
