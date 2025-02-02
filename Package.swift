@@ -38,6 +38,10 @@ let package = Package(
             name: "OversizeAppStoreServices",
             targets: ["OversizeAppStoreServices"]
         ),
+        .library(
+            name: "OversizeMetricServices",
+            targets: ["OversizeMetricServices"]
+        ),
     ],
     dependencies: dependencies,
     targets: [
@@ -49,8 +53,19 @@ let package = Package(
                 .product(name: "OversizeCore", package: "OversizeCore"),
                 .product(name: "OversizeModels", package: "OversizeModels"),
                 .product(name: "OversizeServices", package: "OversizeServices"),
+            ]
+        ),
+        .target(
+            name: "OversizeMetricServices",
+            dependencies: [
+                .product(name: "AppStoreConnect", package: "asc-swift"),
+                .product(name: "Factory", package: "Factory"),
+                .product(name: "OversizeCore", package: "OversizeCore"),
+                .product(name: "OversizeModels", package: "OversizeModels"),
+                .product(name: "OversizeServices", package: "OversizeServices"),
                 .product(name: "Gzip", package: "GzipSwift"),
                 .product(name: "CodableCSV", package: "CodableCSV"),
+                "OversizeAppStoreServices",
             ]
         ),
         .testTarget(
