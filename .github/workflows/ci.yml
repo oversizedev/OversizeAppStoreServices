@@ -20,16 +20,26 @@ jobs:
     uses: oversizedev/GithubWorkflows/.github/workflows/test.yml@main
     secrets: inherit
     
-  build-swiftpm:
-    name: Build SwiftPM
+  build-app-store-services:
+    name: Build OversizeAppStoreServices
     needs: tests
     uses: oversizedev/GithubWorkflows/.github/workflows/build-swiftpm-all-platforms.yml@main
     with:
       package: OversizeAppStoreServices
     secrets: inherit
+    
+  build-metric-services:
+    name: Build OversizeMetricServices
+    needs: tests
+    uses: oversizedev/GithubWorkflows/.github/workflows/build-swiftpm-all-platforms.yml@main
+    with:
+      package: OversizeMetricServices
+    secrets: inherit
 
   bump:
-    name: Bump version
+    name:
+      - build-app-store-services
+      - build-metric-services
     needs: build-swiftpm
     if: github.ref == 'refs/heads/main'
     uses: oversizedev/GithubWorkflows/.github/workflows/bump.yml@main

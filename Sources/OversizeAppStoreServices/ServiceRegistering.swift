@@ -54,19 +54,7 @@ public extension Container {
         self { AppStoreVersionSubmissionsService() }
     }
 
-    var analyticsService: Factory<AnalyticsService> {
-        self { AnalyticsService() }
-    }
-
-    var salesAndFinanceService: Factory<SalesAndFinanceService> {
-        self { SalesAndFinanceService() }
-    }
-
     var cacheService: Factory<CacheService> {
         self { CacheService() }
-    }
-
-    var perfPowerMetricsService: Factory<PerfPowerMetricsService> {
-        self { PerfPowerMetricsService() }
     }
 }

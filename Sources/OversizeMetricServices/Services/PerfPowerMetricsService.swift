@@ -5,6 +5,7 @@
 
 import AppStoreAPI
 import AppStoreConnect
+import OversizeAppStoreServices
 import OversizeModels
 
 public actor PerfPowerMetricsService {
