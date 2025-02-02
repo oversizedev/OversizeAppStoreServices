@@ -31,7 +31,6 @@ public actor AppStoreReviewService {
             }
             return .success(appStoreReviewDetail)
         } catch {
-            print(error)
             return .failure(.network(type: .noResponse))
         }
     }
@@ -141,7 +140,6 @@ public actor AppStoreReviewService {
             }
             return .success(appStoreReviewDetail)
         } catch {
-            print(error)
             return .failure(.network(type: .noResponse))
         }
     }

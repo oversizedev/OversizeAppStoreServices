@@ -325,6 +325,37 @@ public actor InAppPurchasesService {
         }
     }
 
+    public func patchInAppPurchase(
+        inAppPurchasesId: String,
+        name: String? = nil,
+        reviewNote: String? = nil,
+        isFamilySharable: Bool? = nil
+    ) async -> Result<InAppPurchaseV2, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+
+        let requestAttributes: InAppPurchaseV2UpdateRequest.Data.Attributes = .init(
+            name: name,
+            reviewNote: reviewNote,
+            isFamilySharable: isFamilySharable
+        )
+
+        let requestData: InAppPurchaseV2UpdateRequest.Data = .init(
+            type: .inAppPurchases,
+            id: inAppPurchasesId,
+            attributes: requestAttributes
+        )
+        let request = Resources.v2.inAppPurchases.id(inAppPurchasesId).patch(.init(data: requestData))
+        do {
+            let data = try await client.send(request).data
+            guard let app = InAppPurchaseV2(schema: data) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(app)
+        } catch {
+            return handleRequestFailure(error: error, replaces: [:])
+        }
+    }
+
     public func postInAppPurchaseLocalization(
         inAppPurchaseV2Id: String,
         name: String,
@@ -423,6 +454,17 @@ public actor InAppPurchasesService {
             return .success(app)
         } catch {
             return handleRequestFailure(error: error, replaces: [:])
+        }
+    }
+
+    public func deleteInAppPurchases(inAppPurchaseV2Id: String) async -> Result<Bool, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        let request = Resources.v2.inAppPurchases.id(inAppPurchaseV2Id).delete
+        do {
+            let data = try await client.send(request)
+            return .success(true)
+        } catch {
+            return .failure(.network(type: .noResponse))
         }
     }
 

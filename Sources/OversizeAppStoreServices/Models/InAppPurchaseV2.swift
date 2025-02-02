@@ -10,6 +10,7 @@ public struct InAppPurchaseV2: Identifiable, Sendable {
     public let id: String
     public let name: String
     public let productID: String
+    public let reviewNote: String
     public let inAppPurchaseType: InAppPurchaseType
     public let state: InAppPurchaseState
     public let isFamilySharable: Bool?
@@ -34,6 +35,7 @@ public struct InAppPurchaseV2: Identifiable, Sendable {
         self.state = state
         isFamilySharable = schema.attributes?.isFamilySharable
         isContentHosting = schema.attributes?.isContentHosting
+        reviewNote = schema.attributes?.reviewNote ?? ""
 
         relationships = Relationships(
             inAppPurchaseLocalizationsIds: schema.relationships?.inAppPurchaseLocalizations?.data?.map { $0.id },
