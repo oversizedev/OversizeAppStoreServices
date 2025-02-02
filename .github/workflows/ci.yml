@@ -37,10 +37,10 @@ jobs:
     secrets: inherit
 
   bump:
-    name:
+    name: Bump version
+    needs:
       - build-app-store-services
       - build-metric-services
-    needs: build-swiftpm
     if: github.ref == 'refs/heads/main'
     uses: oversizedev/GithubWorkflows/.github/workflows/bump.yml@main
     secrets: inherit
