@@ -19,10 +19,28 @@ jobs:
     if:  github.event_name != 'push' || !startsWith(github.ref, 'refs/tags/')
     uses: oversizedev/GithubWorkflows/.github/workflows/test.yml@main
     secrets: inherit
-    
+
+  cache-swiftpm:
+    name: Cache SwiftPM Dependencies
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Cache SwiftPM Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.swiftpm
+            .build
+          key: swiftpm-${{ runner.os }}-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: swiftpm-${{ runner.os }}-
+  
   build-app-store-services:
     name: Build OversizeAppStoreServices
-    needs: tests
+    needs: 
+      - tests
+      - cache-swiftpm
     uses: oversizedev/GithubWorkflows/.github/workflows/build-swiftpm-all-platforms.yml@main
     with:
       package: OversizeAppStoreServices
@@ -30,7 +48,9 @@ jobs:
     
   build-metric-services:
     name: Build OversizeMetricServices
-    needs: tests
+    needs: 
+     - tests
+     - cache-swiftpm
     uses: oversizedev/GithubWorkflows/.github/workflows/build-swiftpm-all-platforms.yml@main
     with:
       package: OversizeMetricServices
