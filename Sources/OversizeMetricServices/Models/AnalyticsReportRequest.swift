@@ -4,7 +4,7 @@
 //
 
 import AppStoreAPI
-import AppStoreConnect
+
 import Foundation
 import OversizeCore
 
@@ -22,7 +22,7 @@ public struct AnalyticsReportRequest: Identifiable, Sendable {
         self.accessType = accessType
         isStoppedDueToInactivity = schema.attributes?.isStoppedDueToInactivity
 
-        if let analyticsReport = included?.filter { $0.id == schema.relationships?.reports?.data?.first?.id } {
+        if let analyticsReport = included?.filter({ $0.id == schema.relationships?.reports?.data?.first?.id }) {
             self.included = .init(analyticsReports: analyticsReport.compactMap { .init(schema: $0) })
         } else {
             self.included = nil

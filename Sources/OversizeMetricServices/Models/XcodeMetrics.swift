@@ -1,5 +1,4 @@
 import AppStoreAPI
-import AppStoreConnect
 import Foundation
 
 public struct LocalXcodeMetrics: Codable, Equatable, Sendable {

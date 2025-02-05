@@ -4,7 +4,6 @@
 //
 
 import AppStoreAPI
-import AppStoreConnect
 
 public struct Profile: Sendable {
     public let name: String

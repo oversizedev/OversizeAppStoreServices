@@ -1,7 +1,7 @@
 //
 // Copyright © 2025 Aleksandr Romanov
 // SubscriptionOfferCode.swift, created on 05.02.2025
-//  
+//
 
 import AppStoreAPI
 import Foundation
@@ -16,13 +16,13 @@ public struct SubscriptionOfferCode: Identifiable, Sendable {
     public let numberOfPeriods: Int?
     public let totalNumberOfCodes: Int?
     public let isActive: Bool?
-    
+
     public let relationships: Relationships?
     public let included: Included?
-    
+
     public init?(schema: AppStoreAPI.SubscriptionOfferCode, included: [AppStoreAPI.SubscriptionOfferCodesResponse.IncludedItem]? = nil) {
         guard let attributes = schema.attributes else { return nil }
-        
+
         id = schema.id
         name = attributes.name
         customerEligibilities = attributes.customerEligibilities?.compactMap { .init(rawValue: $0.rawValue) }
@@ -32,19 +32,19 @@ public struct SubscriptionOfferCode: Identifiable, Sendable {
         numberOfPeriods = attributes.numberOfPeriods
         totalNumberOfCodes = attributes.totalNumberOfCodes
         isActive = attributes.isActive
-        
+
         relationships = .init(
             subscriptionId: schema.relationships?.subscription?.data?.id,
             oneTimeUseCodesIds: schema.relationships?.oneTimeUseCodes?.data?.compactMap { $0.id } ?? [],
             customCodesIds: schema.relationships?.customCodes?.data?.compactMap { $0.id } ?? [],
             pricesIds: schema.relationships?.prices?.data?.compactMap { $0.id } ?? []
         )
-        
+
         var subscriptions: [AppStoreAPI.Subscription] = []
         var oneTimeUseCodes: [AppStoreAPI.SubscriptionOfferCodeOneTimeUseCode] = []
         var customCodes: [AppStoreAPI.SubscriptionOfferCodeCustomCode] = []
         var prices: [AppStoreAPI.SubscriptionOfferCodePrice] = []
-        
+
         if let includedItems = included {
             for includedItem in includedItems {
                 switch includedItem {
@@ -76,14 +76,14 @@ public struct SubscriptionOfferCode: Identifiable, Sendable {
             self.included = nil
         }
     }
-    
+
     public struct Relationships: Sendable {
         public let subscriptionId: String?
         public let oneTimeUseCodesIds: [String]
         public let customCodesIds: [String]
         public let pricesIds: [String]
     }
-    
+
     public struct Included: Sendable {
         public let subscriptions: [Subscription]?
         public let oneTimeUseCodes: [SubscriptionOfferCodeOneTimeUseCode]?

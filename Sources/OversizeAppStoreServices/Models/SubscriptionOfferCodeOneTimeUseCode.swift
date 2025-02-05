@@ -1,10 +1,10 @@
 //
 // Copyright © 2025 Aleksandr Romanov
 // SubscriptionOfferCodeOneTimeUseCode.swift, created on 05.02.2025
-//  
+//
 
-import Foundation
 import AppStoreAPI
+import Foundation
 
 public struct SubscriptionOfferCodeOneTimeUseCode: Identifiable, Sendable {
     public let id: String
@@ -12,19 +12,19 @@ public struct SubscriptionOfferCodeOneTimeUseCode: Identifiable, Sendable {
     public let createdDate: Date?
     public let expirationDate: String?
     public let isActive: Bool?
-    
+
     public let relationships: Relationships?
     public let included: Included?
-    
+
     public init?(schema: AppStoreAPI.SubscriptionOfferCodeOneTimeUseCode, included: [AppStoreAPI.SubscriptionOfferCode]? = nil) {
         guard let attributes = schema.attributes else { return nil }
-        
+
         id = schema.id
         numberOfCodes = attributes.numberOfCodes
         createdDate = attributes.createdDate
         expirationDate = attributes.expirationDate
         isActive = attributes.isActive
-        
+
         relationships = .init(
             offerCodeId: schema.relationships?.offerCode?.data?.id
         )
@@ -35,11 +35,11 @@ public struct SubscriptionOfferCodeOneTimeUseCode: Identifiable, Sendable {
             self.included = nil
         }
     }
-    
+
     public struct Relationships: Sendable {
         public let offerCodeId: String?
     }
-    
+
     public struct Included: Sendable {
         public let offerCode: SubscriptionOfferCode?
     }

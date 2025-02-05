@@ -4,7 +4,6 @@
 //
 
 import AppStoreAPI
-import AppStoreConnect
 import Foundation
 
 public struct Build: Sendable, Identifiable {

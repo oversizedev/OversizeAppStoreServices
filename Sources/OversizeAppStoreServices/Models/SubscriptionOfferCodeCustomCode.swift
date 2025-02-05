@@ -1,8 +1,7 @@
 //
 // Copyright © 2025 Aleksandr Romanov
 // SubscriptionOfferCodeCustomCode.swift, created on 05.02.2025
-//  
-
+//
 
 import AppStoreAPI
 import Foundation
@@ -14,9 +13,9 @@ public struct SubscriptionOfferCodeCustomCode: Identifiable, Sendable {
     public let createdDate: Date?
     public let expirationDate: String?
     public let isActive: Bool
-    
+
     public let relationships: Relationships?
-    
+
     public init?(schema: AppStoreAPI.SubscriptionOfferCodeCustomCode) {
         guard let attributes = schema.attributes else { return nil }
         id = schema.id
@@ -25,10 +24,10 @@ public struct SubscriptionOfferCodeCustomCode: Identifiable, Sendable {
         createdDate = attributes.createdDate
         expirationDate = attributes.expirationDate
         isActive = attributes.isActive ?? false
-        
+
         relationships = .init(offerCodeId: schema.relationships?.offerCode?.data?.id)
     }
-    
+
     public struct Relationships: Sendable {
         public let offerCodeId: String?
     }

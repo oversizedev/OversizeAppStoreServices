@@ -4,7 +4,7 @@
 //
 
 import AppStoreAPI
-import AppStoreConnect
+
 import Foundation
 import OversizeCore
 import SwiftUI
@@ -34,9 +34,9 @@ public struct AppCategory: Identifiable, Sendable {
 
         self.included = .init(subCategories: subcategoryIds?.compactMap { subcategoryId in
             if let subcategory = included.first(where: { $0.id == subcategoryId }) {
-                return .init(schema: subcategory)
+                .init(schema: subcategory)
             } else {
-                return nil
+                nil
             }
         })
     }

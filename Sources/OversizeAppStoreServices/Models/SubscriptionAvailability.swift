@@ -1,7 +1,7 @@
 //
 // Copyright © 2025 Aleksandr Romanov
 // SubscriptionAvailability.swift, created on 05.02.2025
-//  
+//
 
 import AppStoreAPI
 import OversizeCore

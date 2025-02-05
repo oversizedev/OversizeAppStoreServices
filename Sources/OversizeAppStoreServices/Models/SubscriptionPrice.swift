@@ -1,8 +1,7 @@
 //
 // Copyright © 2025 Aleksandr Romanov
 // SubscriptionPrice.swift, created on 05.02.2025
-//  
-
+//
 
 import AppStoreAPI
 import OversizeCore

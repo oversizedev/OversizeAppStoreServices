@@ -1,7 +1,7 @@
 //
 // Copyright © 2025 Aleksandr Romanov
 // SubscriptionImage.swift, created on 05.02.2025
-//  
+//
 
 import AppStoreAPI
 import Foundation
@@ -15,12 +15,12 @@ public struct SubscriptionImage: Sendable, Identifiable {
     public let imageAsset: ImageAsset?
     public let uploadOperations: [UploadOperation]?
     public let state: State?
-    
+
     public let relationships: Relationships?
-    
+
     public init?(schema: AppStoreAPI.SubscriptionImage) {
         guard let attributes = schema.attributes else { return nil }
-        
+
         id = schema.id
         fileSize = attributes.fileSize
         fileName = attributes.fileName
@@ -29,20 +29,20 @@ public struct SubscriptionImage: Sendable, Identifiable {
         imageAsset = attributes.imageAsset.flatMap { ImageAsset(schema: $0) }
         uploadOperations = attributes.uploadOperations?.compactMap { UploadOperation(schema: $0) }
         state = attributes.state.flatMap { State(rawValue: $0.rawValue) }
-        
+
         relationships = Relationships(
             subscriptionId: schema.relationships?.subscription?.data?.id
         )
     }
-    
+
     public struct Relationships: Sendable {
         public let subscriptionId: String?
-        
+
         public init(subscriptionId: String?) {
             self.subscriptionId = subscriptionId
         }
     }
-    
+
     public enum State: String, CaseIterable, Codable, Sendable {
         case awaitingUpload = "AWAITING_UPLOAD"
         case uploadComplete = "UPLOAD_COMPLETE"

@@ -1,7 +1,7 @@
 //
 // Copyright © 2025 Aleksandr Romanov
 // SubscriptionOfferEligibility.swift, created on 05.02.2025
-//  
+//
 
 import Foundation
 

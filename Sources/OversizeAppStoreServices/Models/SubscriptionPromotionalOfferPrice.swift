@@ -1,25 +1,25 @@
 //
 // Copyright © 2025 Aleksandr Romanov
 // SubscriptionPromotionalOfferPrice.swift, created on 05.02.2025
-//  
+//
 
-import Foundation
 import AppStoreAPI
+import Foundation
 import OversizeCore
 
 public struct SubscriptionPromotionalOfferPrice: Sendable, Identifiable {
     public let id: String
     public let relationships: Relationships?
     public let included: Included?
-    
+
     public init?(schema: AppStoreAPI.SubscriptionPromotionalOfferPrice, included: [SubscriptionPromotionalOfferPricesResponse.IncludedItem]? = nil) {
         id = schema.id
-        
+
         relationships = Relationships(
             territoryId: schema.relationships?.territory?.data?.id,
             subscriptionPricePointId: schema.relationships?.subscriptionPricePoint?.data?.id
         )
-        
+
         self.included = .init(
             territory: included?.compactMap { item -> Territory? in
                 if case let .territory(value) = item { return .init(schema: value) }
@@ -31,12 +31,11 @@ public struct SubscriptionPromotionalOfferPrice: Sendable, Identifiable {
             }.first
         )
     }
-    
 
     public struct Relationships: Sendable {
         public let territoryId: String?
         public let subscriptionPricePointId: String?
-        
+
         public init(
             territoryId: String? = nil,
             subscriptionPricePointId: String? = nil
@@ -45,11 +44,11 @@ public struct SubscriptionPromotionalOfferPrice: Sendable, Identifiable {
             self.subscriptionPricePointId = subscriptionPricePointId
         }
     }
-    
+
     public struct Included: Sendable {
         public let territory: Territory?
         public let subscriptionPricePoint: SubscriptionPricePoint?
-        
+
         public init(
             territory: Territory? = nil,
             subscriptionPricePoint: SubscriptionPricePoint? = nil

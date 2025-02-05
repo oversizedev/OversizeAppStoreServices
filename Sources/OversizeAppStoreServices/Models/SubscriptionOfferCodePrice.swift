@@ -1,10 +1,10 @@
 //
 // Copyright © 2025 Aleksandr Romanov
 // SubscriptionOfferCodePrice.swift, created on 05.02.2025
-//  
+//
 
-import Foundation
 import AppStoreAPI
+import Foundation
 
 public struct SubscriptionOfferCodePrice: Identifiable, Sendable {
     public let id: String

@@ -4,7 +4,7 @@
 //
 
 import AppStoreAPI
-import AppStoreConnect
+
 import OversizeCore
 
 public struct AnalyticsReport: Identifiable, Hashable, Sendable {

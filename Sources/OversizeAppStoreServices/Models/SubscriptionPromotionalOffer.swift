@@ -1,11 +1,10 @@
 //
 // Copyright © 2025 Aleksandr Romanov
 // SubscriptionPromotionalOffer.swift, created on 05.02.2025
-//  
+//
 
-
-import Foundation
 import AppStoreAPI
+import Foundation
 import OversizeCore
 
 public struct SubscriptionPromotionalOffer: Sendable, Identifiable {
@@ -15,29 +14,27 @@ public struct SubscriptionPromotionalOffer: Sendable, Identifiable {
     public let duration: SubscriptionOfferDuration?
     public let offerMode: SubscriptionOfferMode?
     public let numberOfPeriods: Int?
-    
+
     public let relationships: Relationships?
     public let included: Included?
-    
+
     public init?(schema: AppStoreAPI.SubscriptionPromotionalOffer, included: [SubscriptionPromotionalOfferResponse.IncludedItem]? = nil) {
         guard let attributes = schema.attributes else { return nil }
-        
+
         id = schema.id
         name = attributes.name
         offerCode = attributes.offerCode
-        
-       
+
         duration = .init(rawValue: attributes.duration?.rawValue ?? "")
         offerMode = .init(rawValue: attributes.offerMode?.rawValue ?? "")
-        
 
         numberOfPeriods = attributes.numberOfPeriods
-        
+
         relationships = Relationships(
             subscriptionId: schema.relationships?.subscription?.data?.id,
             pricesIds: schema.relationships?.prices?.data?.map { $0.id }
         )
-        
+
         self.included = .init(
             subscription: included?.compactMap { (item: SubscriptionPromotionalOfferResponse.IncludedItem) -> Subscription? in
                 if case let .subscription(value) = item { return .init(schema: value) }
@@ -49,11 +46,11 @@ public struct SubscriptionPromotionalOffer: Sendable, Identifiable {
             }
         )
     }
-    
+
     public struct Relationships: Sendable {
         public var subscriptionId: String?
         public var pricesIds: [String]?
-        
+
         public init(
             subscriptionId: String? = nil,
             pricesIds: [String]? = nil
@@ -62,11 +59,11 @@ public struct SubscriptionPromotionalOffer: Sendable, Identifiable {
             self.pricesIds = pricesIds
         }
     }
-    
+
     public struct Included: Sendable {
         public let subscription: Subscription?
         public let subscriptionPromotionalOfferPrices: [SubscriptionPromotionalOfferPrice]?
-        
+
         public init(
             subscription: Subscription? = nil,
             subscriptionPromotionalOfferPrices: [SubscriptionPromotionalOfferPrice]? = nil
