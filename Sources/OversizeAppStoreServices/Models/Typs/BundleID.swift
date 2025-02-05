@@ -4,7 +4,6 @@
 //
 
 import AppStoreAPI
-import AppStoreConnect
 
 public enum BundleID: Sendable {
     public enum Platform: Sendable {

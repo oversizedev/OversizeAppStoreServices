@@ -244,7 +244,7 @@ public actor InAppPurchasesService {
     ) async -> Result<[InAppPurchasePrice], AppError> {
         let filterTerritoryIds: [String]? = filterTerritory?.compactMap { $0.id }
         guard let client else { return .failure(.network(type: .unauthorized)) }
-        return await cacheService.fetchWithCache(key: "fetchInAppPurchasePriceScheduleAutomaticPrices\(inAppPurchasePriceSchedulesId)\(filterTerritoryIds)", force: force) {
+        return await cacheService.fetchWithCache(key: "fetchInAppPurchasePriceScheduleAutomaticPrices\(inAppPurchasePriceSchedulesId)\(filterTerritoryIds ?? [])", force: force) {
             let request = Resources.v1.inAppPurchasePriceSchedules.id(inAppPurchasePriceSchedulesId).automaticPrices.get(
                 filterTerritory: filterTerritoryIds,
                 limit: 200,
@@ -263,7 +263,7 @@ public actor InAppPurchasesService {
     ) async -> Result<[InAppPurchasePrice], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         let filterTerritoryIds: [String]? = filterTerritory?.compactMap { $0.id }
-        return await cacheService.fetchWithCache(key: "fetchInAppPurchasePriceScheduleManualPrices\(inAppPurchasePriceSchedulesId)\(filterTerritoryIds)", force: force) {
+        return await cacheService.fetchWithCache(key: "fetchInAppPurchasePriceScheduleManualPrices\(inAppPurchasePriceSchedulesId)\(filterTerritoryIds ?? [])", force: force) {
             let request = Resources.v1.inAppPurchasePriceSchedules.id(inAppPurchasePriceSchedulesId).manualPrices.get(
                 filterTerritory: filterTerritoryIds,
                 limit: 200,
@@ -461,7 +461,7 @@ public actor InAppPurchasesService {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v2.inAppPurchases.id(inAppPurchaseV2Id).delete
         do {
-            let data = try await client.send(request)
+            let _ = try await client.send(request)
             return .success(true)
         } catch {
             return .failure(.network(type: .noResponse))

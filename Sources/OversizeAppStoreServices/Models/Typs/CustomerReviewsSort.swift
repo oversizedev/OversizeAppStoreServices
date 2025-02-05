@@ -1,6 +1,6 @@
 //
 // Copyright © 2024 Alexander Romanov
-// Sort.swift, created on 24.11.2024
+// CustomerReviewsSort.swift, created on 24.11.2024
 //
 
 import Foundation

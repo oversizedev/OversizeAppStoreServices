@@ -74,10 +74,10 @@ public struct AppStoreVersion: Sendable, Identifiable {
             build: includedBuild.flatMap { .init(schema: $0) },
             ageRatingDeclaration: includedAgeRatingDeclaration.flatMap { .init(schema: $0) },
             appStoreVersionLocalizations: includedAppStoreVersionLocalizations.flatMap { localizations in
-                localizations.flatMap(AppStoreVersionLocalization.init)
+                localizations.compactMap(AppStoreVersionLocalization.init)
             },
             appStoreReviewDetail: includedAppStoreReviewDetail.flatMap { reviewDetails in
-                reviewDetails.flatMap(AppStoreReviewDetail.init)
+                reviewDetails.compactMap(AppStoreReviewDetail.init)
             }
         )
 

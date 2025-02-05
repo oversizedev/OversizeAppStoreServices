@@ -46,6 +46,45 @@ public actor SubscribtionsService {
         }
     }
 
+    public func fetchSubscription(subscriptionId: String, force: Bool = false) async -> Result<Subscription, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        return await cacheService.fetchWithCache(key: "fetchSubscription\(subscriptionId)", force: force) {
+            let request = Resources.v1.subscriptions.id(subscriptionId).get()
+            return try await client.send(request)
+        }.flatMap {
+            guard let build: Subscription = .init(schema: $0.data) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(build)
+        }
+    }
+
+    public func fetchSubscriptionIncludedAll(subscriptionId: String, force: Bool = false) async -> Result<Subscription, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        return await cacheService.fetchWithCache(key: "fetchSubscriptionIncludedAll\(subscriptionId)", force: force) {
+            let request = Resources.v1.subscriptions.id(subscriptionId).get(
+                include: [
+                    .subscriptionLocalizations,
+                    .appStoreReviewScreenshot,
+                    .group,
+                    .introductoryOffers,
+                    .promotionalOffers,
+                    .offerCodes,
+                    .prices,
+                    .promotedPurchase,
+                    .winBackOffers,
+                    .images,
+                ]
+            )
+            return try await client.send(request)
+        }.flatMap {
+            guard let build: Subscription = .init(schema: $0.data) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(build)
+        }
+    }
+
     public func postSubscriptionGroup(appId: String, referenceName: String) async -> Result<SubscriptionGroup, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         let requestData: SubscriptionGroupCreateRequest.Data = .init(

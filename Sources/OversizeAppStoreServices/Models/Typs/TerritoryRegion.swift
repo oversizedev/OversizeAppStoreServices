@@ -62,7 +62,7 @@ public enum TerritoryRegion: String, Sendable, CaseIterable, Identifiable {
              .kaz, .kgz, .mac, .npl, .tjk, .tkm, .uzb,
              // Additional Pacific territories
              .asm, .cok, .cxr, .gum, .kir, .mhl, .mnp, .ncl, .nfk, .niu,
-             .nru, .pyf, .tuv, .wlf:
+             .pyf, .tuv, .wlf:
             self = .asiaPacific
 
         default:

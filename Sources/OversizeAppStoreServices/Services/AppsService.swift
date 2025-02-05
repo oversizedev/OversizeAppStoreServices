@@ -206,7 +206,7 @@ public actor AppsService {
 
         let request = Resources.v1.bundleIDs.post(.init(data: requestData))
         do {
-            let data = try await client.send(request).data
+            _ = try await client.send(request).data
             return .success(true)
         } catch {
             return .failure(.network(type: .noResponse))

@@ -3,7 +3,6 @@
 // InAppPurchaseState.swift, created on 02.01.2025
 //
 
-import AppStoreConnect
 import Foundation
 import SwiftUI
 

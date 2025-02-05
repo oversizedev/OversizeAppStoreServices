@@ -83,6 +83,8 @@ public struct App: Identifiable, Sendable {
                     appStoreVersions.append(includedAppStoreVersion)
                 case let .build(includedBuild):
                     builds.append(includedBuild)
+                case let .prereleaseVersion(prereleaseVersion):
+                    prereleaseVersions.append(prereleaseVersion)
                 default:
                     continue
                 }
@@ -135,6 +137,8 @@ public struct App: Identifiable, Sendable {
                     appStoreVersions.append(includedAppStoreVersion)
                 case let .build(includedBuild):
                     builds.append(includedBuild)
+                case let .prereleaseVersion(prereleaseVersion):
+                    prereleaseVersions.append(prereleaseVersion)
                 default:
                     continue
                 }

@@ -50,7 +50,6 @@ public struct Build: Sendable, Identifiable {
         } else {
             buildAudienceType = .none
         }
-        let templateUrl = schema.attributes?.iconAssetToken?.templateURL
         relationships = .init(
             buildBundlesIds: schema.relationships?.buildBundles?.data?.compactMap { $0.id }
         )
