@@ -10,7 +10,7 @@ import Foundation
 public struct Certificate: Sendable {
     public let id: String
     public let name: String
-    public let platform: BundleID.Platform
+    public let platform: BundleIDPlatform
     public let type: CertificateType
     public let content: String
     public var expirationDate: Date
@@ -19,12 +19,13 @@ public struct Certificate: Sendable {
         guard let name = schema.attributes?.name,
               let type = CertificateType(rawValue: schema.attributes?.certificateType?.rawValue ?? ""),
               let content = schema.attributes?.certificateContent,
-              let platform = schema.attributes?.platform,
+              let platformRawValue = schema.attributes?.platform?.rawValue,
+              let platform: BundleIDPlatform = .init(rawValue: platformRawValue),
               let expirationDate = schema.attributes?.expirationDate
         else { return nil }
         id = schema.id
         self.name = name
-        self.platform = BundleID.Platform(schema: platform)
+        self.platform = platform
         self.type = type
         self.content = content
         self.expirationDate = expirationDate

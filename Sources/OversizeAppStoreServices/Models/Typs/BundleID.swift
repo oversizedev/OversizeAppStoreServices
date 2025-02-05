@@ -5,13 +5,8 @@
 
 import AppStoreAPI
 
-public enum BundleID: Sendable {
-    public enum Platform: Sendable {
-        case iOS
-        case macOS
-
-        init(schema: AppStoreAPI.BundleIDPlatform) {
-            self = schema == .iOS ? .iOS : .macOS
-        }
-    }
+public enum BundleIDPlatform: String, CaseIterable, Codable, Sendable {
+    case iOS = "IOS"
+    case macOS = "MAC_OS"
+    case universal = "UNIVERSAL"
 }
