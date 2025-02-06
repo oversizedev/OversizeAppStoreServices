@@ -3,12 +3,6 @@
 // AppStoreLanguageTests.swift, created on 06.02.2025
 //  
 
-
-//
-// Copyright © 2025 Aleksandr Romanov
-// AppStoreLanguageTests.swift, created on 2025-02-05
-//
-
 import Testing
 @testable import OversizeAppStoreServices
 import AppStoreAPI

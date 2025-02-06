@@ -1,18 +1,11 @@
 //
 // Copyright © 2025 Aleksandr Romanov
 // TerritoryTests.swift, created on 06.02.2025
-//  
-
-
-//
-// Copyright © 2025 Aleksandr Romanov
-// TerritoryTests.swift, created on 2025-02-05
 //
 
 import Testing
 @testable import OversizeAppStoreServices
 import AppStoreAPI
-import OversizeCore
 
 @Suite struct TerritoryTests {
     @Test("Should initialize correctly from valid schema")
@@ -82,5 +75,19 @@ import OversizeCore
             let territory = Territory(schema: schema)
             #expect(territory?.currency.identifier == currency)
         }
+    }
+    
+    @Test("Should initialize schema with unhandled region as .unknown")
+    func testInitWithSchemaUnhandledRegion() throws {
+        // TerritoryCode.bgd ("BGD" - Bangladesh) is not handled in TerritoryRegion initializer,
+        // so the region should be .unknown.
+        let schema = AppStoreAPI.Territory(
+            id: "BGD",
+            attributes: .init(currency: "BDT")
+        )
+        
+        let territory = Territory(schema: schema)
+        #expect(territory != nil)
+        #expect(territory?.region == .unknown)
     }
 }

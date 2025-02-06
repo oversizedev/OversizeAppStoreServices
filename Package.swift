@@ -70,7 +70,7 @@ let package = Package(
         ),
         .testTarget(
             name: "OversizeAppStoreServicesTests",
-            dependencies: ["OversizeAppStoreServices"]
+            dependencies: ["OversizeAppStoreServices", "OversizeMetricServices"]
         ),
     ]
 )

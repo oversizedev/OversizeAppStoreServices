@@ -54,4 +54,10 @@ import AppStoreAPI
         #expect(TerritoryRegion.asiaPacific.rawValue == "Asia Pacific")
         #expect(TerritoryRegion.unknown.rawValue == "Unknown Region")
     }
+    
+    @Test("Should return .unknown for unhandled territory code")
+    func testInitWithUnhandledTerritoryCode() throws {
+        // TerritoryCode.bgd ("BGD" for Bangladesh) is not handled explicitly in TerritoryRegion initializer
+        #expect(TerritoryRegion(territoryCode: .bgd) == .unknown)
+    }
 }
