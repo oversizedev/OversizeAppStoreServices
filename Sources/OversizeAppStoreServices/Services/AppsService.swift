@@ -194,8 +194,7 @@ public actor AppsService {
     ) async -> Result<Bool, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         guard let bundleIDPlatform: AppStoreAPI.BundleIDPlatform = .init(rawValue: platform.rawValue) else { return .failure(.network(type: .invalidURL)) }
-        
-        
+
         let requestData: BundleIDCreateRequest.Data = .init(
             type: .bundleIDs,
             attributes: .init(

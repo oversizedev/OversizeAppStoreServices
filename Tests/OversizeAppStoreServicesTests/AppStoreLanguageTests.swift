@@ -1,11 +1,11 @@
 //
 // Copyright © 2025 Aleksandr Romanov
 // AppStoreLanguageTests.swift, created on 06.02.2025
-//  
+//
 
-import Testing
-@testable import OversizeAppStoreServices
 import AppStoreAPI
+@testable import OversizeAppStoreServices
+import Testing
 
 @Suite struct AppStoreLanguageTests {
     @Test("Should have correct raw values")
@@ -16,7 +16,7 @@ import AppStoreAPI
         #expect(AppStoreLanguage.chineseSimplified.rawValue == "zh-Hans")
         #expect(AppStoreLanguage.spanishMEX.rawValue == "es-MX")
     }
-    
+
     @Test("Should have correct display names")
     func testDisplayNames() throws {
         #expect(AppStoreLanguage.englishUS.displayName == "English (US)")
@@ -25,7 +25,7 @@ import AppStoreAPI
         #expect(AppStoreLanguage.chineseSimplified.displayName == "Chinese (Simplified)")
         #expect(AppStoreLanguage.spanishMEX.displayName == "Spanish (Mexico)")
     }
-    
+
     @Test("Should have correct flag emojis")
     func testFlagEmojis() throws {
         #expect(AppStoreLanguage.englishUS.flagEmoji == "🇺🇸")
@@ -34,7 +34,7 @@ import AppStoreAPI
         #expect(AppStoreLanguage.chineseSimplified.flagEmoji == "🇨🇳")
         #expect(AppStoreLanguage.spanishMEX.flagEmoji == "🇲🇽")
     }
-    
+
     @Test("Should conform to Identifiable correctly")
     func testIdentifiable() throws {
         #expect(AppStoreLanguage.englishUS.id == "en-US")

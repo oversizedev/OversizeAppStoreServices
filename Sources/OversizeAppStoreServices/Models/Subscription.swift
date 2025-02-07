@@ -16,7 +16,7 @@ public struct Subscription: Sendable, Identifiable {
     public let isFamilySharable: Bool?
     public let state: State
     public let subscriptionPeriod: SubscriptionPeriod?
-    public let reviewNote: String?
+    public let reviewNote: String
     public let groupLevel: Int?
 
     public let relationships: Relationships?
@@ -32,7 +32,7 @@ public struct Subscription: Sendable, Identifiable {
         name = attributes.name.valueOrEmpty
         productID = attributes.productID.valueOrEmpty
         isFamilySharable = attributes.isFamilySharable
-        reviewNote = attributes.reviewNote
+        reviewNote = attributes.reviewNote.valueOrEmpty
         groupLevel = attributes.groupLevel
         if let subscriptionPeriod = attributes.subscriptionPeriod?.rawValue {
             self.subscriptionPeriod = .init(rawValue: subscriptionPeriod)

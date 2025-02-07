@@ -5,28 +5,32 @@
 
 import Foundation
 
-public enum SubscriptionPeriod: String, CaseIterable, Codable, Sendable {
+public enum SubscriptionPeriod: String, CaseIterable, Codable, Sendable, Identifiable {
     case oneWeek = "ONE_WEEK"
     case oneMonth = "ONE_MONTH"
     case twoMonths = "TWO_MONTHS"
     case threeMonths = "THREE_MONTHS"
     case sixMonths = "SIX_MONTHS"
     case oneYear = "ONE_YEAR"
+    
+    public var id: String {
+        return rawValue
+    }
 
     public var displayName: String {
         switch self {
         case .oneWeek:
-            "One Week"
+            "1 Week"
         case .oneMonth:
-            "One Month"
+            "1 Month"
         case .twoMonths:
-            "Two Months"
+            "2 Months"
         case .threeMonths:
-            "Three Months"
+            "3 Months"
         case .sixMonths:
-            "Six Months"
+            "6 Months"
         case .oneYear:
-            "One Year"
+            "1 Year"
         }
     }
 }
