@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Aleksandr Romanov
+// Copyright © 2025 Alexander Romanov
 // SubscriptionGroupLocalization.swift, created on 12.01.2025
 //
 

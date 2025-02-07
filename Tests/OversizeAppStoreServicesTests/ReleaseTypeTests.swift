@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Aleksandr Romanov
+// Copyright © 2025 Alexander Romanov
 // ReleaseTypeTests.swift, created on 06.02.2025
 //
 

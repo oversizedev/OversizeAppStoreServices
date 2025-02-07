@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Aleksandr Romanov
+// Copyright © 2025 Alexander Romanov
 // SubscriptionOfferMode.swift, created on 02.02.2025
 //
 

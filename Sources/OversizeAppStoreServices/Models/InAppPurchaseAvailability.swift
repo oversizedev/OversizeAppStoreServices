@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Aleksandr Romanov
+// Copyright © 2025 Alexander Romanov
 // InAppPurchaseAvailability.swift, created on 24.01.2025
 //
 
