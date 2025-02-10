@@ -10,6 +10,7 @@ public struct SubscriptionPricePoint: Identifiable, Sendable {
     public let id: String
     public let customerPrice: String
     public let proceeds: String
+    public let proceedsYear2: String
     public let relationships: Relationships
     public let included: Included?
 
@@ -18,6 +19,7 @@ public struct SubscriptionPricePoint: Identifiable, Sendable {
         id = schema.id
         customerPrice = attributes.customerPrice.valueOrEmpty
         proceeds = attributes.proceeds.valueOrEmpty
+        proceedsYear2 = attributes.proceedsYear2.valueOrEmpty
         relationships = .init(territoryId: schema.relationships?.territory?.data?.id)
 
         if let territory = included?.first(where: { $0.id == schema.relationships?.territory?.data?.id }) {

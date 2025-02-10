@@ -27,20 +27,29 @@ public struct InAppPurchasePrice: Sendable, Identifiable {
             territoryId: schema.relationships?.territory?.data?.id
         )
 
-        self.included = .init(
-            inAppPurchasePricePoint: included?.compactMap { (item: InAppPurchasePricesResponse.IncludedItem) -> InAppPurchasePricePoint? in
-                if case let .inAppPurchasePricePoint(value) = item {
-                    return .init(schema: value)
+        if let includedItems = included {
+            var inAppPurchasePricePoint: InAppPurchasePricePoint?
+            var territory: Territory?
+
+            for includedItem in includedItems {
+                switch includedItem {
+                case let .inAppPurchasePricePoint(value):
+                    if schema.relationships?.inAppPurchasePricePoint?.data?.id == value.id {
+                        inAppPurchasePricePoint = .init(schema: value)
+                    }
+                case let .territory(value):
+                    if schema.relationships?.territory?.data?.id == value.id {
+                        territory = .init(schema: value)
+                    }
                 }
-                return nil
-            }.first,
-            territory: included?.compactMap { (item: InAppPurchasePricesResponse.IncludedItem) -> Territory? in
-                if case let .territory(value) = item {
-                    return .init(schema: value)
-                }
-                return nil
-            }.first
-        )
+            }
+            self.included = .init(
+                inAppPurchasePricePoint: inAppPurchasePricePoint,
+                territory: territory
+            )
+        } else {
+            self.included = nil
+        }
     }
 
     public struct Relationships: Sendable {

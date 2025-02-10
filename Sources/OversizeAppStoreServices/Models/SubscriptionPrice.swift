@@ -25,20 +25,31 @@ public struct SubscriptionPrice: Sendable, Identifiable {
             territoryId: schema.relationships?.territory?.data?.id
         )
 
-        self.included = .init(
-            subscriptionPricePoint: included?.compactMap { (item: SubscriptionPricesResponse.IncludedItem) -> SubscriptionPricePoint? in
-                if case let .subscriptionPricePoint(value) = item {
-                    return .init(schema: value)
+        if let includedItems = included {
+            var subscriptionPricePoint: SubscriptionPricePoint?
+            var territory: Territory?
+
+            for includedItem in includedItems {
+                switch includedItem {
+                case let .subscriptionPricePoint(value):
+                    if schema.relationships?.subscriptionPricePoint?.data?.id == value.id {
+                        subscriptionPricePoint = .init(schema: value)
+                    }
+                case let .territory(value):
+                    if schema.relationships?.territory?.data?.id == value.id {
+                        territory = .init(schema: value)
+                    }
                 }
-                return nil
-            }.first,
-            territory: included?.compactMap { (item: SubscriptionPricesResponse.IncludedItem) -> Territory? in
-                if case let .territory(value) = item {
-                    return .init(schema: value)
-                }
-                return nil
-            }.first
-        )
+            }
+
+            self.included = .init(
+                subscriptionPricePoint: subscriptionPricePoint,
+                territory: territory
+            )
+        } else {
+            self.included
+                = nil
+        }
     }
 
     public struct Relationships: Sendable {
@@ -49,5 +60,11 @@ public struct SubscriptionPrice: Sendable, Identifiable {
     public struct Included: Sendable {
         public let subscriptionPricePoint: SubscriptionPricePoint?
         public let territory: Territory?
+    }
+}
+
+extension SubscriptionPrice {
+    static func from(response: AppStoreAPI.SubscriptionPricesResponse) -> [SubscriptionPrice] {
+        response.data.compactMap { SubscriptionPrice(schema: $0, included: response.included) }
     }
 }

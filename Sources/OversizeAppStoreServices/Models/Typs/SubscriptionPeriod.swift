@@ -12,9 +12,9 @@ public enum SubscriptionPeriod: String, CaseIterable, Codable, Sendable, Identif
     case threeMonths = "THREE_MONTHS"
     case sixMonths = "SIX_MONTHS"
     case oneYear = "ONE_YEAR"
-    
+
     public var id: String {
-        return rawValue
+        rawValue
     }
 
     public var displayName: String {
