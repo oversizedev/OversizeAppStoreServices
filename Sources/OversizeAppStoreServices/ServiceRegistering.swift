@@ -14,8 +14,8 @@ public extension Container {
         self { InAppPurchasesService() }
     }
 
-    var subscribtionsService: Factory<SubscribtionsService> {
-        self { SubscribtionsService() }
+    var subscriptionsService: Factory<SubscriptionsService> {
+        self { SubscriptionsService() }
     }
 
     var certificateService: Factory<CertificateService> {

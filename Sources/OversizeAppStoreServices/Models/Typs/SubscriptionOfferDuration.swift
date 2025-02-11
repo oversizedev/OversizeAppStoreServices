@@ -14,4 +14,17 @@ public enum SubscriptionOfferDuration: String, CaseIterable, Codable, Sendable {
     case threeMonths = "THREE_MONTHS"
     case sixMonths = "SIX_MONTHS"
     case oneYear = "ONE_YEAR"
+
+    public var displayName: String {
+        switch self {
+        case .threeDays: "3 Days"
+        case .oneWeek: "1 Week"
+        case .twoWeeks: "2 Weeks"
+        case .oneMonth: "1 Month"
+        case .twoMonths: "2 Months"
+        case .threeMonths: "3 Months"
+        case .sixMonths: "6 Months"
+        case .oneYear: "1 Year"
+        }
+    }
 }

@@ -5,6 +5,7 @@
 
 import AppStoreAPI
 import Foundation
+import SwiftUI
 
 public struct SubscriptionLocalization: Codable, Equatable, Identifiable, Sendable {
     public let id: String
@@ -32,5 +33,25 @@ public struct SubscriptionLocalization: Codable, Equatable, Identifiable, Sendab
         case waitingForReview = "WAITING_FOR_REVIEW"
         case approved = "APPROVED"
         case rejected = "REJECTED"
+
+        // Computed property for display name
+        public var displayName: String {
+            switch self {
+            case .prepareForSubmission: "Prepare for Submission"
+            case .waitingForReview: "Waiting for Review"
+            case .approved: "Approved"
+            case .rejected: "Rejected"
+            }
+        }
+
+        // Computed property for status color
+        public var statusColor: Color {
+            switch self {
+            case .prepareForSubmission: .gray
+            case .waitingForReview: .yellow
+            case .approved: .green
+            case .rejected: .red
+            }
+        }
     }
 }

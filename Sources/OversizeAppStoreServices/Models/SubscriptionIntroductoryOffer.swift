@@ -9,8 +9,8 @@ import OversizeCore
 
 public struct SubscriptionIntroductoryOffer: Sendable, Identifiable {
     public let id: String
-    public let startDate: String?
-    public let endDate: String?
+    public let startDate: Date?
+    public let endDate: Date?
     public let duration: SubscriptionOfferDuration?
     public let offerMode: SubscriptionOfferMode?
     public let numberOfPeriods: Int?
@@ -18,12 +18,13 @@ public struct SubscriptionIntroductoryOffer: Sendable, Identifiable {
     public let relationships: Relationships?
     public let included: Included?
 
-    public init?(schema: AppStoreAPI.SubscriptionIntroductoryOffer, included: [SubscriptionIntroductoryOfferResponse.IncludedItem]? = nil) {
+    public init?(schema: AppStoreAPI.SubscriptionIntroductoryOffer, included: [SubscriptionIntroductoryOffersResponse.IncludedItem]? = nil) {
         guard let attributes = schema.attributes else { return nil }
 
         id = schema.id
-        startDate = attributes.startDate
-        endDate = attributes.endDate ?? ""
+
+        startDate = attributes.startDate.valueOrEmpty.toDate()
+        endDate = attributes.endDate.valueOrEmpty.toDate()
         duration = .init(rawValue: attributes.duration?.rawValue ?? "")
         offerMode = .init(rawValue: attributes.offerMode?.rawValue ?? "")
         numberOfPeriods = attributes.numberOfPeriods
@@ -80,5 +81,11 @@ public struct SubscriptionIntroductoryOffer: Sendable, Identifiable {
             self.territory = territory
             self.subscriptionPricePoint = subscriptionPricePoint
         }
+    }
+}
+
+extension SubscriptionIntroductoryOffer {
+    static func from(response: AppStoreAPI.SubscriptionIntroductoryOffersResponse) -> [SubscriptionIntroductoryOffer] {
+        response.data.compactMap { SubscriptionIntroductoryOffer(schema: $0, included: response.included) }
     }
 }

@@ -1,6 +1,6 @@
 //
 // Copyright © 2025 Alexander Romanov
-// SubscribtionsService.swift, created on 12.01.2025
+// subscriptionsService.swift, created on 12.01.2025
 //
 
 import AppStoreAPI
@@ -9,7 +9,7 @@ import Factory
 import Foundation
 import OversizeModels
 
-public actor SubscribtionsService {
+public actor SubscriptionsService {
     private let client: AppStoreConnectClient?
     @Injected(\.cacheService) private var cacheService: CacheService
 
@@ -78,7 +78,7 @@ public actor SubscribtionsService {
             )
             return try await client.send(request)
         }.flatMap {
-            guard let build: Subscription = .init(schema: $0.data) else {
+            guard let build: Subscription = .init(schema: $0.data, included: $0.included) else {
                 return .failure(.network(type: .decode))
             }
             return .success(build)
@@ -162,7 +162,77 @@ public actor SubscribtionsService {
             return handleRequestFailure(error: error, replaces: [:])
         }
     }
-    
+
+    public func fetchSubscriptionIntroductoryOffers(
+        subscriptionId: String,
+        filterTerritory: [Territory]? = nil,
+        force: Bool = false
+    ) async -> Result<[SubscriptionIntroductoryOffer], AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+
+        var filterTerritoryIds: [String]? = nil
+        if let filterTerritory {
+            filterTerritoryIds = filterTerritory.compactMap { $0.id }
+        }
+
+        return await cacheService.fetchWithCache(key: "fetchSubscriptionIntroductoryOffers\(subscriptionId)\(filterTerritoryIds?.joined(separator: "-"))", force: force) {
+            let request = Resources.v1.subscriptions.id(subscriptionId).introductoryOffers.get(
+                filterTerritory: filterTerritoryIds,
+                limit: 200,
+                include: [
+                    .subscription,
+                    .subscriptionPricePoint,
+                    .territory,
+                ]
+            )
+
+            return try await client.send(request)
+        }.map { SubscriptionIntroductoryOffer.from(response: $0) }
+    }
+
+    public func fetchSubscriptionAvailability(
+        subscriptionId: String,
+        force: Bool = false
+    ) async -> Result<SubscriptionAvailability, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        return await cacheService.fetchWithCache(key: "fetchSubscriptionAvailability\(subscriptionId)", force: force) {
+            let request = Resources.v1.subscriptions.id(subscriptionId).subscriptionAvailability.get(
+                limitAvailableTerritories: 50
+            )
+            return try await client.send(request)
+        }.flatMap {
+            guard let availability = SubscriptionAvailability(schema: $0.data, included: $0.included) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(availability)
+        }
+    }
+
+    public func fetchSubscriptionPrices(
+        subscriptionId: String,
+        filterTerritory: [Territory]? = nil,
+        force: Bool = false
+    ) async -> Result<[SubscriptionPrice], AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+
+        var filterTerritoryIds: [String]? = nil
+        if let filterTerritory {
+            filterTerritoryIds = filterTerritory.compactMap { $0.id }
+        }
+
+        return await cacheService.fetchWithCache(key: "fetchSubscriptionPrices\(subscriptionId)\(filterTerritoryIds?.joined(separator: "-"))", force: force) {
+            let request = Resources.v1.subscriptions.id(subscriptionId).prices.get(
+                filterTerritory: filterTerritoryIds,
+                limit: 200,
+                include: [
+                    .territory,
+                    .subscriptionPricePoint,
+                ]
+            )
+            return try await client.send(request)
+        }.map { SubscriptionPrice.from(response: $0) }
+    }
+
     public func patchSubscription(
         subscriptionsId: String,
         name: String? = nil,
@@ -208,44 +278,16 @@ public actor SubscribtionsService {
         }
     }
 
-    public func fetchSubscriptionPrices(
-        subscriptionId: String,
-        filterTerritory: [Territory]? = nil,
+    public func fetchSubscriptionAvailabilitiesAvailableTerritories(
+        subscriptionAvailabilitiyId: String,
         force: Bool = false
-    ) async -> Result<[SubscriptionPrice], AppError> {
+    ) async -> Result<[Territory], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
-
-        var filterTerritoryIds: [String]? = nil
-        if let filterTerritory {
-            filterTerritoryIds = filterTerritory.compactMap { $0.id }
-        }
-
-        return await cacheService.fetchWithCache(key: "fetchSubscriptionPrices\(subscriptionId)\(filterTerritoryIds ?? [])", force: force) {
-            let request = Resources.v1.subscriptions.id(subscriptionId).prices.get(
-                filterTerritory: filterTerritoryIds,
-                limit: 200,
-                include: [.territory, .subscriptionPricePoint]
-            )
-            return try await client.send(request)
+        return await cacheService.fetchWithCache(key: "fetchSubscriptionAvailabilitiesAvailableTerritories\(subscriptionAvailabilitiyId)", force: force) {
+            let request = Resources.v1.subscriptionAvailabilities.id(subscriptionAvailabilitiyId).availableTerritories.get(limit: 200)
+            return try await client.send(request).data
         }.map { data in
-            data.data.compactMap { .init(schema: $0, included: data.included) }
-        }
-    }
-
-    // MARK: - Subscription Promotional Offers
-
-    public func fetchSubscriptionPromotionalOffers(
-        subscriptionId: String,
-        force: Bool = false
-    ) async -> Result<[SubscriptionPromotionalOffer], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
-        return await cacheService.fetchWithCache(key: "fetchSubscriptionPromotionalOffers\(subscriptionId)", force: force) {
-            let request = Resources.v1.subscriptions.id(subscriptionId).promotionalOffers.get(
-                include: [.prices, .subscription]
-            )
-            return try await client.send(request)
-        }.map { data in
-            data.data.compactMap { .init(schema: $0 /* , included: data.included */ ) }
+            data.compactMap { .init(schema: $0) }
         }
     }
 
@@ -288,8 +330,8 @@ public actor SubscribtionsService {
         }
     }
 
-    // MARK: - Subscription Localizations
-
+//    // MARK: - Subscription Localizations
+//
     public func createSubscriptionLocalization(
         subscriptionId: String,
         name: String,
@@ -323,150 +365,9 @@ public actor SubscribtionsService {
             return handleRequestFailure(error: error)
         }
     }
-
-    // MARK: - Subscription Availability
-
-    public func fetchSubscriptionAvailability(
-        subscriptionId: String,
-        force: Bool = false
-    ) async -> Result<SubscriptionAvailability, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
-        return await cacheService.fetchWithCache(key: "fetchSubscriptionAvailability\(subscriptionId)", force: force) {
-            let request = Resources.v1.subscriptions.id(subscriptionId).subscriptionAvailability.get(
-                include: [.availableTerritories]
-            )
-            return try await client.send(request)
-        }.flatMap {
-            guard let availability = SubscriptionAvailability(schema: $0.data, included: $0.included) else {
-                return .failure(.network(type: .decode))
-            }
-            return .success(availability)
-        }
-    }
-
-    // MARK: - Subscription Images
-
-    public func uploadSubscriptionImage(
-        subscriptionId: String,
-        fileSize: Int,
-        fileName: String,
-        fileContent _: Data
-    ) async -> Result<SubscriptionImage, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
-
-        let requestData = SubscriptionImageCreateRequest.Data(
-            type: .subscriptionImages,
-            attributes: .init(
-                fileSize: fileSize,
-                fileName: fileName
-            ),
-            relationships: .init(
-                subscription: .init(
-                    data: .init(type: .subscriptions, id: subscriptionId)
-                )
-            )
-        )
-
-        let request = Resources.v1.subscriptionImages.post(.init(data: requestData))
-        do {
-            let response = try await client.send(request)
-            guard let image = SubscriptionImage(schema: response.data) else {
-                return .failure(.network(type: .decode))
-            }
-
-            // Upload the actual image content
-            if let uploadOperations = response.data.attributes?.uploadOperations {
-                for operation in uploadOperations {
-                    // Implement upload logic here
-                    // You might need to create a separate upload method
-                }
-            }
-
-            return .success(image)
-        } catch {
-            return handleRequestFailure(error: error)
-        }
-    }
-
-    // MARK: - Review Screenshot
-
-//    public func uploadReviewScreenshot(
-//        subscriptionId: String,
-//        fileSize: Int,
-//        fileName: String,
-//        fileContent: Data
-//    ) async -> Result<ReviewScreenshot, AppError> {
-//        guard let client else { return .failure(.network(type: .unauthorized)) }
-//
-//        let requestData = ReviewScreenshotCreateRequest.Data(
-//            type: .reviewScreenshots,
-//            attributes: .init(
-//                fileSize: fileSize,
-//                fileName: fileName
-//            ),
-//            relationships: .init(
-//                subscription: .init(
-//                    data: .init(type: .subscriptions, id: subscriptionId)
-//                )
-//            )
-//        )
-//
-//        let request = Resources.v1.reviewScreenshots.post(.init(data: requestData))
-//        do {
-//            let response = try await client.send(request)
-//            guard let screenshot = ReviewScreenshot(schema: response.data) else {
-//                return .failure(.network(type: .decode))
-//            }
-//
-//            // Upload the actual screenshot content
-//            if let uploadOperations = response.data.attributes?.uploadOperations {
-//                for operation in uploadOperations {
-//                    // Implement upload logic here
-//                    // You might need to create a separate upload method
-//                }
-//            }
-//
-//            return .success(screenshot)
-//        } catch {
-//            return handleRequestFailure(error: error)
-//        }
-//    }
-
-    //    public func updateSubscriptionAvailability(
-    //        subscriptionId: String,
-    //        isAvailableInNewTerritories: Bool,
-    //        availableTerritories: [Territory]
-    //    ) async -> Result<SubscriptionAvailability, AppError> {
-    //        guard let client else { return .failure(.network(type: .unauthorized)) }
-    //
-    //        let requestData = SubscriptionAvailabilityUpdateRequest.Data( // Cannot find 'SubscriptionAvailabilityUpdateRequest' in scope
-    //            type: .subscriptionAvailabilities,
-    //            attributes: .init(
-    //                isAvailableInNewTerritories: isAvailableInNewTerritories
-    //            ),
-    //            relationships: .init(
-    //                availableTerritories: .init(
-    //                    data: availableTerritories.map {
-    //                        .init(type: .territories, id: $0.id)
-    //                    }
-    //                )
-    //            )
-    //        )
-    //
-    //        let request = Resources.v1.subscriptions.id(subscriptionId).subscriptionAvailability.patch(.init(data: requestData)) // Value of type 'Resources.V1.Subscriptions.WithID.SubscriptionAvailability' has no member 'patch'
-    //        do {
-    //            let data = try await client.send(request).data
-    //            guard let availability = SubscriptionAvailability(schema: data) else {
-    //                return .failure(.network(type: .decode))
-    //            }
-    //            return .success(availability)
-    //        } catch {
-    //            return handleRequestFailure(error: error)
-    //        }
-    //    }
 }
 
-extension SubscribtionsService {
+extension SubscriptionsService {
     func handleRequestFailure<T>(error: Error, replaces: [String: String] = [:]) -> Result<T, AppError> {
         if let responseError = error as? ResponseError {
             switch responseError {
