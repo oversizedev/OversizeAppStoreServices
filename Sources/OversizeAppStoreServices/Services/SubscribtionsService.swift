@@ -163,6 +163,74 @@ public actor SubscriptionsService {
         }
     }
 
+    public func fetchSubscriptionPricePointsEqualizations(
+        subscriptionPricePointId: String,
+        force: Bool = false
+    ) async -> Result<[SubscriptionPricePoint], AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        return await cacheService.fetchWithCache(key: "fetchSubscriptionPricePointsEqualizations\(subscriptionPricePointId)", force: force) {
+            let request = Resources.v1.subscriptionPricePoints.id(subscriptionPricePointId).equalizations.get(limit: 200, include: [.territory])
+            return try await client.send(request)
+        }.map { data in
+            data.data.compactMap { .init(schema: $0, included: data.included) }
+        }
+    }
+
+    public func fetchSubscriptionPricePoints(
+        subscriptionId: String,
+        filterTerritory: [Territory]? = nil,
+        force: Bool = false
+    ) async -> Result<[SubscriptionPricePoint], AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+
+        var filterTerritorIds: [String]? = nil
+        if let filterTerritory {
+            filterTerritorIds = filterTerritory.compactMap { $0.id }
+        }
+
+        return await cacheService.fetchWithCache(key: "fetchSubscriptionPricePoints\(subscriptionId)\(filterTerritorIds?.joined(separator: "-"))", force: force) {
+            let request = Resources.v1.subscriptions.id(subscriptionId).pricePoints.get(filterTerritory: filterTerritorIds, limit: 2000, include: [.territory])
+            return try await client.send(request)
+        }.map { data in
+            data.data.compactMap { .init(schema: $0, included: data.included) }
+        }
+    }
+
+    public func postSubscriptionAvailabilities(
+        subscriptionId: String,
+        isAvailableInNewTerritories: Bool,
+        availableTerritories: [Territory]
+    ) async -> Result<SubscriptionAvailability, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+
+        let requestData = SubscriptionAvailabilityCreateRequest.Data(
+            type: .subscriptionAvailabilities,
+            attributes: .init(
+                isAvailableInNewTerritories: isAvailableInNewTerritories
+            ),
+            relationships: .init(
+                subscription: .init(data: .init(type: .subscriptions, id: subscriptionId)),
+                availableTerritories: .init(
+                    data: availableTerritories.compactMap { .init(
+                        type: .territories,
+                        id: $0.id
+                    ) }
+                )
+            )
+        )
+
+        let request = Resources.v1.subscriptionAvailabilities.post(.init(data: requestData))
+        do {
+            let data = try await client.send(request).data
+            guard let subscriptionAvailability = SubscriptionAvailability(schema: data) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(subscriptionAvailability)
+        } catch {
+            return handleRequestFailure(error: error, replaces: [:])
+        }
+    }
+
     public func fetchSubscriptionIntroductoryOffers(
         subscriptionId: String,
         filterTerritory: [Territory]? = nil,
@@ -291,6 +359,19 @@ public actor SubscriptionsService {
         }
     }
 
+    public func fetchSubscriptionPromotionalOfferPrices(
+        subscriptionPromotionalOfferId: String,
+        force: Bool = false
+    ) async -> Result<[SubscriptionPromotionalOfferPrice], AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        return await cacheService.fetchWithCache(key: "fetchSubscriptionPromotionalOfferPrices\(subscriptionPromotionalOfferId)", force: force) {
+            let request = Resources.v1.subscriptionPromotionalOffers.id(subscriptionPromotionalOfferId).prices.get()
+            return try await client.send(request)
+        }.map { data in
+            data.data.compactMap { .init(schema: $0, included: data.included) }
+        }
+    }
+
     public func createPromotionalOffer(
         subscriptionId: String,
         name: String,
@@ -302,13 +383,16 @@ public actor SubscriptionsService {
     ) async -> Result<SubscriptionPromotionalOffer, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
+        guard let duration: AppStoreAPI.SubscriptionOfferDuration = .init(rawValue: duration.rawValue),
+              let offerMode: AppStoreAPI.SubscriptionOfferMode = .init(rawValue: offerMode.rawValue) else { return .failure(.network(type: .invalidURL)) }
+
         let requestData = SubscriptionPromotionalOfferCreateRequest.Data(
             type: .subscriptionPromotionalOffers,
             attributes: .init(
                 name: name,
                 offerCode: offerCode,
-                duration: .init(rawValue: duration.rawValue) ?? .oneMonth,
-                offerMode: .init(rawValue: offerMode.rawValue) ?? .freeTrial,
+                duration: duration,
+                offerMode: offerMode,
                 numberOfPeriods: numberOfPeriods
             ),
             relationships: .init(
@@ -363,6 +447,57 @@ public actor SubscriptionsService {
             return .success(localization)
         } catch {
             return handleRequestFailure(error: error)
+        }
+    }
+
+    public func patchSubscriptionPrice(
+        subscriptionsId: String,
+        pricePountId: String,
+        prices: [SubscriptionPricePoint]
+    ) async -> Result<Subscription, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+
+        let relationships = SubscriptionUpdateRequest.Data.Relationships(
+            prices: .init(data: prices.map { .init(type: .subscriptionPrices, id: $0.id) })
+        )
+
+        let requestData = SubscriptionUpdateRequest.Data(
+            type: .subscriptions,
+            id: subscriptionsId,
+            relationships: relationships
+        )
+
+        let includedItems: [SubscriptionUpdateRequest.IncludedItem] = prices.map { price in
+            let pricePointData = SubscriptionPriceInlineCreate.Relationships.SubscriptionPricePoint.Data(
+                type: .subscriptionPricePoints,
+                id: pricePountId
+            )
+
+            let relationship = SubscriptionPriceInlineCreate.Relationships(
+                subscriptionPricePoint: .init(data: pricePointData)
+            )
+
+            return .subscriptionPriceInlineCreate(
+                SubscriptionPriceInlineCreate(
+                    type: .subscriptionPrices,
+                    id: price.id,
+                    relationships: relationship
+                )
+            )
+        }
+
+        let request = Resources.v1.subscriptions.id(subscriptionsId).patch(
+            .init(data: requestData, included: includedItems)
+        )
+
+        do {
+            let data = try await client.send(request).data
+            guard let subscription = Subscription(schema: data) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(subscription)
+        } catch {
+            return handleRequestFailure(error: error, replaces: [:])
         }
     }
 }
