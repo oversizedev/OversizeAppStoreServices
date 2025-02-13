@@ -414,8 +414,6 @@ public actor SubscriptionsService {
         }
     }
 
-//    // MARK: - Subscription Localizations
-//
     public func createSubscriptionLocalization(
         subscriptionId: String,
         name: String,
@@ -481,6 +479,73 @@ public actor SubscriptionsService {
                 SubscriptionPriceInlineCreate(
                     type: .subscriptionPrices,
                     id: price.id,
+                    relationships: relationship
+                )
+            )
+        }
+
+        let request = Resources.v1.subscriptions.id(subscriptionsId).patch(
+            .init(data: requestData, included: includedItems)
+        )
+
+        do {
+            let data = try await client.send(request).data
+            guard let subscription = Subscription(schema: data) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(subscription)
+        } catch {
+            return handleRequestFailure(error: error, replaces: [:])
+        }
+    }
+
+    public func patchSubscriptionIntroductoryOffers(
+        subscriptionsId: String,
+        startDate: Date,
+        endDate: Date,
+        duration: SubscriptionOfferDuration,
+        offerMode: SubscriptionOfferMode,
+        numberOfPeriods: Int,
+        territories: [Territory]
+    ) async -> Result<Subscription, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+
+        guard let duration: AppStoreAPI.SubscriptionOfferDuration = .init(rawValue: duration.rawValue),
+              let offerMode: AppStoreAPI.SubscriptionOfferMode = .init(rawValue: offerMode.rawValue) else { return .failure(.network(type: .invalidURL)) }
+
+        let relationships = SubscriptionUpdateRequest.Data.Relationships(
+            introductoryOffers: .init(
+                data: territories.compactMap {
+                    .init(
+                        type: .subscriptionIntroductoryOffers,
+                        id: $0.id
+                    )
+                })
+        )
+
+        let requestData = SubscriptionUpdateRequest.Data(
+            type: .subscriptions,
+            id: subscriptionsId,
+            relationships: relationships
+        )
+
+        let includedItems: [SubscriptionUpdateRequest.IncludedItem] = territories.map { territory in
+
+            let attributes = SubscriptionIntroductoryOfferInlineCreate.Attributes(
+                startDate: startDate.formatted(.iso8601),
+                endDate: endDate.formatted(.iso8601),
+                duration: duration,
+                offerMode: offerMode,
+                numberOfPeriods: numberOfPeriods
+            )
+
+            let relationship = SubscriptionIntroductoryOfferInlineCreate.Relationships(
+                territory: .init(data: .init(type: .territories, id: territory.id))
+            )
+
+            return .subscriptionIntroductoryOfferInlineCreate(
+                .init(
+                    attributes: attributes,
                     relationships: relationship
                 )
             )
