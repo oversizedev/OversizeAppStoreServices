@@ -6,6 +6,7 @@
 import AppStoreAPI
 import AppStoreConnect
 import Foundation
+import OversizeAppStoreServices
 import OversizeCore
 import OversizeModels
 

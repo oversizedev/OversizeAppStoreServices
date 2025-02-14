@@ -126,7 +126,7 @@ public actor AppInfoService {
         )
 
         let request = Resources.v1.ageRatingDeclarations.id(ageRatingDeclarationId).patch(
-            .init(data: .init(type: .ageRatingDeclarations, id: ageRatingDeclarationId, attributes: requestAttributes))
+            .init(data: requestData)
         )
 
         do {

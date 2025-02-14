@@ -1,5 +1,5 @@
 //
-// Copyright © 2025 Aleksandr Romanov
+// Copyright © 2025 Alexander Romanov
 // Region.swift, created on 27.01.2025
 //
 
@@ -62,7 +62,7 @@ public enum TerritoryRegion: String, Sendable, CaseIterable, Identifiable {
              .kaz, .kgz, .mac, .npl, .tjk, .tkm, .uzb,
              // Additional Pacific territories
              .asm, .cok, .cxr, .gum, .kir, .mhl, .mnp, .ncl, .nfk, .niu,
-             .nru, .pyf, .tuv, .wlf:
+             .pyf, .tuv, .wlf:
             self = .asiaPacific
 
         default:

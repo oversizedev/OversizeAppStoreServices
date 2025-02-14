@@ -193,12 +193,13 @@ public actor AppsService {
         seedID: String? = nil
     ) async -> Result<Bool, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
+        guard let bundleIDPlatform: AppStoreAPI.BundleIDPlatform = .init(rawValue: platform.rawValue) else { return .failure(.network(type: .invalidURL)) }
 
         let requestData: BundleIDCreateRequest.Data = .init(
             type: .bundleIDs,
             attributes: .init(
                 name: name,
-                platform: platform,
+                platform: bundleIDPlatform,
                 identifier: identifier,
                 seedID: seedID
             )
@@ -206,7 +207,7 @@ public actor AppsService {
 
         let request = Resources.v1.bundleIDs.post(.init(data: requestData))
         do {
-            let data = try await client.send(request).data
+            _ = try await client.send(request).data
             return .success(true)
         } catch {
             return .failure(.network(type: .noResponse))

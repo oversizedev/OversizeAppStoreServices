@@ -37,7 +37,6 @@ public actor BuildsService {
 
     public func fetchBuildBundlesId(buildBundlesId: String, forse: Bool = false) async -> Result<[BuildBundleFileSize], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
-        let pathKey = "buildBundlesId\(buildBundlesId)"
         return await cacheService.fetchWithCache(key: "buildBundlesId\(buildBundlesId)", force: forse) {
             let request = Resources.v1.buildBundles.id(buildBundlesId).buildBundleFileSizes.get()
             return try await client.send(request).data

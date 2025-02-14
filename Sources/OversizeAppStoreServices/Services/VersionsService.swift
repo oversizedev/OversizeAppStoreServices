@@ -396,7 +396,7 @@ public actor VersionsService {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.appStoreVersionLocalizations.id(localizationId).delete
         do {
-            let data = try await client.send(request)
+            let _ = try await client.send(request)
             return .success(true)
         } catch {
             return .failure(.network(type: .noResponse))

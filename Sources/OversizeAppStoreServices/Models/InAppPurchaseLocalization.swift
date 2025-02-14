@@ -1,10 +1,10 @@
 //
-// Copyright © 2025 Aleksandr Romanov
+// Copyright © 2025 Alexander Romanov
 // InAppPurchaseLocalization.swift, created on 12.01.2025
 //
 
 import AppStoreAPI
-import AppStoreConnect
+
 import Foundation
 import SwiftUI
 

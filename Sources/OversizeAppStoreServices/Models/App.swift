@@ -4,7 +4,6 @@
 //
 
 import AppStoreAPI
-import AppStoreConnect
 import Foundation
 
 public struct App: Identifiable, Sendable {
@@ -83,6 +82,8 @@ public struct App: Identifiable, Sendable {
                     appStoreVersions.append(includedAppStoreVersion)
                 case let .build(includedBuild):
                     builds.append(includedBuild)
+                case let .prereleaseVersion(prereleaseVersion):
+                    prereleaseVersions.append(prereleaseVersion)
                 default:
                     continue
                 }
@@ -135,6 +136,8 @@ public struct App: Identifiable, Sendable {
                     appStoreVersions.append(includedAppStoreVersion)
                 case let .build(includedBuild):
                     builds.append(includedBuild)
+                case let .prereleaseVersion(prereleaseVersion):
+                    prereleaseVersions.append(prereleaseVersion)
                 default:
                     continue
                 }
