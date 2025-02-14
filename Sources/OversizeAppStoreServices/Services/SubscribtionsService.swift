@@ -501,8 +501,8 @@ public actor SubscriptionsService {
 
     public func patchSubscriptionIntroductoryOffers(
         subscriptionsId: String,
-        startDate: Date,
-        endDate: Date,
+        startDate: Date? = nil,
+        endDate: Date? = nil,
         duration: SubscriptionOfferDuration,
         offerMode: SubscriptionOfferMode,
         numberOfPeriods: Int,
@@ -511,16 +511,50 @@ public actor SubscriptionsService {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
         guard let duration: AppStoreAPI.SubscriptionOfferDuration = .init(rawValue: duration.rawValue),
-              let offerMode: AppStoreAPI.SubscriptionOfferMode = .init(rawValue: offerMode.rawValue) else { return .failure(.network(type: .invalidURL)) }
+              let offerMode: AppStoreAPI.SubscriptionOfferMode = .init(rawValue: offerMode.rawValue)
+        else {
+            return .failure(.network(type: .invalidURL))
+        }
+
+        let includedItems: [SubscriptionUpdateRequest.IncludedItem] = territories.enumerated().map { index, territory in
+            let temporaryId = "newIntroOffer-\(index)"
+
+            let attributes = SubscriptionIntroductoryOfferInlineCreate.Attributes(
+                startDate: startDate?.toString(),
+                endDate: endDate?.toString(),
+                duration: duration,
+                offerMode: offerMode,
+                numberOfPeriods: numberOfPeriods
+            )
+
+            let relationship = SubscriptionIntroductoryOfferInlineCreate.Relationships(
+                territory: .init(
+                    data: .init(
+                        type: .territories,
+                        id: territory.id
+                    )
+                )
+            )
+
+            return .subscriptionIntroductoryOfferInlineCreate(
+                .init(
+                    id: temporaryId,
+                    attributes: attributes,
+                    relationships: relationship
+                )
+            )
+        }
+
+        let introductoryOffersData = includedItems.compactMap { item -> SubscriptionUpdateRequest.Data.Relationships.IntroductoryOffers.Datum? in
+            guard case let .subscriptionIntroductoryOfferInlineCreate(offer) = item else { return nil }
+            return .init(
+                type: .subscriptionIntroductoryOffers,
+                id: offer.id ?? ""
+            )
+        }
 
         let relationships = SubscriptionUpdateRequest.Data.Relationships(
-            introductoryOffers: .init(
-                data: territories.compactMap {
-                    .init(
-                        type: .subscriptionIntroductoryOffers,
-                        id: $0.id
-                    )
-                })
+            introductoryOffers: .init(data: introductoryOffersData)
         )
 
         let requestData = SubscriptionUpdateRequest.Data(
@@ -528,28 +562,6 @@ public actor SubscriptionsService {
             id: subscriptionsId,
             relationships: relationships
         )
-
-        let includedItems: [SubscriptionUpdateRequest.IncludedItem] = territories.map { territory in
-
-            let attributes = SubscriptionIntroductoryOfferInlineCreate.Attributes(
-                startDate: startDate.formatted(.iso8601),
-                endDate: endDate.formatted(.iso8601),
-                duration: duration,
-                offerMode: offerMode,
-                numberOfPeriods: numberOfPeriods
-            )
-
-            let relationship = SubscriptionIntroductoryOfferInlineCreate.Relationships(
-                territory: .init(data: .init(type: .territories, id: territory.id))
-            )
-
-            return .subscriptionIntroductoryOfferInlineCreate(
-                .init(
-                    attributes: attributes,
-                    relationships: relationship
-                )
-            )
-        }
 
         let request = Resources.v1.subscriptions.id(subscriptionsId).patch(
             .init(data: requestData, included: includedItems)

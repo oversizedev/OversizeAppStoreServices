@@ -5,7 +5,7 @@
 
 import Foundation
 
-public enum SubscriptionOfferDuration: String, CaseIterable, Codable, Sendable {
+public enum SubscriptionOfferDuration: String, CaseIterable, Codable, Sendable, Identifiable {
     case threeDays = "THREE_DAYS"
     case oneWeek = "ONE_WEEK"
     case twoWeeks = "TWO_WEEKS"
@@ -26,5 +26,9 @@ public enum SubscriptionOfferDuration: String, CaseIterable, Codable, Sendable {
         case .sixMonths: "6 Months"
         case .oneYear: "1 Year"
         }
+    }
+
+    public var id: String {
+        rawValue
     }
 }

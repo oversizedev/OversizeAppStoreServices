@@ -5,7 +5,7 @@
 
 import Foundation
 
-public enum SubscriptionOfferMode: String, CaseIterable, Codable, Sendable {
+public enum SubscriptionOfferMode: String, CaseIterable, Codable, Sendable, Identifiable {
     case payAsYouGo = "PAY_AS_YOU_GO"
     case payUpFront = "PAY_UP_FRONT"
     case freeTrial = "FREE_TRIAL"
@@ -16,5 +16,9 @@ public enum SubscriptionOfferMode: String, CaseIterable, Codable, Sendable {
         case .payUpFront: "Pay Up Front"
         case .freeTrial: "Free Trial"
         }
+    }
+
+    public var id: String {
+        rawValue
     }
 }
