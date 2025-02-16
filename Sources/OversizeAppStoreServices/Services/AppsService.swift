@@ -38,7 +38,7 @@ public actor AppsService {
 
     public func fetchAppIncludeBuildsAndAppStoreVersions(id: String, force: Bool = false) async -> Result<App, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
-        return await cacheService.fetchWithCache(key: "fetchApp\(id)", force: force) {
+        return await cacheService.fetchWithCache(key: "fetchAppIncludeBuildsAndAppStoreVersions\(id)", force: force) {
             let request = Resources.v1.apps.id(id).get(
                 include: [
                     .builds,
