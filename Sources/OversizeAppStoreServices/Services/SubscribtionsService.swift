@@ -577,6 +577,17 @@ public actor SubscriptionsService {
             return handleRequestFailure(error: error, replaces: [:])
         }
     }
+
+    public func deleteSubscription(subscriptionsId: String) async -> Result<Bool, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        let request = Resources.v1.subscriptions.id(subscriptionsId).delete
+        do {
+            let _ = try await client.send(request)
+            return .success(true)
+        } catch {
+            return .failure(.network(type: .noResponse))
+        }
+    }
 }
 
 extension SubscriptionsService {
