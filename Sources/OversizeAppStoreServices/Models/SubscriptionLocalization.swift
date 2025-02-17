@@ -47,8 +47,7 @@ public struct SubscriptionLocalization: Codable, Equatable, Identifiable, Sendab
         // Computed property for status color
         public var statusColor: Color {
             switch self {
-            case .prepareForSubmission: .gray
-            case .waitingForReview: .yellow
+            case .waitingForReview, .prepareForSubmission: .yellow
             case .approved: .green
             case .rejected: .red
             }
