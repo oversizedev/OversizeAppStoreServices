@@ -21,6 +21,10 @@ public struct App: Identifiable, Sendable {
 
     public var included: Included?
 
+    public init?(response: AppStoreAPI.AppResponse) {
+        self.init(schema: response.data, included: response.included)
+    }
+
     public init?(schema: AppStoreAPI.App) {
         guard let attributes = schema.attributes,
               let bundleID = attributes.bundleID,
@@ -210,5 +214,25 @@ public extension App {
 
     var lastNamePath: String {
         name.components(separatedBy: [".", "-", "—"]).last ?? ""
+    }
+}
+
+extension App {
+    static func from(response: AppStoreAPI.AppsResponse) -> [App] {
+        response.data.compactMap { schema in
+            let filteredIncluded = response.included?.filter { includedItem in
+                switch includedItem {
+                case let .appStoreVersion(appStoreVersion):
+                    schema.relationships?.appStoreVersions?.data?.contains(where: { $0.id == appStoreVersion.id }) ?? false
+                case let .build(build):
+                    schema.relationships?.builds?.data?.contains(where: { $0.id == build.id }) ?? false
+                case let .prereleaseVersion(prereleaseVersion):
+                    schema.relationships?.preReleaseVersions?.data?.contains(where: { $0.id == prereleaseVersion.id }) ?? false
+                default:
+                    false
+                }
+            }
+            return App(schema: schema, included: filteredIncluded)
+        }
     }
 }

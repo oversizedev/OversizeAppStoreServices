@@ -35,14 +35,19 @@ public actor VersionsService {
         }
     }
 
-    public func fetchAppVersions(appId: String) async -> Result<[AppStoreVersion], AppError> {
+    public func fetchAppVersions(appId: String, platform: Platform? = nil, force: Bool = false) async -> Result<[AppStoreVersion], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
-        let request = Resources.v1.apps.id(appId).appStoreVersions.get()
-        do {
-            let data = try await client.send(request).data
-            return .success(data.compactMap { .init(schema: $0) })
-        } catch {
-            return .failure(.network(type: .noResponse))
+        let filterPlatforms: [Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform]? = if let platform, let filteredPlatform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform = .init(rawValue: platform.rawValue) {
+            [filteredPlatform]
+        } else {
+            nil
+        }
+        return await cacheService.fetchWithCache(key: "fetchAppVersions\(appId)\(platform?.rawValue ?? "")", force: force) {
+            let request = Resources.v1.apps.id(appId).appStoreVersions.get(filterPlatform: filterPlatforms)
+            let response = try await client.send(request)
+            return response.data
+        }.map { data in
+            data.compactMap { .init(schema: $0) }
         }
     }
 
