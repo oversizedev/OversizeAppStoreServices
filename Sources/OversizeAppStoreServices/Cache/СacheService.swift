@@ -54,7 +54,17 @@ public actor CacheService {
     }
 
     public func clearAll() async {
-        try? FileManager.default.removeItem(at: cacheDirectory)
+        do {
+            if FileManager.default.fileExists(atPath: cacheDirectory.path) {
+                try FileManager.default.removeItem(at: cacheDirectory)
+            }
+
+            try FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
+
+            logData("Cache cleared successfully")
+        } catch {
+            logError("Failed to clear cache: \(error)")
+        }
     }
 
     private func isCacheValid(for fileURL: URL) async -> Bool {
