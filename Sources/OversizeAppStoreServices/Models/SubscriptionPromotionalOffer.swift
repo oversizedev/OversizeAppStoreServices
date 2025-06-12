@@ -32,7 +32,7 @@ public struct SubscriptionPromotionalOffer: Sendable, Identifiable {
 
         relationships = Relationships(
             subscriptionId: schema.relationships?.subscription?.data?.id,
-            pricesIds: schema.relationships?.prices?.data?.map { $0.id }
+            pricesIds: schema.relationships?.prices?.data?.map { $0.id },
         )
 
         self.included = .init(
@@ -43,7 +43,7 @@ public struct SubscriptionPromotionalOffer: Sendable, Identifiable {
             subscriptionPromotionalOfferPrices: included?.compactMap { (item: SubscriptionPromotionalOfferResponse.IncludedItem) -> SubscriptionPromotionalOfferPrice? in
                 if case let .subscriptionPromotionalOfferPrice(value) = item { return .init(schema: value) }
                 return nil
-            }
+            },
         )
     }
 

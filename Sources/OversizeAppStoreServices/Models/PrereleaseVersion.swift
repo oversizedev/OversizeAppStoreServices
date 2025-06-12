@@ -23,7 +23,7 @@ public struct PrereleaseVersion: Sendable {
         version = schema.attributes?.version ?? ""
 
         included = .init(
-            builds: builds.compactMap { .init(schema: $0) }
+            builds: builds.compactMap { .init(schema: $0) },
         )
     }
 

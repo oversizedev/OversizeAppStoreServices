@@ -18,7 +18,7 @@ public struct InAppPurchasePriceSchedule: Identifiable, Sendable {
         relationships = .init(
             baseTerritoryId: schema.relationships?.baseTerritory?.data?.id,
             manualPriceIds: schema.relationships?.manualPrices?.data?.map { $0.id },
-            automaticPriceIds: schema.relationships?.automaticPrices?.data?.map { $0.id }
+            automaticPriceIds: schema.relationships?.automaticPrices?.data?.map { $0.id },
         )
 
         self.included = .init(
@@ -31,7 +31,7 @@ public struct InAppPurchasePriceSchedule: Identifiable, Sendable {
             inAppPurchasePrices: included?.compactMap {
                 if case let .inAppPurchasePrice(value) = $0 { return .init(schema: value) }
                 return nil
-            }
+            },
         )
     }
 

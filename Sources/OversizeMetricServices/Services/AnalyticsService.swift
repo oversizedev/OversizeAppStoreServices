@@ -35,7 +35,7 @@ public actor AnalyticsService {
     public func fetchAppAnalyticsReportRequestsIncludeReports(appId: String) async -> Result<[AnalyticsReportRequest], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.apps.id(appId).analyticsReportRequests.get(
-            include: [.reports]
+            include: [.reports],
         )
         do {
             let result = try await client.send(request)
@@ -94,20 +94,20 @@ public actor AnalyticsService {
         }
 
         let requestAttributes: AnalyticsReportRequestCreateRequest.Data.Attributes = .init(
-            accessType: .ongoing
+            accessType: .ongoing,
         )
 
         let requestRelationships: AnalyticsReportRequestCreateRequest.Data.Relationships = .init(
             app: .init(data: .init(
                 type: .apps,
-                id: appId
-            ))
+                id: appId,
+            )),
         )
 
         let requestData: AnalyticsReportRequestCreateRequest.Data = .init(
             type: .analyticsReportRequests,
             attributes: requestAttributes,
-            relationships: requestRelationships
+            relationships: requestRelationships,
         )
 
         let request = Resources.v1.analyticsReportRequests.post(.init(data: requestData))

@@ -3,7 +3,7 @@
 // ServiceRegistering.swift, created on 13.07.2024
 //
 
-import Factory
+import FactoryKit
 
 public extension Container {
     var appsService: Factory<AppsService> {

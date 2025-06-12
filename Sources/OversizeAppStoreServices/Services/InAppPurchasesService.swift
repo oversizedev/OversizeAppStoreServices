@@ -5,7 +5,7 @@
 
 import AppStoreAPI
 import AppStoreConnect
-import Factory
+import FactoryKit
 import Foundation
 import OversizeModels
 
@@ -101,7 +101,7 @@ public actor InAppPurchasesService {
     public func fetchPricePoints(
         inAppPurchaseId: String,
         filterTerritory: [Territory]? = nil,
-        force: Bool = false
+        force: Bool = false,
     ) async -> Result<[InAppPurchasePricePoint], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -120,13 +120,13 @@ public actor InAppPurchasesService {
 
     public func fetchInAppPurchaseAvailabilityIncludedAvailableTerritories(
         inAppPurchaseId: String,
-        force: Bool = false
+        force: Bool = false,
     ) async -> Result<InAppPurchaseAvailability, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         return await cacheService.fetchWithCache(key: "fetchInAppPurchaseAvailabilityIncludedAvailableTerritories\(inAppPurchaseId)", force: force) {
             let request = Resources.v2.inAppPurchases.id(inAppPurchaseId).inAppPurchaseAvailability.get(
                 include: [.availableTerritories],
-                limitAvailableTerritories: 50
+                limitAvailableTerritories: 50,
             )
             return try await client.send(request)
         }.flatMap {
@@ -139,7 +139,7 @@ public actor InAppPurchasesService {
 
     public func fetchInAppPurchaseAvailability(
         inAppPurchaseId: String,
-        force: Bool = false
+        force: Bool = false,
     ) async -> Result<InAppPurchaseAvailability, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         return await cacheService.fetchWithCache(key: "fetchInAppPurchaseAvailability\(inAppPurchaseId)", force: force) {
@@ -155,7 +155,7 @@ public actor InAppPurchasesService {
 
     public func fetchInAppPurchaseAvailabilitiesAvailableTerritories(
         inAppPurchaseAvailabilityId: String,
-        force: Bool = false
+        force: Bool = false,
     ) async -> Result<[Territory], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         return await cacheService.fetchWithCache(key: "fetchInAppPurchaseAvailabilityIncludedAvailableTerritories\(inAppPurchaseAvailabilityId)", force: force) {
@@ -168,7 +168,7 @@ public actor InAppPurchasesService {
 
     public func fetchAppPriceScheduleBaseTerritory(
         appPriceSchedulesId: String,
-        force: Bool = false
+        force: Bool = false,
     ) async -> Result<Territory, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         return await cacheService.fetchWithCache(key: "fetchAppPriceScheduleBaseTerritory\(appPriceSchedulesId)", force: force) {
@@ -184,7 +184,7 @@ public actor InAppPurchasesService {
 
     public func fetchInAppPurchasePriceSchedulesBaseTerritory(
         inAppPurchaseId: String,
-        force: Bool = false
+        force: Bool = false,
     ) async -> Result<Territory, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         return await cacheService.fetchWithCache(key: "fetchInAppPurchasePriceSchedulesBaseTerritory\(inAppPurchaseId)", force: force) {
@@ -200,14 +200,14 @@ public actor InAppPurchasesService {
 
     public func fetchInAppPurchasePriceSchedule(
         inAppPurchasePriceSchedulesId: String,
-        force: Bool = false
+        force: Bool = false,
     ) async -> Result<InAppPurchasePriceSchedule, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         return await cacheService.fetchWithCache(key: "fetchInAppPurchasePriceSchedule\(inAppPurchasePriceSchedulesId)", force: force) {
             let request = Resources.v1.inAppPurchasePriceSchedules.id(inAppPurchasePriceSchedulesId).get(
                 include: [.automaticPrices, .manualPrices, .baseTerritory],
                 limitAutomaticPrices: 50,
-                limitManualPrices: 50
+                limitManualPrices: 50,
             )
             return try await client.send(request)
         }.flatMap {
@@ -220,13 +220,13 @@ public actor InAppPurchasesService {
 
     public func fetchInAppPurchasePriceSchedule(
         inAppPurchaseId: String,
-        force: Bool = false
+        force: Bool = false,
     ) async -> Result<InAppPurchasePriceSchedule, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         return await cacheService.fetchWithCache(key: "fetchInAppPurchasesId\(inAppPurchaseId)InAppPurchasePriceSchedule", force: force) {
             let request = Resources.v2.inAppPurchases.id(inAppPurchaseId).iapPriceSchedule.get(
                 include: [.automaticPrices, .manualPrices, .baseTerritory],
-                limitManualPrices: 50, limitAutomaticPrices: 50
+                limitManualPrices: 50, limitAutomaticPrices: 50,
             )
             return try await client.send(request)
         }.flatMap {
@@ -240,7 +240,7 @@ public actor InAppPurchasesService {
     public func fetchInAppPurchasePriceScheduleAutomaticPrices(
         inAppPurchasePriceSchedulesId: String,
         filterTerritory: [Territory]? = nil,
-        force: Bool = false
+        force: Bool = false,
     ) async -> Result<[InAppPurchasePrice], AppError> {
         let filterTerritoryIds: [String]? = filterTerritory?.compactMap { $0.id }
         guard let client else { return .failure(.network(type: .unauthorized)) }
@@ -248,7 +248,7 @@ public actor InAppPurchasesService {
             let request = Resources.v1.inAppPurchasePriceSchedules.id(inAppPurchasePriceSchedulesId).automaticPrices.get(
                 filterTerritory: filterTerritoryIds,
                 limit: 200,
-                include: [.inAppPurchasePricePoint, .territory]
+                include: [.inAppPurchasePricePoint, .territory],
             )
             return try await client.send(request)
         }.map { data in
@@ -259,7 +259,7 @@ public actor InAppPurchasesService {
     public func fetchInAppPurchasePriceScheduleManualPrices(
         inAppPurchasePriceSchedulesId: String,
         filterTerritory: [Territory]? = nil,
-        force: Bool = false
+        force: Bool = false,
     ) async -> Result<[InAppPurchasePrice], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         let filterTerritoryIds: [String]? = filterTerritory?.compactMap { $0.id }
@@ -267,7 +267,7 @@ public actor InAppPurchasesService {
             let request = Resources.v1.inAppPurchasePriceSchedules.id(inAppPurchasePriceSchedulesId).manualPrices.get(
                 filterTerritory: filterTerritoryIds,
                 limit: 200,
-                include: [.inAppPurchasePricePoint, .territory]
+                include: [.inAppPurchasePricePoint, .territory],
             )
             return try await client.send(request)
         }.map { data in
@@ -277,7 +277,7 @@ public actor InAppPurchasesService {
 
     public func inAppPurchasePricePointsEqualizations(
         inAppPurchasePricePointId: String,
-        force: Bool = false
+        force: Bool = false,
     ) async -> Result<[InAppPurchasePricePoint], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         return await cacheService.fetchWithCache(key: "inAppPurchasePricePointsEqualizations\(inAppPurchasePricePointId)", force: force) {
@@ -292,7 +292,7 @@ public actor InAppPurchasesService {
         appId: String,
         name: String,
         productID: String,
-        inAppPurchaseType: InAppPurchaseType
+        inAppPurchaseType: InAppPurchaseType,
     ) async -> Result<InAppPurchaseV2, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         guard let inAppPurchaseType: AppStoreAPI.InAppPurchaseType = .init(rawValue: inAppPurchaseType.rawValue) else { return .failure(.network(type: .unauthorized)) }
@@ -302,16 +302,16 @@ public actor InAppPurchasesService {
             attributes: .init(
                 name: name,
                 productID: productID,
-                inAppPurchaseType: inAppPurchaseType
+                inAppPurchaseType: inAppPurchaseType,
             ),
             relationships: .init(
                 app: .init(
                     data: .init(
                         type: .apps,
-                        id: appId
-                    )
-                )
-            )
+                        id: appId,
+                    ),
+                ),
+            ),
         )
         let request = Resources.v2.inAppPurchases.post(.init(data: requestData))
         do {
@@ -329,20 +329,20 @@ public actor InAppPurchasesService {
         inAppPurchasesId: String,
         name: String? = nil,
         reviewNote: String? = nil,
-        isFamilySharable: Bool? = nil
+        isFamilySharable: Bool? = nil,
     ) async -> Result<InAppPurchaseV2, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
         let requestAttributes: InAppPurchaseV2UpdateRequest.Data.Attributes = .init(
             name: name,
             reviewNote: reviewNote,
-            isFamilySharable: isFamilySharable
+            isFamilySharable: isFamilySharable,
         )
 
         let requestData: InAppPurchaseV2UpdateRequest.Data = .init(
             type: .inAppPurchases,
             id: inAppPurchasesId,
-            attributes: requestAttributes
+            attributes: requestAttributes,
         )
         let request = Resources.v2.inAppPurchases.id(inAppPurchasesId).patch(.init(data: requestData))
         do {
@@ -360,7 +360,7 @@ public actor InAppPurchasesService {
         inAppPurchaseV2Id: String,
         name: String,
         description: String?,
-        locale: AppStoreLanguage
+        locale: AppStoreLanguage,
     ) async -> Result<InAppPurchaseLocalization, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -369,12 +369,12 @@ public actor InAppPurchasesService {
             attributes: .init(
                 name: name,
                 locale: locale.rawValue,
-                description: description
+                description: description,
             ),
             relationships: .init(inAppPurchaseV2: .init(data: .init(
                 type: .inAppPurchases,
-                id: inAppPurchaseV2Id
-            )))
+                id: inAppPurchaseV2Id,
+            ))),
         )
         let request = Resources.v1.inAppPurchaseLocalizations.post(.init(data: requestData))
         do {
@@ -391,24 +391,24 @@ public actor InAppPurchasesService {
     public func postInAppPurchaseAvailabilities(
         inAppPurchaseV2Id: String,
         isAvailableInNewTerritories: Bool,
-        availableTerritories: [Territory]
+        availableTerritories: [Territory],
     ) async -> Result<InAppPurchaseAvailability, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
         let requestData: InAppPurchaseAvailabilityCreateRequest.Data = .init(
             type: .inAppPurchaseAvailabilities,
             attributes: .init(
-                isAvailableInNewTerritories: isAvailableInNewTerritories
+                isAvailableInNewTerritories: isAvailableInNewTerritories,
             ),
             relationships: .init(
                 inAppPurchase: .init(data: .init(type: .inAppPurchases, id: inAppPurchaseV2Id)),
                 availableTerritories: .init(
                     data: availableTerritories.compactMap { .init(
                         type: .territories,
-                        id: $0.id
-                    ) }
-                )
-            )
+                        id: $0.id,
+                    ) },
+                ),
+            ),
         )
 
         let request = Resources.v1.inAppPurchaseAvailabilities.post(.init(data: requestData))
@@ -426,7 +426,7 @@ public actor InAppPurchasesService {
     public func postInAppPurchaseLocalization(
         inAppPurchaseV2Id: String,
         territories: [Territory],
-        isAvailableInNewTerritories: Bool
+        isAvailableInNewTerritories: Bool,
     ) async -> Result<InAppPurchaseAvailability, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -437,13 +437,13 @@ public actor InAppPurchasesService {
                 inAppPurchase: .init(
                     data: .init(
                         type: .inAppPurchases,
-                        id: inAppPurchaseV2Id
-                    )
+                        id: inAppPurchaseV2Id,
+                    ),
                 ),
                 availableTerritories: .init(data: territories.compactMap {
                     .init(type: .territories, id: $0.id)
-                })
-            )
+                }),
+            ),
         )
         let request = Resources.v1.inAppPurchaseAvailabilities.post(.init(data: requestData))
         do {
@@ -473,7 +473,7 @@ public actor InAppPurchasesService {
         baseTerritory: Territory,
         inAppPurchasePricePoints: [InAppPurchasePricePoint],
         startDate: String? = nil,
-        endDate: String? = nil
+        endDate: String? = nil,
     ) async -> Result<InAppPurchasePriceSchedule, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -483,24 +483,24 @@ public actor InAppPurchasesService {
                 inAppPurchase: .init(
                     data: .init(
                         type: .inAppPurchases,
-                        id: inAppPurchaseV2Id
-                    )
+                        id: inAppPurchaseV2Id,
+                    ),
                 ),
                 baseTerritory: .init(
                     data: .init(
                         type: .territories,
-                        id: baseTerritory.id
-                    )
+                        id: baseTerritory.id,
+                    ),
                 ),
                 manualPrices: .init(
                     data: inAppPurchasePricePoints.compactMap {
                         .init(
                             type: .inAppPurchasePrices,
-                            id: $0.id
+                            id: $0.id,
                         )
-                    }
-                )
-            )
+                    },
+                ),
+            ),
         )
 
         let included: [InAppPurchasePriceScheduleCreateRequest.IncludedItem] = inAppPurchasePricePoints.compactMap {
@@ -510,27 +510,27 @@ public actor InAppPurchasesService {
                     id: $0.id,
                     attributes: .init(
                         startDate: startDate,
-                        endDate: endDate
+                        endDate: endDate,
                     ),
                     relationships: .init(
                         inAppPurchaseV2: .init(data: .init(
                             type: .inAppPurchases,
-                            id: inAppPurchaseV2Id
+                            id: inAppPurchaseV2Id,
                         )),
                         inAppPurchasePricePoint: .init(data: .init(
                             type: .inAppPurchasePricePoints,
-                            id: $0.id
-                        ))
-                    )
-                )
+                            id: $0.id,
+                        )),
+                    ),
+                ),
             )
         }
 
         let request = Resources.v1.inAppPurchasePriceSchedules.post(
             .init(
                 data: requestData,
-                included: included
-            )
+                included: included,
+            ),
         )
 
         do {

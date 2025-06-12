@@ -54,8 +54,8 @@ public struct NetworkEnvironment {
                     fileURLWithPath: ".env",
                     relativeTo: URL(
                         fileURLWithPath: FileManager.default.currentDirectoryPath,
-                        isDirectory: true
-                    )
+                        isDirectory: true,
+                    ),
                 )
         self.processInfo = processInfo
         do {
@@ -107,8 +107,8 @@ public struct NetworkEnvironment {
                     FileParserError.ParseContext(
                         content: String(line),
                         line: index + 1,
-                        url: url
-                    )
+                        url: url,
+                    ),
                 )
             }
 

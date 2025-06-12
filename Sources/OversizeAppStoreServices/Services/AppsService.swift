@@ -5,7 +5,7 @@
 
 import AppStoreAPI
 import AppStoreConnect
-import Factory
+import FactoryKit
 import Foundation
 import OversizeCore
 import OversizeModels
@@ -42,7 +42,7 @@ public actor AppsService {
                 include: [
                     .builds,
                     .appStoreVersions,
-                ]
+                ],
             )
             return try await client.send(request)
         }.flatMap {
@@ -63,7 +63,7 @@ public actor AppsService {
                     .builds,
                     .appStoreVersions,
                     .preReleaseVersions,
-                ]
+                ],
             )
             let result = try await client.send(request)
             guard let app: App = .init(schema: result.data, included: result.included) else {
@@ -95,7 +95,7 @@ public actor AppsService {
                     .builds,
                     .appStoreVersions,
                     .preReleaseVersions,
-                ]
+                ],
             )
             return try await client.send(request)
         }.map { App.from(response: $0) }
@@ -130,7 +130,7 @@ public actor AppsService {
                     .builds,
                     .appStoreVersions,
                 ],
-                limitAppStoreVersions: limitAppStoreVersions
+                limitAppStoreVersions: limitAppStoreVersions,
             )
             return try await client.send(request)
         }.map { App.from(response: $0) }
@@ -140,7 +140,7 @@ public actor AppsService {
         name: String,
         platform: BundleIDPlatform,
         identifier: String,
-        seedID: String? = nil
+        seedID: String? = nil,
     ) async -> Result<Bool, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         guard let bundleIDPlatform: AppStoreAPI.BundleIDPlatform = .init(rawValue: platform.rawValue) else { return .failure(.network(type: .invalidURL)) }
@@ -151,8 +151,8 @@ public actor AppsService {
                 name: name,
                 platform: bundleIDPlatform,
                 identifier: identifier,
-                seedID: seedID
-            )
+                seedID: seedID,
+            ),
         )
 
         let request = Resources.v1.bundleIDs.post(.init(data: requestData))
@@ -166,14 +166,14 @@ public actor AppsService {
 
     public func patchPrimaryLanguage(
         appId: String,
-        locale: AppStoreLanguage
+        locale: AppStoreLanguage,
     ) async -> Result<App, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
         let requestData: AppUpdateRequest.Data = .init(
             type: .apps,
             id: appId,
-            attributes: .init(primaryLocale: locale.rawValue)
+            attributes: .init(primaryLocale: locale.rawValue),
         )
         let request = Resources.v1.apps.id(appId).patch(.init(data: requestData))
         do {

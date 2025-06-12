@@ -77,11 +77,11 @@ public struct AppStoreVersion: Sendable, Identifiable {
             },
             appStoreReviewDetail: includedAppStoreReviewDetail.flatMap { reviewDetails in
                 reviewDetails.compactMap(AppStoreReviewDetail.init)
-            }
+            },
         )
 
         relationships = .init(
-            appStoreVersionLocalizationsIds: schema.relationships?.appStoreVersionLocalizations?.data?.compactMap { $0.id }
+            appStoreVersionLocalizationsIds: schema.relationships?.appStoreVersionLocalizations?.data?.compactMap { $0.id },
         )
     }
 

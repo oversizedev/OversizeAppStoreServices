@@ -9,7 +9,7 @@ import Testing
 
 @Suite struct TerritoryRegionTests {
     @Test("Should initialize with valid territory code")
-    func testInitWithValidCode() throws {
+    func initWithValidCode() throws {
         #expect(TerritoryRegion(territoryCode: .usa) == .unitedStatesAndCanada)
         #expect(TerritoryRegion(territoryCode: .fra) == .europe)
         #expect(TerritoryRegion(territoryCode: .ind) == .africaMiddleEastIndia)
@@ -18,7 +18,7 @@ import Testing
     }
 
     @Test("Should initialize with valid country ID")
-    func testInitWithValidCountryID() throws {
+    func initWithValidCountryID() throws {
         #expect(TerritoryRegion(countryID: "USA") == .unitedStatesAndCanada)
         #expect(TerritoryRegion(countryID: "FRA") == .europe)
         #expect(TerritoryRegion(countryID: "IND") == .africaMiddleEastIndia)
@@ -27,7 +27,7 @@ import Testing
     }
 
     @Test("Should handle invalid country ID")
-    func testInitWithInvalidCountryID() throws {
+    func initWithInvalidCountryID() throws {
         #expect(TerritoryRegion(countryID: "INVALID") == .unknown)
         #expect(TerritoryRegion(countryID: "") == .unknown)
         #expect(TerritoryRegion(countryID: "123") == .unknown)
@@ -46,7 +46,7 @@ import Testing
     }
 
     @Test("Should have correct raw values")
-    func testRawValues() throws {
+    func rawValues() throws {
         #expect(TerritoryRegion.unitedStatesAndCanada.rawValue == "The United States and Canada")
         #expect(TerritoryRegion.europe.rawValue == "Europe")
         #expect(TerritoryRegion.africaMiddleEastIndia.rawValue == "Africa, Middle East, and India")
@@ -56,7 +56,7 @@ import Testing
     }
 
     @Test("Should return .unknown for unhandled territory code")
-    func testInitWithUnhandledTerritoryCode() throws {
+    func initWithUnhandledTerritoryCode() throws {
         // TerritoryCode.bgd ("BGD" for Bangladesh) is not handled explicitly in TerritoryRegion initializer
         #expect(TerritoryRegion(territoryCode: .bgd) == .unknown)
     }

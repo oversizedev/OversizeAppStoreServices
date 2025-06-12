@@ -50,7 +50,7 @@ public struct Build: Sendable, Identifiable {
             buildAudienceType = .none
         }
         relationships = .init(
-            buildBundlesIds: schema.relationships?.buildBundles?.data?.compactMap { $0.id }
+            buildBundlesIds: schema.relationships?.buildBundles?.data?.compactMap { $0.id },
         )
     }
 

@@ -45,7 +45,7 @@ public struct InAppPurchaseV2: Identifiable, Sendable {
             promotedPurchaseId: schema.relationships?.promotedPurchase?.data?.id,
             iapPriceScheduleId: schema.relationships?.iapPriceSchedule?.data?.id,
             inAppPurchaseAvailabilityId: schema.relationships?.inAppPurchaseAvailability?.data?.id,
-            imagesIds: schema.relationships?.images?.data?.map { $0.id }
+            imagesIds: schema.relationships?.images?.data?.map { $0.id },
         )
 
         self.included = .init(
@@ -88,7 +88,7 @@ public struct InAppPurchaseV2: Identifiable, Sendable {
             inAppPurchaseImages: included?.compactMap {
                 if case let .inAppPurchaseImage(value) = $0 { return .init(schema: value) }
                 return nil
-            }
+            },
         )
     }
 

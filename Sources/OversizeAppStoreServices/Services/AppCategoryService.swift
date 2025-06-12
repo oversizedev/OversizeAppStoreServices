@@ -28,7 +28,7 @@ public actor AppCategoryService {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.appCategories.get(
             filterPlatforms: [appCategoriesPlatform],
-            isExistsParent: false
+            isExistsParent: false,
         )
         do {
             let data = try await client.send(request).data
@@ -47,7 +47,7 @@ public actor AppCategoryService {
         let request = Resources.v1.appCategories.get(
             filterPlatforms: [appCategoriesPlatform],
             isExistsParent: false,
-            include: [.subcategories]
+            include: [.subcategories],
         )
 
         do {
@@ -68,7 +68,7 @@ public actor AppCategoryService {
         primarySubcategoryTwoId: String? = nil,
         secondaryCategoryId: String? = nil,
         secondarySubcategoryOneId: String? = nil,
-        secondarySubcategoryTwoId: String? = nil
+        secondarySubcategoryTwoId: String? = nil,
     ) async -> Result<AppInfo, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -85,17 +85,17 @@ public actor AppCategoryService {
             primarySubcategoryTwo: primarySubcategoryTwo,
             secondaryCategory: secondaryCategory,
             secondarySubcategoryOne: secondarySubcategoryOne,
-            secondarySubcategoryTwo: secondarySubcategoryTwo
+            secondarySubcategoryTwo: secondarySubcategoryTwo,
         )
 
         let requestData: AppInfoUpdateRequest.Data = .init(
             type: .appInfos,
             id: appInfoId,
-            relationships: requestRelationships
+            relationships: requestRelationships,
         )
 
         let request = Resources.v1.appInfos.id(appInfoId).patch(
-            .init(data: requestData)
+            .init(data: requestData),
         )
 
         do {

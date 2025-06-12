@@ -5,7 +5,7 @@
 
 import AppStoreAPI
 import AppStoreConnect
-import Factory
+import FactoryKit
 import Foundation
 import OversizeModels
 
@@ -38,7 +38,7 @@ public actor SubscriptionsService {
                 include: [
                     .subscriptions,
                     .subscriptionGroupLocalizations,
-                ]
+                ],
             )
             return try await client.send(request)
         }.map { data in
@@ -74,7 +74,7 @@ public actor SubscriptionsService {
                     .promotedPurchase,
                     .winBackOffers,
                     .images,
-                ]
+                ],
             )
             return try await client.send(request)
         }.flatMap {
@@ -94,10 +94,10 @@ public actor SubscriptionsService {
                 app: .init(
                     data: .init(
                         type: .apps,
-                        id: appId
-                    )
-                )
-            )
+                        id: appId,
+                    ),
+                ),
+            ),
         )
         let request = Resources.v1.subscriptionGroups.post(.init(data: requestData))
         do {
@@ -118,7 +118,7 @@ public actor SubscriptionsService {
         isFamilySharable: Bool? = nil,
         subscriptionPeriod: SubscriptionPeriod? = nil,
         reviewNote: String? = nil,
-        groupLevel: Int? = nil
+        groupLevel: Int? = nil,
     ) async -> Result<Subscription, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -136,7 +136,7 @@ public actor SubscriptionsService {
             isFamilySharable: isFamilySharable,
             subscriptionPeriod: subscriptionPeriodRequest,
             reviewNote: reviewNote,
-            groupLevel: groupLevel
+            groupLevel: groupLevel,
         )
 
         let requestData: SubscriptionCreateRequest.Data = .init(
@@ -146,10 +146,10 @@ public actor SubscriptionsService {
                 group: .init(
                     data: .init(
                         type: .subscriptionGroups,
-                        id: subscriptionGroupId
-                    )
-                )
-            )
+                        id: subscriptionGroupId,
+                    ),
+                ),
+            ),
         )
         let request = Resources.v1.subscriptions.post(.init(data: requestData))
         do {
@@ -165,7 +165,7 @@ public actor SubscriptionsService {
 
     public func fetchSubscriptionPricePointsEqualizations(
         subscriptionPricePointId: String,
-        force: Bool = false
+        force: Bool = false,
     ) async -> Result<[SubscriptionPricePoint], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         return await cacheService.fetchWithCache(key: "fetchSubscriptionPricePointsEqualizations\(subscriptionPricePointId)", force: force) {
@@ -179,7 +179,7 @@ public actor SubscriptionsService {
     public func fetchSubscriptionPricePoints(
         subscriptionId: String,
         filterTerritory: [Territory]? = nil,
-        force: Bool = false
+        force: Bool = false,
     ) async -> Result<[SubscriptionPricePoint], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -199,24 +199,24 @@ public actor SubscriptionsService {
     public func postSubscriptionAvailabilities(
         subscriptionId: String,
         isAvailableInNewTerritories: Bool,
-        availableTerritories: [Territory]
+        availableTerritories: [Territory],
     ) async -> Result<SubscriptionAvailability, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
         let requestData = SubscriptionAvailabilityCreateRequest.Data(
             type: .subscriptionAvailabilities,
             attributes: .init(
-                isAvailableInNewTerritories: isAvailableInNewTerritories
+                isAvailableInNewTerritories: isAvailableInNewTerritories,
             ),
             relationships: .init(
                 subscription: .init(data: .init(type: .subscriptions, id: subscriptionId)),
                 availableTerritories: .init(
                     data: availableTerritories.compactMap { .init(
                         type: .territories,
-                        id: $0.id
-                    ) }
-                )
-            )
+                        id: $0.id,
+                    ) },
+                ),
+            ),
         )
 
         let request = Resources.v1.subscriptionAvailabilities.post(.init(data: requestData))
@@ -234,7 +234,7 @@ public actor SubscriptionsService {
     public func fetchSubscriptionIntroductoryOffers(
         subscriptionId: String,
         filterTerritory: [Territory]? = nil,
-        force: Bool = false
+        force: Bool = false,
     ) async -> Result<[SubscriptionIntroductoryOffer], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -251,7 +251,7 @@ public actor SubscriptionsService {
                     .subscription,
                     .subscriptionPricePoint,
                     .territory,
-                ]
+                ],
             )
 
             return try await client.send(request)
@@ -260,12 +260,12 @@ public actor SubscriptionsService {
 
     public func fetchSubscriptionAvailability(
         subscriptionId: String,
-        force: Bool = false
+        force: Bool = false,
     ) async -> Result<SubscriptionAvailability, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         return await cacheService.fetchWithCache(key: "fetchSubscriptionAvailability\(subscriptionId)", force: force) {
             let request = Resources.v1.subscriptions.id(subscriptionId).subscriptionAvailability.get(
-                limitAvailableTerritories: 50
+                limitAvailableTerritories: 50,
             )
             return try await client.send(request)
         }.flatMap {
@@ -279,7 +279,7 @@ public actor SubscriptionsService {
     public func fetchSubscriptionPrices(
         subscriptionId: String,
         filterTerritory: [Territory]? = nil,
-        force: Bool = false
+        force: Bool = false,
     ) async -> Result<[SubscriptionPrice], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -295,7 +295,7 @@ public actor SubscriptionsService {
                 include: [
                     .territory,
                     .subscriptionPricePoint,
-                ]
+                ],
             )
             return try await client.send(request)
         }.map { SubscriptionPrice.from(response: $0) }
@@ -307,7 +307,7 @@ public actor SubscriptionsService {
         isFamilySharable: Bool? = nil,
         subscriptionPeriod: SubscriptionPeriod? = nil,
         reviewNote: String? = nil,
-        groupLevel: Int? = nil
+        groupLevel: Int? = nil,
     ) async -> Result<Subscription, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -324,13 +324,13 @@ public actor SubscriptionsService {
             isFamilySharable: isFamilySharable,
             subscriptionPeriod: subscriptionPeriodRequest,
             reviewNote: reviewNote,
-            groupLevel: groupLevel
+            groupLevel: groupLevel,
         )
 
         let requestData: SubscriptionUpdateRequest.Data = .init(
             type: .subscriptions,
             id: subscriptionsId,
-            attributes: requestAttributes
+            attributes: requestAttributes,
         )
 
         let request = Resources.v1.subscriptions.id(subscriptionsId).patch(.init(data: requestData))
@@ -348,7 +348,7 @@ public actor SubscriptionsService {
 
     public func fetchSubscriptionAvailabilitiesAvailableTerritories(
         subscriptionAvailabilitiyId: String,
-        force: Bool = false
+        force: Bool = false,
     ) async -> Result<[Territory], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         return await cacheService.fetchWithCache(key: "fetchSubscriptionAvailabilitiesAvailableTerritories\(subscriptionAvailabilitiyId)", force: force) {
@@ -361,7 +361,7 @@ public actor SubscriptionsService {
 
     public func fetchSubscriptionPromotionalOfferPrices(
         subscriptionPromotionalOfferId: String,
-        force: Bool = false
+        force: Bool = false,
     ) async -> Result<[SubscriptionPromotionalOfferPrice], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         return await cacheService.fetchWithCache(key: "fetchSubscriptionPromotionalOfferPrices\(subscriptionPromotionalOfferId)", force: force) {
@@ -379,7 +379,7 @@ public actor SubscriptionsService {
         duration: SubscriptionOfferDuration,
         offerMode: SubscriptionOfferMode,
         numberOfPeriods: Int,
-        subscriptionPromotionalOfferPriceId: String
+        subscriptionPromotionalOfferPriceId: String,
     ) async -> Result<SubscriptionPromotionalOffer, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -393,13 +393,13 @@ public actor SubscriptionsService {
                 offerCode: offerCode,
                 duration: duration,
                 offerMode: offerMode,
-                numberOfPeriods: numberOfPeriods
+                numberOfPeriods: numberOfPeriods,
             ),
             relationships: .init(
                 subscription: .init(
-                    data: .init(type: .subscriptions, id: subscriptionId)
-                ), prices: .init(data: [.init(type: .subscriptionPromotionalOfferPrices, id: subscriptionPromotionalOfferPriceId)])
-            )
+                    data: .init(type: .subscriptions, id: subscriptionId),
+                ), prices: .init(data: [.init(type: .subscriptionPromotionalOfferPrices, id: subscriptionPromotionalOfferPriceId)]),
+            ),
         )
 
         let request = Resources.v1.subscriptionPromotionalOffers.post(.init(data: requestData))
@@ -418,7 +418,7 @@ public actor SubscriptionsService {
         subscriptionId: String,
         name: String,
         description: String?,
-        locale: AppStoreLanguage
+        locale: AppStoreLanguage,
     ) async -> Result<SubscriptionLocalization, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -427,13 +427,13 @@ public actor SubscriptionsService {
             attributes: .init(
                 name: name,
                 locale: locale.rawValue,
-                description: description
+                description: description,
             ),
             relationships: .init(
                 subscription: .init(
-                    data: .init(type: .subscriptions, id: subscriptionId)
-                )
-            )
+                    data: .init(type: .subscriptions, id: subscriptionId),
+                ),
+            ),
         )
 
         let request = Resources.v1.subscriptionLocalizations.post(.init(data: requestData))
@@ -451,41 +451,41 @@ public actor SubscriptionsService {
     public func patchSubscriptionPrice(
         subscriptionsId: String,
         pricePountId: String,
-        prices: [SubscriptionPricePoint]
+        prices: [SubscriptionPricePoint],
     ) async -> Result<Subscription, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
         let relationships = SubscriptionUpdateRequest.Data.Relationships(
-            prices: .init(data: prices.map { .init(type: .subscriptionPrices, id: $0.id) })
+            prices: .init(data: prices.map { .init(type: .subscriptionPrices, id: $0.id) }),
         )
 
         let requestData = SubscriptionUpdateRequest.Data(
             type: .subscriptions,
             id: subscriptionsId,
-            relationships: relationships
+            relationships: relationships,
         )
 
         let includedItems: [SubscriptionUpdateRequest.IncludedItem] = prices.map { price in
             let pricePointData = SubscriptionPriceInlineCreate.Relationships.SubscriptionPricePoint.Data(
                 type: .subscriptionPricePoints,
-                id: pricePountId
+                id: pricePountId,
             )
 
             let relationship = SubscriptionPriceInlineCreate.Relationships(
-                subscriptionPricePoint: .init(data: pricePointData)
+                subscriptionPricePoint: .init(data: pricePointData),
             )
 
             return .subscriptionPriceInlineCreate(
                 SubscriptionPriceInlineCreate(
                     type: .subscriptionPrices,
                     id: price.id,
-                    relationships: relationship
-                )
+                    relationships: relationship,
+                ),
             )
         }
 
         let request = Resources.v1.subscriptions.id(subscriptionsId).patch(
-            .init(data: requestData, included: includedItems)
+            .init(data: requestData, included: includedItems),
         )
 
         do {
@@ -506,7 +506,7 @@ public actor SubscriptionsService {
         duration: SubscriptionOfferDuration,
         offerMode: SubscriptionOfferMode,
         numberOfPeriods: Int,
-        territories: [Territory]
+        territories: [Territory],
     ) async -> Result<Subscription, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -524,24 +524,24 @@ public actor SubscriptionsService {
                 endDate: endDate?.toString(),
                 duration: duration,
                 offerMode: offerMode,
-                numberOfPeriods: numberOfPeriods
+                numberOfPeriods: numberOfPeriods,
             )
 
             let relationship = SubscriptionIntroductoryOfferInlineCreate.Relationships(
                 territory: .init(
                     data: .init(
                         type: .territories,
-                        id: territory.id
-                    )
-                )
+                        id: territory.id,
+                    ),
+                ),
             )
 
             return .subscriptionIntroductoryOfferInlineCreate(
                 .init(
                     id: temporaryId,
                     attributes: attributes,
-                    relationships: relationship
-                )
+                    relationships: relationship,
+                ),
             )
         }
 
@@ -549,22 +549,22 @@ public actor SubscriptionsService {
             guard case let .subscriptionIntroductoryOfferInlineCreate(offer) = item else { return nil }
             return .init(
                 type: .subscriptionIntroductoryOffers,
-                id: offer.id ?? ""
+                id: offer.id ?? "",
             )
         }
 
         let relationships = SubscriptionUpdateRequest.Data.Relationships(
-            introductoryOffers: .init(data: introductoryOffersData)
+            introductoryOffers: .init(data: introductoryOffersData),
         )
 
         let requestData = SubscriptionUpdateRequest.Data(
             type: .subscriptions,
             id: subscriptionsId,
-            relationships: relationships
+            relationships: relationships,
         )
 
         let request = Resources.v1.subscriptions.id(subscriptionsId).patch(
-            .init(data: requestData, included: includedItems)
+            .init(data: requestData, included: includedItems),
         )
 
         do {

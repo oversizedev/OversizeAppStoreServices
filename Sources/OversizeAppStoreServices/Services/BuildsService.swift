@@ -5,7 +5,7 @@
 
 import AppStoreAPI
 import AppStoreConnect
-import Factory
+import FactoryKit
 import Foundation
 import OversizeCore
 import OversizeModels
@@ -84,7 +84,7 @@ public actor BuildsService {
     public func fetchAppStoreVersionsBuildImageUrl(versionId: String) async -> Result<URL?, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.appStoreVersions.id(versionId).build.get(
-            fieldsBuilds: [.iconAssetToken]
+            fieldsBuilds: [.iconAssetToken],
         )
         do {
             let iconAssetToken = try await client.send(request).data.attributes?.iconAssetToken

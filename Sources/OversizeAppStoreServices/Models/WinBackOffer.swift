@@ -42,12 +42,12 @@ public struct WinBackOffer: Sendable, Identifiable {
         promotionIntent = .init(rawValue: attributes.promotionIntent?.rawValue ?? "")
 
         relationships = Relationships(
-            pricesIds: schema.relationships?.prices?.data?.map { $0.id }
+            pricesIds: schema.relationships?.prices?.data?.map { $0.id },
         )
 
         if let included {
             self.included = .init(
-                winBackOfferPrices: included.compactMap { .init(schema: $0) }
+                winBackOfferPrices: included.compactMap { .init(schema: $0) },
             )
         } else {
             self.included = nil

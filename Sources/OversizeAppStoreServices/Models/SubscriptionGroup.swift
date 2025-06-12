@@ -23,7 +23,7 @@ public struct SubscriptionGroup: Identifiable, Sendable {
 
         relationships = .init(
             subscriptionsIds: schema.relationships?.subscriptions?.data?.compactMap { $0.id } ?? [],
-            subscriptionGroupLocalizationsIds: schema.relationships?.subscriptionGroupLocalizations?.data?.compactMap { $0.id } ?? []
+            subscriptionGroupLocalizationsIds: schema.relationships?.subscriptionGroupLocalizations?.data?.compactMap { $0.id } ?? [],
         )
 
         var subscriptions: [AppStoreAPI.Subscription] = []
@@ -45,7 +45,7 @@ public struct SubscriptionGroup: Identifiable, Sendable {
 
             self.included = .init(
                 subscriptions: subscriptions.compactMap { .init(schema: $0) },
-                subscriptionGroupLocalizations: subscriptionGroupLocalizations.compactMap { .init(schema: $0) }
+                subscriptionGroupLocalizations: subscriptionGroupLocalizations.compactMap { .init(schema: $0) },
             )
         } else {
             self.included = nil
