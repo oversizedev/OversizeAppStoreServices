@@ -23,12 +23,12 @@ public struct EnvAuthenticator: Authenticator {
             throw Error.missingEnvironmentVariable("AppStore.Account")
         }
 
-        guard let appStoreIssuerID = storage.getPassword(for: "AppConnector-IssuerID-" + keyLabel) else {
+        guard let appStoreIssuerID = storage.getPassword(for: "DevConnector-IssuerID-" + keyLabel) else {
             logError("Get Keychain value for IssuerID")
             throw Error.missingEnvironmentVariable("AppStore.Key.Default")
         }
 
-        guard let appStoreCertificate = storage.getCredentials(with: "AppConnector-Certificate-" + keyLabel) else {
+        guard let appStoreCertificate = storage.getCredentials(with: "DevConnector-Certificate-" + keyLabel) else {
             logError("Get Keychain value for Certificate")
             throw Error.missingEnvironmentVariable("AppStore.Key.Default")
         }
