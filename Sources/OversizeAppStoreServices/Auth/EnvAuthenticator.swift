@@ -4,7 +4,7 @@
 //
 
 import AppStoreConnect
-import Factory
+import FactoryKit
 import Foundation
 import OversizeCore
 import OversizeServices
@@ -40,7 +40,7 @@ public struct EnvAuthenticator: Authenticator {
             keyID: appStoreCertificate.login,
             issuerID: appStoreIssuerID,
             expiryDuration: 20 * 60,
-            privateKey: privateKey
+            privateKey: privateKey,
         )
     }
 

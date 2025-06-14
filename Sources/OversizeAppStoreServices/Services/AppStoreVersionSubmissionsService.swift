@@ -29,10 +29,10 @@ public actor AppStoreVersionSubmissionsService {
                 appStoreVersion: .init(
                     data: .init(
                         type: .appStoreVersions,
-                        id: appStoreVersionsId
-                    )
-                )
-            )
+                        id: appStoreVersionsId,
+                    ),
+                ),
+            ),
         )
 
         let request = Resources.v1.appStoreVersionSubmissions.post(.init(data: requestData))

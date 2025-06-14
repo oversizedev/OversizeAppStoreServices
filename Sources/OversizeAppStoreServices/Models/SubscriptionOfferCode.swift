@@ -37,7 +37,7 @@ public struct SubscriptionOfferCode: Identifiable, Sendable {
             subscriptionId: schema.relationships?.subscription?.data?.id,
             oneTimeUseCodesIds: schema.relationships?.oneTimeUseCodes?.data?.compactMap { $0.id } ?? [],
             customCodesIds: schema.relationships?.customCodes?.data?.compactMap { $0.id } ?? [],
-            pricesIds: schema.relationships?.prices?.data?.compactMap { $0.id } ?? []
+            pricesIds: schema.relationships?.prices?.data?.compactMap { $0.id } ?? [],
         )
 
         var subscriptions: [AppStoreAPI.Subscription] = []
@@ -70,7 +70,7 @@ public struct SubscriptionOfferCode: Identifiable, Sendable {
                 subscriptions: subscriptions.compactMap { .init(schema: $0) },
                 oneTimeUseCodes: oneTimeUseCodes.compactMap { .init(schema: $0) },
                 customCodes: customCodes.compactMap { .init(schema: $0) },
-                prices: prices.compactMap { .init(schema: $0) }
+                prices: prices.compactMap { .init(schema: $0) },
             )
         } else {
             self.included = nil

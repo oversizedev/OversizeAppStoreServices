@@ -137,7 +137,7 @@ public struct FinanceReports: Sendable {
                     preOrderFlag: $0.element(18),
                     promoCode: $0.element(19),
                     customerPrice: $0.element(20).valueOrEmpty,
-                    customerCurrency: $0.element(21)
+                    customerCurrency: $0.element(21),
                 )
             }
 

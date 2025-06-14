@@ -51,7 +51,7 @@ public struct Subscription: Sendable, Identifiable {
             introductoryOffersIds: schema.relationships?.introductoryOffers?.data?.map { $0.id },
             promotionalOffersIds: schema.relationships?.promotionalOffers?.data?.map { $0.id },
             winBackOffersIds: schema.relationships?.winBackOffers?.data?.map { $0.id },
-            imagesIds: schema.relationships?.images?.data?.map { $0.id }
+            imagesIds: schema.relationships?.images?.data?.map { $0.id },
         )
 
         self.included = .init(included: included)

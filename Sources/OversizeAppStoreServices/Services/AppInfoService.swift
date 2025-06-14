@@ -5,7 +5,7 @@
 
 import AppStoreAPI
 import AppStoreConnect
-import Factory
+import FactoryKit
 import Foundation
 import OversizeCore
 import OversizeModels
@@ -58,7 +58,7 @@ public actor AppInfoService {
     public func fetchAppInfoLocalization(appInfoId: String, locale: String) async -> Result<AppInfoLocalization?, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.appInfos.id(appInfoId).appInfoLocalizations.get(
-            filterLocale: [locale]
+            filterLocale: [locale],
         )
         do {
             let data = try await client.send(request).data
@@ -92,7 +92,7 @@ public actor AppInfoService {
         violenceRealistic: AgeRatingDeclarationUpdateRequest.Data.Attributes.ViolenceRealistic?,
         ageRatingOverride: AgeRatingDeclarationUpdateRequest.Data.Attributes.AgeRatingOverride?,
         koreaAgeRatingOverride: AgeRatingDeclarationUpdateRequest.Data.Attributes.KoreaAgeRatingOverride?,
-        isSeventeenPlus: Bool?
+        isSeventeenPlus: Bool?,
     ) async -> Result<AgeRatingDeclaration, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -116,17 +116,17 @@ public actor AppInfoService {
             violenceRealistic: violenceRealistic,
             ageRatingOverride: ageRatingOverride,
             koreaAgeRatingOverride: koreaAgeRatingOverride,
-            isSeventeenPlus: isSeventeenPlus
+            isSeventeenPlus: isSeventeenPlus,
         )
 
         let requestData: AgeRatingDeclarationUpdateRequest.Data = .init(
             type: .ageRatingDeclarations,
             id: ageRatingDeclarationId,
-            attributes: requestAttributes
+            attributes: requestAttributes,
         )
 
         let request = Resources.v1.ageRatingDeclarations.id(ageRatingDeclarationId).patch(
-            .init(data: requestData)
+            .init(data: requestData),
         )
 
         do {
@@ -146,7 +146,7 @@ public actor AppInfoService {
         subtitle: String? = nil,
         privacyPolicyURL: String? = nil,
         privacyChoicesURL: String? = nil,
-        privacyPolicyText: String? = nil
+        privacyPolicyText: String? = nil,
     ) async -> Result<AppInfoLocalization, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -155,17 +155,17 @@ public actor AppInfoService {
             subtitle: subtitle,
             privacyPolicyURL: privacyPolicyURL,
             privacyChoicesURL: privacyChoicesURL,
-            privacyPolicyText: privacyPolicyText
+            privacyPolicyText: privacyPolicyText,
         )
 
         let requestData: AppInfoLocalizationUpdateRequest.Data = .init(
             type: .appInfoLocalizations,
             id: localizationId,
-            attributes: requestAttributes
+            attributes: requestAttributes,
         )
 
         let request = Resources.v1.appInfoLocalizations.id(localizationId).patch(
-            .init(data: requestData)
+            .init(data: requestData),
         )
 
         do {
@@ -186,7 +186,7 @@ public actor AppInfoService {
         subtitle: String? = nil,
         privacyPolicyURL: String? = nil,
         privacyChoicesURL: String? = nil,
-        privacyPolicyText: String? = nil
+        privacyPolicyText: String? = nil,
     ) async -> Result<AppInfoLocalization, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -196,7 +196,7 @@ public actor AppInfoService {
             subtitle: subtitle,
             privacyPolicyURL: privacyPolicyURL,
             privacyChoicesURL: privacyChoicesURL,
-            privacyPolicyText: privacyPolicyText
+            privacyPolicyText: privacyPolicyText,
         )
 
         let requestData: AppInfoLocalizationCreateRequest.Data = .init(
@@ -205,10 +205,9 @@ public actor AppInfoService {
             relationships: .init(
                 appInfo: .init(data: .init(
                     type: .appInfos,
-                    id: appInfoId
-                )
-                )
-            )
+                    id: appInfoId,
+                )),
+            ),
         )
         let request = Resources.v1.appInfoLocalizations.post(.init(data: requestData))
 

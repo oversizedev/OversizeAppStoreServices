@@ -15,7 +15,7 @@ public struct SubscriptionOfferCodePrice: Identifiable, Sendable {
         id = schema.id
         relationships = .init(
             territoryId: schema.relationships?.territory?.data?.id,
-            subscriptionPricePointId: schema.relationships?.subscriptionPricePoint?.data?.id
+            subscriptionPricePointId: schema.relationships?.subscriptionPricePoint?.data?.id,
         )
 
         var territories: [AppStoreAPI.Territory] = []
@@ -37,7 +37,7 @@ public struct SubscriptionOfferCodePrice: Identifiable, Sendable {
 
             self.included = .init(
                 territory: territories.first.flatMap { .init(schema: $0) },
-                subscriptionPricePoint: subscriptionPricePoints.first.flatMap { .init(schema: $0) }
+                subscriptionPricePoint: subscriptionPricePoints.first.flatMap { .init(schema: $0) },
             )
         } else {
             self.included = nil

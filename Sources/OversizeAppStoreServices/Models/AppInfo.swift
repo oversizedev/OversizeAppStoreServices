@@ -37,7 +37,7 @@ public struct AppInfo: Sendable {
         relationships = .init(
             primaryCategoryId: schema.relationships?.primaryCategory?.data?.id,
             secondaryCategoryId: schema.relationships?.secondaryCategory?.data?.id,
-            ageRatingDeclarationId: schema.relationships?.ageRatingDeclaration?.data?.id
+            ageRatingDeclarationId: schema.relationships?.ageRatingDeclaration?.data?.id,
         )
 
         var appCategories: [AppStoreAPI.AppCategory] = []
@@ -71,7 +71,7 @@ public struct AppInfo: Sendable {
                 self.included = .init(
                     primaryCategory: .init(schema: primaryCategory),
                     secondaryCategory: .init(schema: seconaryCategory),
-                    ageRatingDeclaration: ageRatingDeclaration != nil ? .init(schema: ageRatingDeclaration!) : nil
+                    ageRatingDeclaration: ageRatingDeclaration != nil ? .init(schema: ageRatingDeclaration!) : nil,
                 )
             } else {
                 self.included = nil

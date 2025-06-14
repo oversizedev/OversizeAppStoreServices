@@ -26,7 +26,7 @@ public struct SubscriptionOfferCodeOneTimeUseCode: Identifiable, Sendable {
         isActive = attributes.isActive
 
         relationships = .init(
-            offerCodeId: schema.relationships?.offerCode?.data?.id
+            offerCodeId: schema.relationships?.offerCode?.data?.id,
         )
 
         if let offerCode = included?.first(where: { $0.id == schema.relationships?.offerCode?.data?.id }) {

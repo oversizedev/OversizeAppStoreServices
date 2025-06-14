@@ -24,7 +24,7 @@ public struct InAppPurchasePrice: Sendable, Identifiable {
 
         relationships = .init(
             inAppPurchasePricePointId: schema.relationships?.inAppPurchasePricePoint?.data?.id,
-            territoryId: schema.relationships?.territory?.data?.id
+            territoryId: schema.relationships?.territory?.data?.id,
         )
 
         if let includedItems = included {
@@ -45,7 +45,7 @@ public struct InAppPurchasePrice: Sendable, Identifiable {
             }
             self.included = .init(
                 inAppPurchasePricePoint: inAppPurchasePricePoint,
-                territory: territory
+                territory: territory,
             )
         } else {
             self.included = nil

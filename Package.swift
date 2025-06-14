@@ -36,11 +36,11 @@ let package = Package(
     products: [
         .library(
             name: "OversizeAppStoreServices",
-            targets: ["OversizeAppStoreServices"]
+            targets: ["OversizeAppStoreServices"],
         ),
         .library(
             name: "OversizeMetricServices",
-            targets: ["OversizeMetricServices"]
+            targets: ["OversizeMetricServices"],
         ),
     ],
     dependencies: dependencies,
@@ -49,28 +49,28 @@ let package = Package(
             name: "OversizeAppStoreServices",
             dependencies: [
                 .product(name: "AppStoreConnect", package: "asc-swift"),
-                .product(name: "Factory", package: "Factory"),
+                .product(name: "FactoryKit", package: "Factory"),
                 .product(name: "OversizeCore", package: "OversizeCore"),
                 .product(name: "OversizeModels", package: "OversizeModels"),
                 .product(name: "OversizeServices", package: "OversizeServices"),
-            ]
+            ],
         ),
         .target(
             name: "OversizeMetricServices",
             dependencies: [
                 .product(name: "AppStoreConnect", package: "asc-swift"),
-                .product(name: "Factory", package: "Factory"),
+                .product(name: "FactoryKit", package: "Factory"),
                 .product(name: "OversizeCore", package: "OversizeCore"),
                 .product(name: "OversizeModels", package: "OversizeModels"),
                 .product(name: "OversizeServices", package: "OversizeServices"),
                 .product(name: "Gzip", package: "GzipSwift"),
                 .product(name: "CodableCSV", package: "CodableCSV"),
                 "OversizeAppStoreServices",
-            ]
+            ],
         ),
         .testTarget(
             name: "OversizeAppStoreServicesTests",
-            dependencies: ["OversizeAppStoreServices", "OversizeMetricServices"]
+            dependencies: ["OversizeAppStoreServices", "OversizeMetricServices"],
         ),
-    ]
+    ],
 )

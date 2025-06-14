@@ -39,7 +39,7 @@ public actor CustomerReviewService {
         }
         let request = Resources.v1.apps.id(appId).customerReviews.get(
             sort: [sort],
-            include: [.response]
+            include: [.response],
         )
         do {
             let result = try await client.send(request)
@@ -74,21 +74,21 @@ public actor CustomerReviewService {
 
     public func postCustomerReviewResponse(
         customerReviewsId: String,
-        responseBody: String
+        responseBody: String,
     ) async -> Result<CustomerReviewResponseV1, AppError> {
         guard let client else {
             return .failure(.network(type: .unauthorized))
         }
 
         let requestAttributes: CustomerReviewResponseV1CreateRequest.Data.Attributes = .init(
-            responseBody: responseBody
+            responseBody: responseBody,
         )
         let requestData: CustomerReviewResponseV1CreateRequest.Data = .init(
             type: .customerReviewResponses,
             attributes: requestAttributes,
             relationships: .init(
-                review: .init(data: .init(type: .customerReviews, id: customerReviewsId))
-            )
+                review: .init(data: .init(type: .customerReviews, id: customerReviewsId)),
+            ),
         )
         let request = Resources.v1.customerReviewResponses.post(.init(data: requestData))
 

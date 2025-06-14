@@ -22,7 +22,7 @@ public actor AppStoreReviewService {
     public func fetchAppStoreReviewDetail(versionId: String) async -> Result<AppStoreReviewDetail, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.appStoreVersions.id(versionId).appStoreReviewDetail.get(
-            include: [.appStoreReviewAttachments]
+            include: [.appStoreReviewAttachments],
         )
         do {
             let data = try await client.send(request).data
@@ -38,7 +38,7 @@ public actor AppStoreReviewService {
     public func fetchAppStoreReviewDetailAttachments(versionId: String) async -> Result<[AppStoreReviewAttachment], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
         let request = Resources.v1.appStoreReviewDetails.id(
-            versionId
+            versionId,
         ).appStoreReviewAttachments.get()
 
         do {
@@ -58,7 +58,7 @@ public actor AppStoreReviewService {
         demoAccountName: String?,
         demoAccountPassword: String?,
         isDemoAccountRequired: Bool?,
-        notes: String?
+        notes: String?,
     ) async -> Result<AppStoreReviewDetail, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -70,17 +70,17 @@ public actor AppStoreReviewService {
             demoAccountName: demoAccountName?.isEmpty == true ? nil : demoAccountName,
             demoAccountPassword: demoAccountPassword?.isEmpty == true ? nil : demoAccountPassword,
             isDemoAccountRequired: isDemoAccountRequired,
-            notes: notes?.isEmpty == true ? nil : notes
+            notes: notes?.isEmpty == true ? nil : notes,
         )
 
         let requestData: AppStoreReviewDetailUpdateRequest.Data = .init(
             type: .appStoreReviewDetails,
             id: appStoreReviewDetailId,
-            attributes: requestAttributes
+            attributes: requestAttributes,
         )
 
         let request = Resources.v1.appStoreReviewDetails.id(appStoreReviewDetailId).patch(
-            .init(data: requestData)
+            .init(data: requestData),
         )
 
         do {
@@ -103,7 +103,7 @@ public actor AppStoreReviewService {
         demoAccountName: String?,
         demoAccountPassword: String?,
         isDemoAccountRequired: Bool?,
-        notes: String?
+        notes: String?,
     ) async -> Result<AppStoreReviewDetail, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -115,7 +115,7 @@ public actor AppStoreReviewService {
             demoAccountName: demoAccountName,
             demoAccountPassword: demoAccountPassword,
             isDemoAccountRequired: isDemoAccountRequired,
-            notes: notes
+            notes: notes,
         )
 
         let requestData: AppStoreReviewDetailCreateRequest.Data = .init(
@@ -125,10 +125,10 @@ public actor AppStoreReviewService {
                 appStoreVersion: .init(
                     data: .init(
                         type: .appStoreVersions,
-                        id: versionId
-                    )
-                )
-            )
+                        id: versionId,
+                    ),
+                ),
+            ),
         )
 
         let request = Resources.v1.appStoreReviewDetails.post(.init(data: requestData))

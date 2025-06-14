@@ -45,7 +45,7 @@ public actor SalesAndFinanceService {
                 .summaryTerritory,
                 .summaryChannel,
             ],
-            filterFrequency: [.monthly]
+            filterFrequency: [.monthly],
         )
         do {
             let data = try await client.download(request)
@@ -63,7 +63,7 @@ public actor SalesAndFinanceService {
             filterReportType: [.installs],
             filterReportSubType: [.summary],
             filterFrequency: [.monthly],
-            filterReportDate: [reportDate] // Format "2024-11"
+            filterReportDate: [reportDate], // Format "2024-11"
         )
         do {
             let fileURL = try await client.download(request)
@@ -115,7 +115,7 @@ public actor SalesAndFinanceService {
             filterReportSubType: [.summary],
             filterFrequency: [.daily],
             filterReportDate: ["2024-10-10"],
-            filterVersion: ["1_0"]
+            filterVersion: ["1_0"],
         )
         do {
             let fileURL = try await client.download(request)
@@ -139,7 +139,7 @@ public actor SalesAndFinanceService {
             filterVendorNumber: vendorNumbers,
             filterReportType: [.financial, .financeDetail],
             filterRegionCode: regionCodes,
-            filterReportDate: reportDates
+            filterReportDate: reportDates,
         )
         do {
             let data = try await client.download(request)
@@ -156,7 +156,7 @@ public actor SalesAndFinanceService {
             filterVendorNumber: vendorNumbers,
             filterReportType: [.financial, .financeDetail],
             filterRegionCode: regionCodes,
-            filterReportDate: reportDates
+            filterReportDate: reportDates,
         )
 
         do {

@@ -31,7 +31,7 @@ public struct SubscriptionImage: Sendable, Identifiable {
         state = attributes.state.flatMap { State(rawValue: $0.rawValue) }
 
         relationships = Relationships(
-            subscriptionId: schema.relationships?.subscription?.data?.id
+            subscriptionId: schema.relationships?.subscription?.data?.id,
         )
     }
 

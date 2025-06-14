@@ -21,7 +21,7 @@ public struct ImageAsset: Sendable {
             baseURL: schema.templateURL ?? "",
             width: schema.width ?? 100,
             height: schema.height ?? 100,
-            format: "png"
+            format: "png",
         )
         imageURL = ImageAsset.parseURL(from: constructedURLString)
     }

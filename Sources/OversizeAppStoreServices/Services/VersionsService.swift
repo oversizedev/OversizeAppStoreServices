@@ -5,7 +5,7 @@
 
 import AppStoreAPI
 import AppStoreConnect
-import Factory
+import FactoryKit
 import Foundation
 import OversizeModels
 
@@ -67,7 +67,7 @@ public actor VersionsService {
                     .developerRejected,
                     .rejected,
                     .invalidBinary,
-                ]
+                ],
             )
             let response = try await client.send(request)
             return response.data
@@ -82,7 +82,7 @@ public actor VersionsService {
             filterAppVersionState: [
                 .replacedWithNewVersion,
                 .readyForDistribution,
-            ]
+            ],
         )
         do {
             let data = try await client.send(request).data
@@ -117,7 +117,7 @@ public actor VersionsService {
                     .rejected,
                     .waitingForExportCompliance,
                     .waitingForReview,
-                ]
+                ],
             )
             let response = try await client.send(request)
             return response.data
@@ -156,7 +156,7 @@ public actor VersionsService {
                 include: [
                     .build,
                     .appStoreVersionLocalizations,
-                ]
+                ],
             )
 
             return try await client.send(request)
@@ -186,8 +186,7 @@ public actor VersionsService {
                     return nil
                 }
                 return (localization.id, language)
-            }
-            )
+            })
         } catch {
             return .failure(.network(type: .noResponse))
         }
@@ -207,13 +206,13 @@ public actor VersionsService {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
         let relationships: AppStoreVersionUpdateRequest.Data.Relationships = .init(
-            build: .init(data: .init(type: .builds, id: buildId))
+            build: .init(data: .init(type: .builds, id: buildId)),
         )
 
         let requestData: AppStoreVersionUpdateRequest.Data = .init(
             type: .appStoreVersions,
             id: versionId,
-            relationships: relationships
+            relationships: relationships,
         )
 
         let request = Resources.v1.appStoreVersions.id(versionId).patch(.init(data: requestData))
@@ -237,7 +236,7 @@ public actor VersionsService {
         promotionalText: String? = nil,
         keywords: String? = nil,
         marketingURL: URL? = nil,
-        supportURL: URL? = nil
+        supportURL: URL? = nil,
     ) async -> Result<AppStoreVersionLocalization, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -248,17 +247,17 @@ public actor VersionsService {
             marketingURL: marketingURL,
             promotionalText: promotionalText,
             supportURL: supportURL,
-            whatsNew: whatsNew
+            whatsNew: whatsNew,
         )
 
         let requestRelationships: AppStoreVersionLocalizationCreateRequest.Data.Relationships = .init(
-            appStoreVersion: .init(data: .init(type: .appStoreVersions, id: appStoreVersionsId))
+            appStoreVersion: .init(data: .init(type: .appStoreVersions, id: appStoreVersionsId)),
         )
 
         let requestData: AppStoreVersionLocalizationCreateRequest.Data = .init(
             type: .appStoreVersionLocalizations,
             attributes: requestAttributes,
-            relationships: requestRelationships
+            relationships: requestRelationships,
         )
 
         let request = Resources.v1.appStoreVersionLocalizations.post(.init(data: requestData))
@@ -281,7 +280,7 @@ public actor VersionsService {
         promotionalText: String? = nil,
         keywords: String? = nil,
         marketingURL: URL? = nil,
-        supportURL: URL? = nil
+        supportURL: URL? = nil,
     ) async -> Result<AppStoreVersionLocalization, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -291,13 +290,13 @@ public actor VersionsService {
             marketingURL: marketingURL,
             promotionalText: promotionalText,
             supportURL: supportURL,
-            whatsNew: whatsNew
+            whatsNew: whatsNew,
         )
 
         let requestData: AppStoreVersionLocalizationUpdateRequest.Data = .init(
             type: .appStoreVersionLocalizations,
             id: localizationId,
-            attributes: requestAttributes
+            attributes: requestAttributes,
         )
 
         let request = Resources.v1.appStoreVersionLocalizations.id(localizationId).patch(.init(data: requestData))
@@ -320,7 +319,7 @@ public actor VersionsService {
         reviewType: ReviewType? = nil,
         releaseType: ReleaseType? = nil,
         earliestReleaseDate _: Date? = nil,
-        isDownloadable: Bool? = nil
+        isDownloadable: Bool? = nil,
     ) async -> Result<AppStoreVersion, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -330,13 +329,13 @@ public actor VersionsService {
             reviewType: .init(rawValue: reviewType?.rawValue ?? ""),
             releaseType: .init(rawValue: releaseType?.rawValue ?? ""),
             // earliestReleaseDate: earliestReleaseDate,
-            isDownloadable: isDownloadable
+            isDownloadable: isDownloadable,
         )
 
         let requestData: AppStoreVersionUpdateRequest.Data = .init(
             type: .appStoreVersions,
             id: versionId,
-            attributes: requestAttributes
+            attributes: requestAttributes,
         )
 
         let request = Resources.v1.appStoreVersions.id(versionId).patch(.init(data: requestData))
@@ -359,7 +358,7 @@ public actor VersionsService {
         copyright: String? = nil,
         reviewType: ReviewType? = nil,
         releaseType: ReleaseType? = nil,
-        earliestReleaseDate: Date? = nil
+        earliestReleaseDate: Date? = nil,
     ) async -> Result<AppStoreVersion, AppError> {
         guard let client, let platform: AppStoreAPI.Platform = .init(rawValue: platform.rawValue) else {
             return .failure(.network(type: .unauthorized))
@@ -371,7 +370,7 @@ public actor VersionsService {
             copyright: copyright,
             reviewType: .init(rawValue: reviewType?.rawValue ?? ""),
             releaseType: .init(rawValue: releaseType?.rawValue ?? ""),
-            earliestReleaseDate: earliestReleaseDate
+            earliestReleaseDate: earliestReleaseDate,
         )
 
         let requestData: AppStoreVersionCreateRequest.Data = .init(
@@ -380,8 +379,8 @@ public actor VersionsService {
             relationships: .init(
                 app: .init(data: .init(id: appId)),
                 appStoreVersionLocalizations: nil,
-                build: nil
-            )
+                build: nil,
+            ),
         )
 
         let request = Resources.v1.appStoreVersions.post(.init(data: requestData))
