@@ -13,17 +13,15 @@ let commonDependencies: [PackageDescription.Package.Dependency] = [
 
 let remoteDependencies: [PackageDescription.Package.Dependency] = commonDependencies + [
     .package(url: "https://github.com/oversizedev/OversizeCore.git", .upToNextMajor(from: "1.3.0")),
-    .package(url: "https://github.com/oversizedev/OversizeServices.git", .upToNextMajor(from: "1.4.0")),
     .package(url: "https://github.com/oversizedev/OversizeModels.git", .upToNextMajor(from: "0.1.0")),
 ]
 
 let localDependencies: [PackageDescription.Package.Dependency] = commonDependencies + [
     .package(name: "OversizeCore", path: "../OversizeCore"),
     .package(name: "OversizeModels", path: "../OversizeModels"),
-    .package(name: "OversizeServices", path: "../OversizeServices"),
 ]
 
-let dependencies: [PackageDescription.Package.Dependency] = remoteDependencies
+let dependencies: [PackageDescription.Package.Dependency] = localDependencies
 
 let package = Package(
     name: "OversizeAppStoreServices",
@@ -52,7 +50,6 @@ let package = Package(
                 .product(name: "FactoryKit", package: "Factory"),
                 .product(name: "OversizeCore", package: "OversizeCore"),
                 .product(name: "OversizeModels", package: "OversizeModels"),
-                .product(name: "OversizeServices", package: "OversizeServices"),
             ],
         ),
         .target(
@@ -62,7 +59,6 @@ let package = Package(
                 .product(name: "FactoryKit", package: "Factory"),
                 .product(name: "OversizeCore", package: "OversizeCore"),
                 .product(name: "OversizeModels", package: "OversizeModels"),
-                .product(name: "OversizeServices", package: "OversizeServices"),
                 .product(name: "Gzip", package: "GzipSwift"),
                 .product(name: "CodableCSV", package: "CodableCSV"),
                 "OversizeAppStoreServices",

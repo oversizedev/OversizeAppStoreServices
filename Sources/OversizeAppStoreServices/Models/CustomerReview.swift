@@ -4,7 +4,6 @@
 //
 
 import AppStoreAPI
-
 import Foundation
 
 public struct CustomerReview: Sendable, Identifiable {

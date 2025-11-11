@@ -4,7 +4,6 @@
 // swift-format-ignore-file
 
 import AppStoreAPI
-
 import Foundation
 
 public struct BuildBundleFileSize: Sendable, Identifiable {

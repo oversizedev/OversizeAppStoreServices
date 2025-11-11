@@ -5,7 +5,6 @@
 
 import AppStoreAPI
 import Foundation
-import OversizeCore
 
 public struct SubscriptionIntroductoryOffer: Sendable, Identifiable {
     public let id: String

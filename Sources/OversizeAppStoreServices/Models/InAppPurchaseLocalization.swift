@@ -4,9 +4,10 @@
 //
 
 import AppStoreAPI
-
 import Foundation
+#if !os(Linux)
 import SwiftUI
+#endif
 
 public struct InAppPurchaseLocalization: Identifiable, Equatable, Hashable, Sendable {
     public let id: String
@@ -48,6 +49,7 @@ public struct InAppPurchaseLocalization: Identifiable, Equatable, Hashable, Send
             }
         }
 
+        #if !os(Linux)
         public var statusColor: Color {
             switch self {
             case .waitingForReview, .prepareForSubmission:
@@ -58,5 +60,6 @@ public struct InAppPurchaseLocalization: Identifiable, Equatable, Hashable, Send
                 .red
             }
         }
+        #endif
     }
 }

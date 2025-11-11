@@ -5,7 +5,6 @@
 
 import AppStoreAPI
 import Foundation
-import OversizeCore
 
 public struct IntegerRange: Sendable {
     public let minimum: Int?

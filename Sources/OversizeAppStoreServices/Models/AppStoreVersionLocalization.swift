@@ -4,9 +4,7 @@
 //
 
 import AppStoreAPI
-
 import Foundation
-import OversizeCore
 
 public struct AppStoreVersionLocalization: Identifiable, Hashable, Sendable {
     public let id: String

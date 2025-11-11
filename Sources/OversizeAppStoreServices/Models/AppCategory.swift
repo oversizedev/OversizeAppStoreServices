@@ -4,10 +4,10 @@
 //
 
 import AppStoreAPI
-
 import Foundation
-import OversizeCore
+#if !os(Linux)
 import SwiftUI
+#endif
 
 public struct AppCategory: Identifiable, Sendable {
     public let id: String
@@ -24,7 +24,7 @@ public struct AppCategory: Identifiable, Sendable {
             .compactMap { $0.id }
 
         relationships = .init(
-            subcategoryIds: subcategoryIds,
+            subcategoryIds: subcategoryIds
         )
 
         guard let included else {
@@ -111,6 +111,7 @@ public extension AppCategory {
         }
     }
 
+    #if !os(Linux)
     var image: Image {
         switch id {
         case "STICKERS_EMOJI_AND_EXPRESSIONS": Image(systemName: "face.smiling.fill")
@@ -170,4 +171,5 @@ public extension AppCategory {
         default: Image(systemName: "questionmark.circle.fill")
         }
     }
+    #endif
 }

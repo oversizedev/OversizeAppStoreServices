@@ -4,10 +4,10 @@
 //
 
 import AppStoreAPI
-
 import Foundation
-import OversizeCore
+#if !os(Linux)
 import SwiftUI
+#endif
 
 public struct Subscription: Sendable, Identifiable {
     public let id: String
@@ -69,7 +69,7 @@ public struct Subscription: Sendable, Identifiable {
         case removedFromSale = "REMOVED_FROM_SALE"
         case rejected = "REJECTED"
 
-        // Computed property to return color based on the state
+        #if !os(Linux)
         public var statusColor: Color {
             switch self {
             case .approved:
@@ -80,8 +80,8 @@ public struct Subscription: Sendable, Identifiable {
                 .red
             }
         }
+        #endif
 
-        // Computed property to return display-friendly name
         public var displayName: String {
             switch self {
             case .missingMetadata:

@@ -5,7 +5,6 @@
 
 import AppStoreAPI
 import Foundation
-import OversizeCore
 
 public struct Territory: Sendable, Identifiable, Hashable {
     public let id: String

@@ -4,7 +4,6 @@
 //
 
 import AppStoreAPI
-import OversizeCore
 
 public struct AgeRatingDeclaration: Sendable {
     public let id: String
