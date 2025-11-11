@@ -20,28 +20,7 @@ public actor AppStoreVersionSubmissionsService {
         }
     }
 
-    public func postAppStoreVersionSubmission(appStoreVersionsId: String) async -> Result<String, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
-
-        let requestData: AppStoreVersionSubmissionCreateRequest.Data = .init(
-            type: .appStoreVersionSubmissions,
-            relationships: .init(
-                appStoreVersion: .init(
-                    data: .init(
-                        type: .appStoreVersions,
-                        id: appStoreVersionsId,
-                    ),
-                ),
-            ),
-        )
-
-        let request = Resources.v1.appStoreVersionSubmissions.post(.init(data: requestData))
-
-        do {
-            let data = try await client.send(request).data
-            return .success(data.id)
-        } catch {
-            return .failure(.network(type: .noResponse))
-        }
+    public func postAppStoreVersionSubmission(appStoreVersionsId _: String) async -> Result<String, AppError> {
+        .failure(.network(type: .noResponse))
     }
 }

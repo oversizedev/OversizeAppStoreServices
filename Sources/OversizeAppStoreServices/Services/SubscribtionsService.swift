@@ -389,11 +389,11 @@ public actor SubscriptionsService {
         let requestData = SubscriptionPromotionalOfferCreateRequest.Data(
             type: .subscriptionPromotionalOffers,
             attributes: .init(
-                name: name,
-                offerCode: offerCode,
                 duration: duration,
-                offerMode: offerMode,
+                name: name,
                 numberOfPeriods: numberOfPeriods,
+                offerCode: offerCode,
+                offerMode: offerMode,
             ),
             relationships: .init(
                 subscription: .init(

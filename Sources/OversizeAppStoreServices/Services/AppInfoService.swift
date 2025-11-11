@@ -75,7 +75,6 @@ public actor AppInfoService {
         ageRatingDeclarationId: String,
         alcoholTobaccoOrDrugUseOrReferences: AgeRatingDeclarationUpdateRequest.Data.Attributes.AlcoholTobaccoOrDrugUseOrReferences?,
         contests: AgeRatingDeclarationUpdateRequest.Data.Attributes.Contests?,
-        isGamblingAndContests: Bool?,
         isGambling: Bool?,
         gamblingSimulated: AgeRatingDeclarationUpdateRequest.Data.Attributes.GamblingSimulated?,
         kidsAgeBand: AppStoreAPI.KidsAgeBand?,
@@ -90,16 +89,13 @@ public actor AppInfoService {
         violenceCartoonOrFantasy: AgeRatingDeclarationUpdateRequest.Data.Attributes.ViolenceCartoonOrFantasy?,
         violenceRealisticProlongedGraphicOrSadistic: AgeRatingDeclarationUpdateRequest.Data.Attributes.ViolenceRealisticProlongedGraphicOrSadistic?,
         violenceRealistic: AgeRatingDeclarationUpdateRequest.Data.Attributes.ViolenceRealistic?,
-        ageRatingOverride: AgeRatingDeclarationUpdateRequest.Data.Attributes.AgeRatingOverride?,
         koreaAgeRatingOverride: AgeRatingDeclarationUpdateRequest.Data.Attributes.KoreaAgeRatingOverride?,
-        isSeventeenPlus: Bool?,
     ) async -> Result<AgeRatingDeclaration, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
         let requestAttributes: AgeRatingDeclarationUpdateRequest.Data.Attributes = .init(
             alcoholTobaccoOrDrugUseOrReferences: alcoholTobaccoOrDrugUseOrReferences,
             contests: contests,
-            isGamblingAndContests: isGamblingAndContests,
             isGambling: isGambling,
             gamblingSimulated: gamblingSimulated,
             kidsAgeBand: kidsAgeBand,
@@ -114,9 +110,7 @@ public actor AppInfoService {
             violenceCartoonOrFantasy: violenceCartoonOrFantasy,
             violenceRealisticProlongedGraphicOrSadistic: violenceRealisticProlongedGraphicOrSadistic,
             violenceRealistic: violenceRealistic,
-            ageRatingOverride: ageRatingOverride,
             koreaAgeRatingOverride: koreaAgeRatingOverride,
-            isSeventeenPlus: isSeventeenPlus,
         )
 
         let requestData: AgeRatingDeclarationUpdateRequest.Data = .init(
