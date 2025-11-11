@@ -142,7 +142,7 @@ public struct Subscription: Sendable, Identifiable {
             introductoryOffersIds: [String]? = nil,
             promotionalOffersIds: [String]? = nil,
             winBackOffersIds: [String]? = nil,
-            imagesIds: [String]? = nil
+            imagesIds: [String]? = nil,
         ) {
             self.subscriptionLocalizationsIds = subscriptionLocalizationsIds
             self.subscriptionPricesIds = subscriptionPricesIds
@@ -182,7 +182,7 @@ public struct Subscription: Sendable, Identifiable {
             introductoryOffers: [SubscriptionIntroductoryOffer]? = nil,
             promotionalOffers: [SubscriptionPromotionalOffer]? = nil,
             winBackOffers: [WinBackOffer]? = nil,
-            subscriptionImages: [SubscriptionImage]? = nil
+            subscriptionImages: [SubscriptionImage]? = nil,
         ) {
             self.subscriptionLocalizations = subscriptionLocalizations
             self.subscriptionPrices = subscriptionPrices

@@ -59,7 +59,7 @@ public struct SubscriptionIntroductoryOffer: Sendable, Identifiable {
         public init(
             subscriptionId: String? = nil,
             territoryId: String? = nil,
-            subscriptionPricePointId: String? = nil
+            subscriptionPricePointId: String? = nil,
         ) {
             self.subscriptionId = subscriptionId
             self.territoryId = territoryId
@@ -75,7 +75,7 @@ public struct SubscriptionIntroductoryOffer: Sendable, Identifiable {
         public init(
             subscription: Subscription? = nil,
             territory: Territory? = nil,
-            subscriptionPricePoint: SubscriptionPricePoint? = nil
+            subscriptionPricePoint: SubscriptionPricePoint? = nil,
         ) {
             self.subscription = subscription
             self.territory = territory

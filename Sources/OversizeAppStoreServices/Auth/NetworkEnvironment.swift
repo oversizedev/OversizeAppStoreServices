@@ -46,7 +46,7 @@ public struct NetworkEnvironment {
     /// - Throws: ``FileParserError`` if the file could not be loaded or parsed.
     public init(
         contentsOf url: URL? = nil,
-        processInfo: ProcessInfo = .processInfo
+        processInfo: ProcessInfo = .processInfo,
     ) throws {
         self.url =
             url

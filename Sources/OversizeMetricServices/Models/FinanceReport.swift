@@ -54,7 +54,7 @@ public struct FinanceReports: Sendable {
             preOrderFlag: String? = nil,
             promoCode: String? = nil,
             customerPrice: String,
-            customerCurrency: String? = nil
+            customerCurrency: String? = nil,
         ) {
             self.startDate = startDate
             self.endDate = endDate

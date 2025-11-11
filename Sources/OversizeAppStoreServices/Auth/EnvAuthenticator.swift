@@ -15,7 +15,7 @@ public struct EnvAuthenticator: Authenticator {
     public var api: API { jwt.api }
 
     public init(
-        api: API = .appStoreConnect
+        api: API = .appStoreConnect,
 
     ) throws {
         guard let keyLabel = UserDefaults.standard.string(forKey: "AppStore.Account") else {

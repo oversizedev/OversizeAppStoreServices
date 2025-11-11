@@ -17,7 +17,7 @@ public struct SalesReports: Sendable {
         public let startDate: String
 
         public init(
-            startDate: String
+            startDate: String,
         ) {
             self.startDate = startDate
         }

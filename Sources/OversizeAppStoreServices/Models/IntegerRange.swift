@@ -18,7 +18,7 @@ public struct IntegerRange: Sendable {
 
     public init(
         minimum: Int? = nil,
-        maximum: Int? = nil
+        maximum: Int? = nil,
     ) {
         self.minimum = minimum
         self.maximum = maximum

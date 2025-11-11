@@ -53,7 +53,7 @@ public struct SubscriptionPromotionalOffer: Sendable, Identifiable {
 
         public init(
             subscriptionId: String? = nil,
-            pricesIds: [String]? = nil
+            pricesIds: [String]? = nil,
         ) {
             self.subscriptionId = subscriptionId
             self.pricesIds = pricesIds
@@ -66,7 +66,7 @@ public struct SubscriptionPromotionalOffer: Sendable, Identifiable {
 
         public init(
             subscription: Subscription? = nil,
-            subscriptionPromotionalOfferPrices: [SubscriptionPromotionalOfferPrice]? = nil
+            subscriptionPromotionalOfferPrices: [SubscriptionPromotionalOfferPrice]? = nil,
         ) {
             self.subscription = subscription
             self.subscriptionPromotionalOfferPrices = subscriptionPromotionalOfferPrices

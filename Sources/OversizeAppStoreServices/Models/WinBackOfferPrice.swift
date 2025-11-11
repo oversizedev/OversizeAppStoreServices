@@ -44,7 +44,7 @@ public struct WinBackOfferPrice: Sendable, Identifiable {
 
         public init(
             territoryId: String? = nil,
-            subscriptionPricePointId: String? = nil
+            subscriptionPricePointId: String? = nil,
         ) {
             self.territoryId = territoryId
             self.subscriptionPricePointId = subscriptionPricePointId
@@ -57,7 +57,7 @@ public struct WinBackOfferPrice: Sendable, Identifiable {
 
         public init(
             territory: Territory? = nil,
-            subscriptionPricePoint: SubscriptionPricePoint? = nil
+            subscriptionPricePoint: SubscriptionPricePoint? = nil,
         ) {
             self.territory = territory
             self.subscriptionPricePoint = subscriptionPricePoint

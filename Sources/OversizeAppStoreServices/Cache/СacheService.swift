@@ -81,7 +81,7 @@ public extension CacheService {
     func fetchWithCache<T: Codable & Sendable>(
         key: String,
         force: Bool = false,
-        fetcher: () async throws -> T
+        fetcher: () async throws -> T,
     ) async -> Result<T, AppError> {
         if !force {
             if let cachedData: T = await load(key: key, as: T.self) {
