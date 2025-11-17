@@ -110,6 +110,41 @@ public actor SubscriptionsService {
             return handleRequestFailure(error: error, replaces: [:])
         }
     }
+    
+    public func postSubscriptionGroupLocalization(
+        subscriptionGroupId: String,
+        name: String,
+        customAppName: String? = nil,
+        locale: AppStoreLanguage,
+    ) async -> Result<SubscriptionGroupLocalization, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+        let requestData: SubscriptionGroupLocalizationCreateRequest.Data = .init(
+            type: .subscriptionGroupLocalizations,
+            attributes: .init(
+                name: name,
+                customAppName: customAppName,
+                locale: locale.rawValue,
+            ),
+            relationships: .init(
+                subscriptionGroup: .init(
+                    data: .init(
+                        type: .subscriptionGroups,
+                        id: subscriptionGroupId
+                    ),
+                ),
+            ),
+        )
+        let request = Resources.v1.subscriptionGroupLocalizations.post(.init(data: requestData))
+        do {
+            let data = try await client.send(request).data
+            guard let app = SubscriptionGroupLocalization(schema: data) else {
+                return .failure(.network(type: .decode))
+            }
+            return .success(app)
+        } catch {
+            return handleRequestFailure(error: error, replaces: [:])
+        }
+    }
 
     public func postSubscription(
         subscriptionGroupId: String,
@@ -455,20 +490,12 @@ public actor SubscriptionsService {
     ) async -> Result<Subscription, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
-        let relationships = SubscriptionUpdateRequest.Data.Relationships(
-            prices: .init(data: prices.map { .init(type: .subscriptionPrices, id: $0.id) }),
-        )
+        let includedItems: [SubscriptionUpdateRequest.IncludedItem] = prices.enumerated().map { index, price in
+            let temporaryId = "${newprice-\(index)}"
 
-        let requestData = SubscriptionUpdateRequest.Data(
-            type: .subscriptions,
-            id: subscriptionsId,
-            relationships: relationships,
-        )
-
-        let includedItems: [SubscriptionUpdateRequest.IncludedItem] = prices.map { price in
             let pricePointData = SubscriptionPriceInlineCreate.Relationships.SubscriptionPricePoint.Data(
                 type: .subscriptionPricePoints,
-                id: pricePountId,
+                id: price.id,
             )
 
             let relationship = SubscriptionPriceInlineCreate.Relationships(
@@ -478,11 +505,30 @@ public actor SubscriptionsService {
             return .subscriptionPriceInlineCreate(
                 SubscriptionPriceInlineCreate(
                     type: .subscriptionPrices,
-                    id: price.id,
+                    id: temporaryId,
+                    attributes: .init(),
                     relationships: relationship,
                 ),
             )
         }
+
+        let pricesData = includedItems.compactMap { item -> SubscriptionUpdateRequest.Data.Relationships.Prices.Datum? in
+            guard case let .subscriptionPriceInlineCreate(price) = item else { return nil }
+            return .init(
+                type: .subscriptionPrices,
+                id: price.id ?? "",
+            )
+        }
+
+        let relationships = SubscriptionUpdateRequest.Data.Relationships(
+            prices: .init(data: pricesData),
+        )
+
+        let requestData = SubscriptionUpdateRequest.Data(
+            type: .subscriptions,
+            id: subscriptionsId,
+            relationships: relationships,
+        )
 
         let request = Resources.v1.subscriptions.id(subscriptionsId).patch(
             .init(data: requestData, included: includedItems),
@@ -517,7 +563,7 @@ public actor SubscriptionsService {
         }
 
         let includedItems: [SubscriptionUpdateRequest.IncludedItem] = territories.enumerated().map { index, territory in
-            let temporaryId = "newIntroOffer-\(index)"
+            let temporaryId = "${newIntroOffer-\(index)}"
 
             let attributes = SubscriptionIntroductoryOfferInlineCreate.Attributes(
                 startDate: startDate?.toString(),
