@@ -477,6 +477,39 @@ public actor InAppPurchasesService {
     ) async -> Result<InAppPurchasePriceSchedule, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
+        let included: [InAppPurchasePriceScheduleCreateRequest.IncludedItem] = inAppPurchasePricePoints.enumerated().map { index, pricePoint in
+            let temporaryId = "${newprice-\(index)}"
+
+            return .inAppPurchasePriceInlineCreate(
+                .init(
+                    type: .inAppPurchasePrices,
+                    id: temporaryId,
+                    attributes: .init(
+                        startDate: startDate,
+                        endDate: endDate,
+                    ),
+                    relationships: .init(
+                        inAppPurchaseV2: .init(data: .init(
+                            type: .inAppPurchases,
+                            id: inAppPurchaseV2Id,
+                        )),
+                        inAppPurchasePricePoint: .init(data: .init(
+                            type: .inAppPurchasePricePoints,
+                            id: pricePoint.id,
+                        )),
+                    ),
+                ),
+            )
+        }
+
+        let manualPricesData = included.compactMap { item -> InAppPurchasePriceScheduleCreateRequest.Data.Relationships.ManualPrices.Datum? in
+            guard case let .inAppPurchasePriceInlineCreate(price) = item else { return nil }
+            return .init(
+                type: .inAppPurchasePrices,
+                id: price.id ?? "",
+            )
+        }
+
         let requestData: InAppPurchasePriceScheduleCreateRequest.Data = .init(
             type: .inAppPurchasePriceSchedules,
             relationships: .init(
@@ -492,39 +525,9 @@ public actor InAppPurchasesService {
                         id: baseTerritory.id,
                     ),
                 ),
-                manualPrices: .init(
-                    data: inAppPurchasePricePoints.compactMap {
-                        .init(
-                            type: .inAppPurchasePrices,
-                            id: $0.id,
-                        )
-                    },
-                ),
+                manualPrices: .init(data: manualPricesData),
             ),
         )
-
-        let included: [InAppPurchasePriceScheduleCreateRequest.IncludedItem] = inAppPurchasePricePoints.compactMap {
-            .inAppPurchasePriceInlineCreate(
-                .init(
-                    type: .inAppPurchasePrices,
-                    id: $0.id,
-                    attributes: .init(
-                        startDate: startDate,
-                        endDate: endDate,
-                    ),
-                    relationships: .init(
-                        inAppPurchaseV2: .init(data: .init(
-                            type: .inAppPurchases,
-                            id: inAppPurchaseV2Id,
-                        )),
-                        inAppPurchasePricePoint: .init(data: .init(
-                            type: .inAppPurchasePricePoints,
-                            id: $0.id,
-                        )),
-                    ),
-                ),
-            )
-        }
 
         let request = Resources.v1.inAppPurchasePriceSchedules.post(
             .init(

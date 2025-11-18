@@ -40,9 +40,9 @@ The `Package.swift` has **two dependency configurations**:
 - `remoteDependencies`: Uses packages from GitHub
 - `localDependencies`: Uses local file paths (../OversizeCore, ../OversizeModels, ../OversizeServices)
 
-**Current configuration**: `localDependencies` (line 26)
+**Current configuration**: `localDependencies` (line 25)
 
-When switching between local and remote development, modify line 26:
+When switching between local and remote development, modify line 25:
 ```swift
 let dependencies: [PackageDescription.Package.Dependency] = localDependencies  // or remoteDependencies
 ```
@@ -138,7 +138,7 @@ Sources/
 │   ├── Auth/                    # EnvAuthenticator, NetworkEnvironment
 │   ├── Cache/                   # CacheService (file-based)
 │   ├── Models/                  # 30+ data models
-│   │   └── Typs/               # Type-safe enums (SubscriptionPeriod, Platform, etc.)
+│   │   └── Types/              # Type-safe enums (SubscriptionPeriod, Platform, etc.)
 │   ├── Services/               # 12 actor-based services
 │   └── ServiceRegistering.swift # Factory DI registration
 │
@@ -147,7 +147,7 @@ Sources/
 │   └── Services/               # AnalyticsService, SalesAndFinanceService, PerfPowerMetricsService
 │
 Tests/
-└── OversizeAppStoreServicesTests/  # 19 test files using Swift Testing framework
+└── OversizeAppStoreServicesTests/  # 18 test files using Swift Testing framework
 ```
 
 ## Testing Infrastructure
@@ -189,7 +189,7 @@ Test coverage focuses on:
 1. Create model in `Sources/OversizeAppStoreServices/Models/`
 2. Add custom initializer from AppStoreAPI schema
 3. Conform to `Codable` and `Sendable` (Swift 6)
-4. Add type enums in `Models/Typs/` if needed
+4. Add type enums in `Models/Types/` if needed
 
 ### Type Enums
 All type enums should provide:
