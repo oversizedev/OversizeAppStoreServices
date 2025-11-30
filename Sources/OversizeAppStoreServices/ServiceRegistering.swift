@@ -54,6 +54,10 @@ public extension Container {
         self { AppStoreVersionSubmissionsService() }
     }
 
+    var appScreenshotsService: Factory<AppScreenshotsService> {
+        self { AppScreenshotsService() }
+    }
+
     var cacheService: Factory<CacheService> {
         self { CacheService() }
     }
