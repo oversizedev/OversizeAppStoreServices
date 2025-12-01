@@ -139,16 +139,7 @@ public actor AppScreenshotsService {
             try await withThrowingTaskGroup(of: Void.self) { group in
                 for operation in uploadOperations {
                     group.addTask {
-                        let uploadOp = AppStoreAPI.UploadOperation(
-                            method: operation.method,
-                            url: operation.url,
-                            length: operation.length,
-                            offset: operation.offset,
-                            requestHeaders: operation.requestHeaders.map {
-                                .init(name: $0.name, value: $0.value)
-                            }
-                        )
-                        try await client.upload(operation: uploadOp, from: fileData)
+                        try await client.upload(operation: operation, from: fileData)
                     }
                 }
                 try await group.waitForAll()
