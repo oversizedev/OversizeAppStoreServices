@@ -110,7 +110,10 @@ public actor AppScreenshotsService {
                         ),
                         relationships: .init(
                             appScreenshotSet: .init(
-                                data: .init(type: .appScreenshotSets, id: screenshotSetId)
+                                data: .init(
+                                    type: .appScreenshotSets,
+                                    id: screenshotSetId
+                                )
                             )
                         )
                     )
@@ -127,7 +130,6 @@ public actor AppScreenshotsService {
     }
 
     public func uploadAppScreenshot(
-        screenshotId: String,
         fileData: Data,
         uploadOperations: [UploadOperation]
     ) async -> Result<Void, AppError> {

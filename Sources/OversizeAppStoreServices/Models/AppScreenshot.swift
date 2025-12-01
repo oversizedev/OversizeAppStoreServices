@@ -16,6 +16,7 @@ public struct AppScreenshot: Identifiable, Sendable {
     public var uploadOperations: [UploadOperation]?
     public var assetType: String?
     public var assetToken: String?
+    public var assetDeliveryState: AppMediaAssetState?
 
     public init(
         id: String,
@@ -26,7 +27,8 @@ public struct AppScreenshot: Identifiable, Sendable {
         sourceFileChecksum: String? = nil,
         uploadOperations: [UploadOperation]? = nil,
         assetType: String? = nil,
-        assetToken: String? = nil
+        assetToken: String? = nil,
+        assetDeliveryState: AppMediaAssetState? = nil
     ) {
         self.id = id
         self.type = type
@@ -37,6 +39,7 @@ public struct AppScreenshot: Identifiable, Sendable {
         self.uploadOperations = uploadOperations
         self.assetType = assetType
         self.assetToken = assetToken
+        self.assetDeliveryState = assetDeliveryState
     }
 
     public init(schema: AppStoreAPI.AppScreenshot) {
@@ -53,5 +56,8 @@ public struct AppScreenshot: Identifiable, Sendable {
         }
         assetType = schema.attributes?.assetType
         assetToken = schema.attributes?.assetToken
+        if let assetDeliveryStateSchema = schema.attributes?.assetDeliveryState {
+            assetDeliveryState = AppMediaAssetState(schema: assetDeliveryStateSchema)
+        }
     }
 }
