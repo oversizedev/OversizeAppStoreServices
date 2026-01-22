@@ -28,7 +28,7 @@ public struct AppScreenshot: Identifiable, Sendable {
         uploadOperations: [UploadOperation]? = nil,
         assetType: String? = nil,
         assetToken: String? = nil,
-        assetDeliveryState: AppMediaAssetState? = nil
+        assetDeliveryState: AppMediaAssetState? = nil,
     ) {
         self.id = id
         self.type = type

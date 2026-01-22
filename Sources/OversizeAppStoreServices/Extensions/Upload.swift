@@ -6,10 +6,10 @@
 import AppStoreConnect
 import Foundation
 
-extension AppStoreConnectClient {
-    public func upload(
+public extension AppStoreConnectClient {
+    func upload(
         operation: UploadOperation,
-        from data: Data
+        from data: Data,
     ) async throws {
         guard let offset = operation.offset,
               let length = operation.length,
@@ -20,7 +20,7 @@ extension AppStoreConnectClient {
             throw NSError(domain: "UploadError", code: -1)
         }
 
-        let dataChunk = data[offset..<(length + offset)]
+        let dataChunk = data[offset ..< (length + offset)]
 
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = method
@@ -34,7 +34,7 @@ extension AppStoreConnectClient {
         let (_, response) = try await URLSession.shared.upload(for: urlRequest, from: dataChunk)
 
         guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode)
+              (200 ... 299).contains(httpResponse.statusCode)
         else {
             throw NSError(domain: "UploadError", code: -1, userInfo: [NSLocalizedDescriptionKey: "Upload failed"])
         }

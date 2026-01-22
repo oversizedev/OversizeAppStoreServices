@@ -138,8 +138,8 @@ public actor AppInfoService {
         localizationId: String,
         name: String? = nil,
         subtitle: String? = nil,
-        privacyPolicyURL: String? = nil,
-        privacyChoicesURL: String? = nil,
+        privacyPolicyURL: URL? = nil,
+        privacyChoicesURL: URL? = nil,
         privacyPolicyText: String? = nil,
     ) async -> Result<AppInfoLocalization, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
@@ -147,8 +147,8 @@ public actor AppInfoService {
         let requestAttributes: AppInfoLocalizationUpdateRequest.Data.Attributes = .init(
             name: name,
             subtitle: subtitle,
-            privacyPolicyURL: privacyPolicyURL,
-            privacyChoicesURL: privacyChoicesURL,
+            privacyPolicyURL: privacyPolicyURL?.absoluteString,
+            privacyChoicesURL: privacyChoicesURL?.absoluteString,
             privacyPolicyText: privacyPolicyText,
         )
 

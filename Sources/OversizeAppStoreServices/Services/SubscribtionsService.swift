@@ -110,7 +110,7 @@ public actor SubscriptionsService {
             return handleRequestFailure(error: error, replaces: [:])
         }
     }
-    
+
     public func postSubscriptionGroupLocalization(
         subscriptionGroupId: String,
         name: String,
@@ -129,7 +129,7 @@ public actor SubscriptionsService {
                 subscriptionGroup: .init(
                     data: .init(
                         type: .subscriptionGroups,
-                        id: subscriptionGroupId
+                        id: subscriptionGroupId,
                     ),
                 ),
             ),
@@ -485,7 +485,7 @@ public actor SubscriptionsService {
 
     public func patchSubscriptionPrice(
         subscriptionsId: String,
-        pricePountId: String,
+        pricePountId _: String,
         prices: [SubscriptionPricePoint],
     ) async -> Result<Subscription, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }

@@ -24,7 +24,7 @@ public struct AppCategory: Identifiable, Sendable {
             .compactMap { $0.id }
 
         relationships = .init(
-            subcategoryIds: subcategoryIds
+            subcategoryIds: subcategoryIds,
         )
 
         guard let included else {

@@ -21,7 +21,7 @@ public struct AppMediaAssetState: Codable, Equatable, Sendable {
     public init(
         errors: [AppMediaStateError]? = nil,
         warnings: [AppMediaStateError]? = nil,
-        state: State? = nil
+        state: State? = nil,
     ) {
         self.errors = errors
         self.warnings = warnings

@@ -12,7 +12,6 @@ import OversizeCore
 import OversizeModels
 
 public actor AppScreenshotsService {
-    
     @Injected(\.cacheService) private var cacheService: CacheService
     private let client: AppStoreConnectClient?
 
@@ -27,7 +26,7 @@ public actor AppScreenshotsService {
     public func fetchAppScreenshotSets(
         localizationId: String,
         screenshotDisplayType: ScreenshotDisplayType? = nil,
-        force: Bool = false
+        force: Bool = false,
     ) async -> Result<[AppScreenshotSet], AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -48,7 +47,7 @@ public actor AppScreenshotsService {
 
     public func postAppScreenshotSet(
         localizationId: String,
-        screenshotDisplayType: ScreenshotDisplayType
+        screenshotDisplayType: ScreenshotDisplayType,
     ) async -> Result<AppScreenshotSet, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -62,12 +61,12 @@ public actor AppScreenshotsService {
                             appStoreVersionLocalization: .init(
                                 data: .init(
                                     type: .appStoreVersionLocalizations,
-                                    id: localizationId
-                                )
-                            )
-                        )
-                    )
-                )
+                                    id: localizationId,
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
             )
 
             let response = try await client.send(request)
@@ -95,7 +94,7 @@ public actor AppScreenshotsService {
     public func reserveAppScreenshot(
         screenshotSetId: String,
         fileName: String,
-        fileSize: Int
+        fileSize: Int,
     ) async -> Result<AppScreenshot, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -106,18 +105,18 @@ public actor AppScreenshotsService {
                         type: .appScreenshots,
                         attributes: .init(
                             fileSize: fileSize,
-                            fileName: fileName
+                            fileName: fileName,
                         ),
                         relationships: .init(
                             appScreenshotSet: .init(
                                 data: .init(
                                     type: .appScreenshotSets,
-                                    id: screenshotSetId
-                                )
-                            )
-                        )
-                    )
-                )
+                                    id: screenshotSetId,
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
             )
 
             let response = try await client.send(request)
@@ -131,7 +130,7 @@ public actor AppScreenshotsService {
 
     public func uploadAppScreenshot(
         fileData: Data,
-        uploadOperations: [UploadOperation]
+        uploadOperations: [UploadOperation],
     ) async -> Result<Void, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -153,7 +152,7 @@ public actor AppScreenshotsService {
 
     public func commitAppScreenshot(
         screenshotId: String,
-        sourceFileChecksum: String
+        sourceFileChecksum: String,
     ) async -> Result<AppScreenshot, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 
@@ -166,10 +165,10 @@ public actor AppScreenshotsService {
                             id: screenshotId,
                             attributes: .init(
                                 sourceFileChecksum: sourceFileChecksum,
-                                isUploaded: true
-                            )
-                        )
-                    )
+                                isUploaded: true,
+                            ),
+                        ),
+                    ),
                 )
 
             let response = try await client.send(request)
@@ -196,7 +195,7 @@ public actor AppScreenshotsService {
 
     public func updateScreenshotOrder(
         screenshotSetId: String,
-        screenshotIds: [String]
+        screenshotIds: [String],
     ) async -> Result<Void, AppError> {
         guard let client else { return .failure(.network(type: .unauthorized)) }
 

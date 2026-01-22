@@ -16,7 +16,7 @@ public struct AppScreenshotSet: Identifiable, Sendable {
         id: String,
         type: String = "appScreenshotSets",
         screenshotDisplayType: ScreenshotDisplayType? = nil,
-        appScreenshots: [AppScreenshot]? = nil
+        appScreenshots: [AppScreenshot]? = nil,
     ) {
         self.id = id
         self.type = type
