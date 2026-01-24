@@ -17,7 +17,7 @@ public struct CustomerReview: Sendable, Identifiable {
 
     public let included: Included?
 
-    init?(schema: AppStoreAPI.CustomerReview, included: [AppStoreAPI.CustomerReviewResponseV1]? = nil) {
+    public init?(schema: AppStoreAPI.CustomerReview, included: [AppStoreAPI.CustomerReviewResponseV1]? = nil) {
         guard let rating = schema.attributes?.rating,
               let territory = schema.attributes?.territory?.rawValue
         else { return nil }

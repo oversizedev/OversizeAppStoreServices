@@ -7,6 +7,7 @@ import AppStoreAPI
 import AppStoreConnect
 import Foundation
 import OversizeModels
+import OversizeAppStoreModels
 
 public actor AppStoreReviewService {
     private let client: AppStoreConnectClient?

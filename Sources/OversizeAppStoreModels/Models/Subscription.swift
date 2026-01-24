@@ -197,7 +197,7 @@ public struct Subscription: Sendable, Identifiable {
             self.subscriptionImages = subscriptionImages
         }
 
-        init?(included: [SubscriptionResponse.IncludedItem]?) {
+        public init?(included: [SubscriptionResponse.IncludedItem]?) {
             subscriptionLocalizations = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> SubscriptionLocalization? in
                 if case let .subscriptionLocalization(value) = item { return .init(schema: value) }
                 return nil

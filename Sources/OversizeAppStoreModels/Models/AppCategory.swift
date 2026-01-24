@@ -16,7 +16,7 @@ public struct AppCategory: Identifiable, Sendable {
     public let relationships: Relationships?
     public let included: Included?
 
-    init?(schema: AppStoreAPI.AppCategory, included: [AppStoreAPI.AppCategory]? = nil) {
+    public init?(schema: AppStoreAPI.AppCategory, included: [AppStoreAPI.AppCategory]? = nil) {
         id = schema.id
         platforms = schema.attributes?.platforms?.compactMap { .init(rawValue: $0.rawValue) } ?? []
 

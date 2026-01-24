@@ -9,6 +9,7 @@ import FactoryKit
 import Foundation
 import OversizeCore
 import OversizeModels
+import OversizeAppStoreModels
 
 public actor BuildsService {
     @Injected(\.cacheService) private var cacheService: CacheService

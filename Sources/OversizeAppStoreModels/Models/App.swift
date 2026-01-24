@@ -217,8 +217,8 @@ public extension App {
     }
 }
 
-extension App {
-    static func from(response: AppStoreAPI.AppsResponse) -> [App] {
+public extension App {
+    public static func from(response: AppStoreAPI.AppsResponse) -> [App] {
         response.data.compactMap { schema in
             let filteredIncluded = response.included?.filter { includedItem in
                 switch includedItem {

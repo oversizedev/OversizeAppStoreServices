@@ -13,7 +13,7 @@ public struct BuildBundleFileSize: Sendable, Identifiable {
     public let downloadBytes: Int
     public let installBytes: Int
 
-    init?(schema: AppStoreAPI.BuildBundleFileSize) {
+    public init?(schema: AppStoreAPI.BuildBundleFileSize) {
         guard let attributes = schema.attributes,
               let deviceModel = attributes.deviceModel,
               let osVersion = attributes.osVersion,

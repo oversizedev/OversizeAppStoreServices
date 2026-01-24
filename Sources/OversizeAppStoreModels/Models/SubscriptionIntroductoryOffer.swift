@@ -84,7 +84,7 @@ public struct SubscriptionIntroductoryOffer: Sendable, Identifiable {
 }
 
 extension SubscriptionIntroductoryOffer {
-    static func from(response: AppStoreAPI.SubscriptionIntroductoryOffersResponse) -> [SubscriptionIntroductoryOffer] {
+    public static func from(response: AppStoreAPI.SubscriptionIntroductoryOffersResponse) -> [SubscriptionIntroductoryOffer] {
         response.data.compactMap { SubscriptionIntroductoryOffer(schema: $0, included: response.included) }
     }
 }

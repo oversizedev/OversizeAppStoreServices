@@ -29,4 +29,14 @@ public struct UploadOperation: Codable, Equatable, Sendable {
         offset = schema.offset
         requestHeaders = schema.requestHeaders?.map { RequestHeader(name: $0.name, value: $0.value) } ?? []
     }
+
+    public var schema: AppStoreAPI.UploadOperation {
+        AppStoreAPI.UploadOperation(
+            method: method,
+            url: url,
+            length: length,
+            offset: offset,
+            requestHeaders: requestHeaders.map { .init(name: $0.name, value: $0.value) },
+        )
+    }
 }

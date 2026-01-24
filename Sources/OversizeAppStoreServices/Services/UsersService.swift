@@ -6,6 +6,7 @@
 import AppStoreAPI
 import AppStoreConnect
 import OversizeModels
+import OversizeAppStoreModels
 
 public actor UsersService {
     private let client: AppStoreConnectClient?

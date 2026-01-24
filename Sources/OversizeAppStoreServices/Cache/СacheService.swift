@@ -6,6 +6,7 @@
 import Foundation
 import OversizeCore
 import OversizeModels
+import OversizeAppStoreModels
 
 public actor CacheService {
     private let cacheDirectory: URL

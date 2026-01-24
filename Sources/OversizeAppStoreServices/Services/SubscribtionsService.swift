@@ -8,6 +8,7 @@ import AppStoreConnect
 import FactoryKit
 import Foundation
 import OversizeModels
+import OversizeAppStoreModels
 
 public actor SubscriptionsService {
     private let client: AppStoreConnectClient?

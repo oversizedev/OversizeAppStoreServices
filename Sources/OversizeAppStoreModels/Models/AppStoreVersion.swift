@@ -22,7 +22,7 @@ public struct AppStoreVersion: Sendable, Identifiable {
     public let included: Included?
     public let relationships: Relationships?
 
-    init?(schema: AppStoreAPI.AppStoreVersion, included: [AppStoreAPI.AppStoreVersionsResponse.IncludedItem]? = nil) {
+    public init?(schema: AppStoreAPI.AppStoreVersion, included: [AppStoreAPI.AppStoreVersionsResponse.IncludedItem]? = nil) {
         guard let storeState = schema.attributes?.appStoreState?.rawValue,
               let storeStateType: AppStoreVersionState = .init(rawValue: storeState),
               let state = schema.attributes?.appVersionState?.rawValue,

@@ -4,6 +4,7 @@
 //
 
 import FactoryKit
+import OversizeAppStoreModels
 
 public extension Container {
     var appsService: Factory<AppsService> {

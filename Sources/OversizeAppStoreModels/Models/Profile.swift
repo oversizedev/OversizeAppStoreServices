@@ -11,7 +11,7 @@ public struct Profile: Sendable {
     public let content: String
     public let isActive: Bool
 
-    init?(schema: AppStoreAPI.Profile) {
+    public init?(schema: AppStoreAPI.Profile) {
         guard let name = schema.attributes?.name,
               let content = schema.attributes?.profileContent,
               let state = schema.attributes?.profileState,
@@ -27,7 +27,7 @@ public struct Profile: Sendable {
 }
 
 extension Profile {
-    static func from(_ response: AppStoreAPI.ProfilesResponse, include: (Profile) -> Bool) -> [Profile] {
+    public static func from(_ response: AppStoreAPI.ProfilesResponse, include: (Profile) -> Bool) -> [Profile] {
         response.data.compactMap { Profile(schema: $0) }.filter { include($0) }
     }
 }

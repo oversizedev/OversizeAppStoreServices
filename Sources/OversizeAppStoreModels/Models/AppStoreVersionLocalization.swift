@@ -16,7 +16,7 @@ public struct AppStoreVersionLocalization: Identifiable, Hashable, Sendable {
     public let supportURL: URL?
     public let whatsNew: String?
 
-    init?(schema: AppStoreAPI.AppStoreVersionLocalization) {
+    public init?(schema: AppStoreAPI.AppStoreVersionLocalization) {
         guard let localeRawValue = schema.attributes?.locale,
               let locale: AppStoreLanguage = .init(rawValue: localeRawValue) else { return nil }
         id = schema.id

@@ -8,6 +8,7 @@ import AppStoreConnect
 import Foundation
 import OversizeCore
 import OversizeModels
+import OversizeAppStoreModels
 
 public actor AppStoreVersionSubmissionsService {
     private let client: AppStoreConnectClient?
