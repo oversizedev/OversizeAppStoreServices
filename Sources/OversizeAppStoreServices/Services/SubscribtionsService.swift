@@ -429,7 +429,7 @@ public actor SubscriptionsService {
                 name: name,
                 numberOfPeriods: numberOfPeriods,
                 offerCode: offerCode,
-                offerMode: offerMode,
+                offerMode: offerMode
             ),
             relationships: .init(
                 subscription: .init(
@@ -440,8 +440,8 @@ public actor SubscriptionsService {
 
         let request = Resources.v1.subscriptionPromotionalOffers.post(.init(data: requestData))
         do {
-            let data = try await client.send(request).data
-            guard let offer = SubscriptionPromotionalOffer(schema: data) else {
+            let response = try await client.send(request)
+            guard let offer = SubscriptionPromotionalOffer(schema: response.data) else {
                 return .failure(.network(type: .decode))
             }
             return .success(offer)

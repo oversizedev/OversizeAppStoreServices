@@ -8,7 +8,6 @@ import AppStoreConnect
 import Foundation
 import OversizeCore
 import OversizeModels
-import OversizeAppStoreModels
 
 public actor AppStoreVersionSubmissionsService {
     private let client: AppStoreConnectClient?
@@ -21,7 +20,128 @@ public actor AppStoreVersionSubmissionsService {
         }
     }
 
-    public func postAppStoreVersionSubmission(appStoreVersionsId _: String) async -> Result<String, AppError> {
-        .failure(.network(type: .noResponse))
+    public func postAppStoreVersionSubmission(
+        appId: String,
+        appStoreVersionsId: String,
+        platform: Platform
+    ) async -> Result<String, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+
+        do {
+            let apiPlatform: AppStoreAPI.Platform = switch platform {
+            case .ios: .iOS
+            case .macOs: .macOS
+            case .tvOs: .tvOS
+            case .visionOs: .visionOS
+            }
+
+            let reviewSubmissionRequest = ReviewSubmissionCreateRequest(
+                data: .init(
+                    type: .reviewSubmissions,
+                    attributes: .init(platform: apiPlatform),
+                    relationships: .init(
+                        app: .init(data: .init(type: .apps, id: appId))
+                    )
+                )
+            )
+
+            let createRequest = Resources.v1.reviewSubmissions.post(reviewSubmissionRequest)
+            let reviewSubmission = try await client.send(createRequest).data
+
+            let itemRequest = ReviewSubmissionItemCreateRequest(
+                data: .init(
+                    type: .reviewSubmissionItems,
+                    relationships: .init(
+                        reviewSubmission: .init(
+                            data: .init(type: .reviewSubmissions, id: reviewSubmission.id)
+                        ),
+                        appStoreVersion: .init(
+                            data: .init(type: .appStoreVersions, id: appStoreVersionsId)
+                        )
+                    )
+                )
+            )
+
+            let itemCreateRequest = Resources.v1.reviewSubmissionItems.post(itemRequest)
+            _ = try await client.send(itemCreateRequest)
+
+            let submitRequest = ReviewSubmissionUpdateRequest(
+                data: .init(
+                    type: .reviewSubmissions,
+                    id: reviewSubmission.id,
+                    attributes: .init(isSubmitted: true)
+                )
+            )
+
+            let patchRequest = Resources.v1.reviewSubmissions.id(reviewSubmission.id).patch(submitRequest)
+            _ = try await client.send(patchRequest)
+
+            return .success(reviewSubmission.id)
+
+        } catch {
+            return handleRequestFailure(error: error)
+        }
+    }
+
+    public func fetchReviewSubmission(
+        appId: String
+    ) async -> Result<ReviewSubmission?, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+
+        do {
+            let request = Resources.v1.reviewSubmissions.get(
+                filterState: [.readyForReview, .waitingForReview, .inReview],
+                filterApp: [appId]
+            )
+
+            let response = try await client.send(request)
+            return .success(response.data.first)
+
+        } catch {
+            return handleRequestFailure(error: error)
+        }
+    }
+
+    public func cancelReviewSubmission(
+        id: String
+    ) async -> Result<Void, AppError> {
+        guard let client else { return .failure(.network(type: .unauthorized)) }
+
+        do {
+            let cancelRequest = ReviewSubmissionUpdateRequest(
+                data: .init(
+                    type: .reviewSubmissions,
+                    id: id,
+                    attributes: .init(isCanceled: true)
+                )
+            )
+
+            let request = Resources.v1.reviewSubmissions.id(id).patch(cancelRequest)
+            _ = try await client.send(request)
+
+            return .success(())
+
+        } catch {
+            return handleRequestFailure(error: error)
+        }
+    }
+}
+
+private extension AppStoreVersionSubmissionsService {
+    func handleRequestFailure<T>(error: Error) -> Result<T, AppError> {
+        if let responseError = error as? ResponseError {
+            switch responseError {
+            case let .requestFailure(errorResponse, _, _):
+                if let errors = errorResponse?.errors, let firstError = errors.first {
+                    let title = firstError.title
+                    let detail = firstError.detail
+                    return .failure(AppError.network(type: .apiError(title, detail)))
+                }
+                return .failure(AppError.network(type: .unknown))
+            default:
+                return .failure(AppError.network(type: .unknown))
+            }
+        }
+        return .failure(AppError.network(type: .unknown))
     }
 }
