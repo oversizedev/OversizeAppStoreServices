@@ -31,8 +31,8 @@ public struct Certificate: Sendable {
     }
 }
 
-extension Certificate {
-    public static func from(response: AppStoreAPI.CertificatesResponse, include: (Certificate) -> Bool) -> [Certificate] {
+public extension Certificate {
+    static func from(response: AppStoreAPI.CertificatesResponse, include: (Certificate) -> Bool) -> [Certificate] {
         response.data.compactMap { Certificate(schema: $0) }.filter { include($0) }
     }
 }

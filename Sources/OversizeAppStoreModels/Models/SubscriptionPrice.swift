@@ -62,8 +62,8 @@ public struct SubscriptionPrice: Sendable, Identifiable {
     }
 }
 
-extension SubscriptionPrice {
-    public static func from(response: AppStoreAPI.SubscriptionPricesResponse) -> [SubscriptionPrice] {
+public extension SubscriptionPrice {
+    static func from(response: AppStoreAPI.SubscriptionPricesResponse) -> [SubscriptionPrice] {
         response.data.compactMap { SubscriptionPrice(schema: $0, included: response.included) }
     }
 }

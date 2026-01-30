@@ -24,7 +24,7 @@ public struct AppInfoLocalization: Sendable, Hashable, Identifiable {
         name = schema.attributes?.name
         subtitle = schema.attributes?.subtitle
         privacyPolicyURL = URL(string: schema.attributes?.privacyPolicyURL ?? "")
-        privacyChoicesURL = URL(string: schema.attributes?.privacyPolicyURL ?? "")
+        privacyChoicesURL = URL(string: schema.attributes?.privacyChoicesURL ?? "")
         privacyPolicyText = schema.attributes?.privacyPolicyText
     }
 }

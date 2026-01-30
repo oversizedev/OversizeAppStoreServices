@@ -6,7 +6,7 @@
 import AppStoreAPI
 import AppStoreConnect
 import OversizeAppStoreServices
-import OversizeModels
+import OversizeCore
 
 public actor PerfPowerMetricsService {
     private let client: AppStoreConnectClient?
@@ -19,8 +19,8 @@ public actor PerfPowerMetricsService {
         }
     }
 
-    public func fetchXcodeMetrics(appId: String) async -> Result<LocalXcodeMetrics, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchXcodeMetrics(appId: String) async -> Result<LocalXcodeMetrics, Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
         let request = Resources.v1.apps.id(appId).perfPowerMetrics.get()
         do {
             let data = try await client.send(request)
@@ -30,12 +30,12 @@ public actor PerfPowerMetricsService {
             return .success(localXcodeMetrics)
 
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
-    public func fetchBuildMetrics(buildId: String) async -> Result<LocalXcodeMetrics, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchBuildMetrics(buildId: String) async -> Result<LocalXcodeMetrics, Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
         let request = Resources.v1.builds.id(buildId).perfPowerMetrics.get()
 
         do {
@@ -44,7 +44,7 @@ public actor PerfPowerMetricsService {
             return .success(localXcodeMetrics)
 
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 }

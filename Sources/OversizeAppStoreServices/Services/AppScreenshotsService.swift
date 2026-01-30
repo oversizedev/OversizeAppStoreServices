@@ -8,9 +8,8 @@ import AppStoreConnect
 import CryptoKit
 import FactoryKit
 import Foundation
-import OversizeCore
-import OversizeModels
 import OversizeAppStoreModels
+import OversizeCore
 
 public actor AppScreenshotsService {
     @Injected(\.cacheService) private var cacheService: CacheService
@@ -28,8 +27,8 @@ public actor AppScreenshotsService {
         localizationId: String,
         screenshotDisplayType: ScreenshotDisplayType? = nil,
         force: Bool = false,
-    ) async -> Result<[AppScreenshotSet], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    ) async -> Result<[AppScreenshotSet], Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
 
         let cacheKey = "fetchScreenshotSets\(localizationId)\(screenshotDisplayType?.rawValue ?? "")"
 
@@ -49,8 +48,8 @@ public actor AppScreenshotsService {
     public func postAppScreenshotSet(
         localizationId: String,
         screenshotDisplayType: ScreenshotDisplayType,
-    ) async -> Result<AppScreenshotSet, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    ) async -> Result<AppScreenshotSet, Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
 
         do {
             let request = Resources.v1.appScreenshotSets.post(
@@ -75,12 +74,12 @@ public actor AppScreenshotsService {
             return .success(screenshotSet)
         } catch {
             logError(error.localizedDescription)
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
-    public func deleteScreenshotSet(id: String) async -> Result<Void, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func deleteScreenshotSet(id: String) async -> Result<Void, Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
 
         do {
             let request = Resources.v1.appScreenshotSets.id(id).delete
@@ -88,7 +87,7 @@ public actor AppScreenshotsService {
             return .success(())
         } catch {
             logError(error.localizedDescription)
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
@@ -96,8 +95,8 @@ public actor AppScreenshotsService {
         screenshotSetId: String,
         fileName: String,
         fileSize: Int,
-    ) async -> Result<AppScreenshot, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    ) async -> Result<AppScreenshot, Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
 
         do {
             let request = Resources.v1.appScreenshots.post(
@@ -125,15 +124,15 @@ public actor AppScreenshotsService {
             return .success(screenshot)
         } catch {
             logError(error.localizedDescription)
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
     public func uploadAppScreenshot(
         fileData: Data,
         uploadOperations: [UploadOperation],
-    ) async -> Result<Void, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    ) async -> Result<Void, Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
 
         do {
             try await withThrowingTaskGroup(of: Void.self) { group in
@@ -147,15 +146,15 @@ public actor AppScreenshotsService {
             return .success(())
         } catch {
             logError(error.localizedDescription)
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
     public func commitAppScreenshot(
         screenshotId: String,
         sourceFileChecksum: String,
-    ) async -> Result<AppScreenshot, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    ) async -> Result<AppScreenshot, Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
 
         do {
             let request = Resources.v1.appScreenshots.id(screenshotId)
@@ -177,12 +176,12 @@ public actor AppScreenshotsService {
             return .success(screenshot)
         } catch {
             logError(error.localizedDescription)
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
-    public func deleteAppScreenshot(id: String) async -> Result<Void, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func deleteAppScreenshot(id: String) async -> Result<Void, Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
 
         do {
             let request = Resources.v1.appScreenshots.id(id).delete
@@ -190,15 +189,15 @@ public actor AppScreenshotsService {
             return .success(())
         } catch {
             logError(error.localizedDescription)
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
     public func updateScreenshotOrder(
         screenshotSetId: String,
         screenshotIds: [String],
-    ) async -> Result<Void, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    ) async -> Result<Void, Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
 
         do {
             let relationships: [AppStoreAPI.AppScreenshotSetAppScreenshotsLinkagesRequest.Datum] = screenshotIds.map {
@@ -213,7 +212,7 @@ public actor AppScreenshotsService {
             return .success(())
         } catch {
             logError(error.localizedDescription)
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 

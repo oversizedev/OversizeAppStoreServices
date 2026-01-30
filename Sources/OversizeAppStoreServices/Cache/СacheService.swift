@@ -4,9 +4,8 @@
 //
 
 import Foundation
-import OversizeCore
-import OversizeModels
 import OversizeAppStoreModels
+import OversizeCore
 
 public actor CacheService {
     private let cacheDirectory: URL
@@ -83,7 +82,7 @@ public extension CacheService {
         key: String,
         force: Bool = false,
         fetcher: () async throws -> T,
-    ) async -> Result<T, AppError> {
+    ) async -> Result<T, Error> {
         if !force {
             if let cachedData: T = await load(key: key, as: T.self) {
                 logNotice("Returning cached data for key: \(key)")
@@ -96,12 +95,12 @@ public extension CacheService {
             let fetchedData = try await fetcher()
             await save(fetchedData, key: key) // Save new data to cache
             return .success(fetchedData)
-        } catch let error as AppError {
+        } catch let error as NetworkError {
             logError("Failed to fetch data for key \(key): \(error)")
             return .failure(error)
         } catch {
             logError("Unexpected error during fetch for key \(key): \(error)")
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 }

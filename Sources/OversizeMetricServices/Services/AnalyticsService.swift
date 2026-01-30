@@ -8,7 +8,6 @@ import AppStoreConnect
 import Foundation
 import OversizeAppStoreServices
 import OversizeCore
-import OversizeModels
 
 public actor AnalyticsService {
     private let client: AppStoreConnectClient?
@@ -21,19 +20,19 @@ public actor AnalyticsService {
         }
     }
 
-    public func fetchAppAnalyticsReportRequests(appId: String) async -> Result<[AnalyticsReportRequest], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchAppAnalyticsReportRequests(appId: String) async -> Result<[AnalyticsReportRequest], Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
         let request = Resources.v1.apps.id(appId).analyticsReportRequests.get()
         do {
             let data = try await client.send(request).data
             return .success(data.compactMap { .init(schema: $0) })
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
-    public func fetchAppAnalyticsReportRequestsIncludeReports(appId: String) async -> Result<[AnalyticsReportRequest], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchAppAnalyticsReportRequestsIncludeReports(appId: String) async -> Result<[AnalyticsReportRequest], Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
         let request = Resources.v1.apps.id(appId).analyticsReportRequests.get(
             include: [.reports],
         )
@@ -41,56 +40,56 @@ public actor AnalyticsService {
             let result = try await client.send(request)
             return .success(result.data.compactMap { .init(schema: $0, included: result.included) })
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
-    public func fetchAnalyticsReportRequestReport(analyticsReportRequestsId: String) async -> Result<[AnalyticsReport], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchAnalyticsReportRequestReport(analyticsReportRequestsId: String) async -> Result<[AnalyticsReport], Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
         let request = Resources.v1.analyticsReportRequests.id(analyticsReportRequestsId).reports.get()
         do {
             let data = try await client.send(request).data
             return .success(data.compactMap { .init(schema: $0) })
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
-    public func fetchAnalyticsReport(analyticsReportId: String) async -> Result<AnalyticsReport, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchAnalyticsReport(analyticsReportId: String) async -> Result<AnalyticsReport, Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
         let request = Resources.v1.analyticsReports.id(analyticsReportId).get()
         do {
             let data = try await client.send(request).data
             guard let analyticsReport: AnalyticsReport = .init(schema: data) else {
-                return .failure(.network(type: .decode))
+                return .failure(NetworkError.decode)
             }
             return .success(analyticsReport)
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
     /*
-     public func fetchAnalyticsReportInstances(analyticsReportId: String) async -> Result<AnalyticsReport, AppError> {
-         guard let client else { return .failure(.network(type: .unauthorized)) }
+     public func fetchAnalyticsReportInstances(analyticsReportId: String) async -> Result<AnalyticsReport, Error> {
+         guard let client else { return .failure(NetworkError.unauthorized) }
          let request = Resources.v1.analyticsReports.id(
              analyticsReportId
          ).instances.get()
          do {
              let data = try await client.send(request).data
              guard let analyticsReport: AnalyticsReport = .init(schema: data) else {
-                 return .failure(.network(type: .decode))
+                 return .failure(NetworkError.decode)
               }
              return .success(analyticsReport)
          } catch {
-             return .failure(.network(type: .noResponse))
+             return .failure(NetworkError.noResponse)
          }
      }
      */
 
-    public func postAppAnalyticsReportRequests(appId: String) async -> Result<AnalyticsReportRequest, AppError> {
+    public func postAppAnalyticsReportRequests(appId: String) async -> Result<AnalyticsReportRequest, Error> {
         guard let client else {
-            return .failure(.network(type: .unauthorized))
+            return .failure(NetworkError.unauthorized)
         }
 
         let requestAttributes: AnalyticsReportRequestCreateRequest.Data.Attributes = .init(
@@ -115,11 +114,11 @@ public actor AnalyticsService {
         do {
             let data = try await client.send(request).data
             guard let analyticsReportRequest: AnalyticsReportRequest = .init(schema: data) else {
-                return .failure(.network(type: .decode))
+                return .failure(NetworkError.decode)
             }
             return .success(analyticsReportRequest)
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 }

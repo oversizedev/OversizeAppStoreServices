@@ -6,9 +6,8 @@
 import AppStoreAPI
 import AppStoreConnect
 import Foundation
-import OversizeCore
-import OversizeModels
 import OversizeAppStoreModels
+import OversizeCore
 
 public actor AppCategoryService {
     private let client: AppStoreConnectClient?
@@ -21,12 +20,12 @@ public actor AppCategoryService {
         }
     }
 
-    public func fetchAppCategoryIds(platform: Platform) async -> Result<[String], AppError> {
+    public func fetchAppCategoryIds(platform: Platform) async -> Result<[String], Error> {
         guard let appCategoriesPlatform: Resources.V1.AppCategories.FilterPlatforms = .init(rawValue: platform.rawValue) else {
-            return .failure(.network(type: .invalidURL))
+            return .failure(NetworkError.invalidURL)
         }
 
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(NetworkError.unauthorized) }
         let request = Resources.v1.appCategories.get(
             filterPlatforms: [appCategoriesPlatform],
             isExistsParent: false,
@@ -35,16 +34,16 @@ public actor AppCategoryService {
             let data = try await client.send(request).data
             return .success(data.compactMap { $0.id })
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
-    public func fetchAppCategoriesIncludedSubCategories(platform: Platform) async -> Result<[AppCategory], AppError> {
+    public func fetchAppCategoriesIncludedSubCategories(platform: Platform) async -> Result<[AppCategory], Error> {
         guard let appCategoriesPlatform: Resources.V1.AppCategories.FilterPlatforms = .init(rawValue: platform.rawValue) else {
-            return .failure(.network(type: .invalidURL))
+            return .failure(NetworkError.invalidURL)
         }
 
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+        guard let client else { return .failure(NetworkError.unauthorized) }
         let request = Resources.v1.appCategories.get(
             filterPlatforms: [appCategoriesPlatform],
             isExistsParent: false,
@@ -58,7 +57,7 @@ public actor AppCategoryService {
                     .compactMap { .init(schema: $0, included: responce.included)
                     })
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
@@ -70,8 +69,8 @@ public actor AppCategoryService {
         secondaryCategoryId: String? = nil,
         secondarySubcategoryOneId: String? = nil,
         secondarySubcategoryTwoId: String? = nil,
-    ) async -> Result<AppInfo, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    ) async -> Result<AppInfo, Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
 
         let primaryCategory: AppInfoUpdateRequest.Data.Relationships.PrimaryCategory? = primaryCategoryId != nil ? .init(data: .init(id: primaryCategoryId!)) : nil
         let primarySubcategoryOne: AppInfoUpdateRequest.Data.Relationships.PrimarySubcategoryOne? = primarySubcategoryOneId != nil ? .init(data: .init(id: primarySubcategoryOneId!)) : nil
@@ -102,11 +101,11 @@ public actor AppCategoryService {
         do {
             let data = try await client.send(request).data
             guard let appStoreReviewDetail: AppInfo = .init(schema: data) else {
-                return .failure(.network(type: .decode))
+                return .failure(NetworkError.decode)
             }
             return .success(appStoreReviewDetail)
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 }

@@ -7,9 +7,8 @@ import AppStoreAPI
 import AppStoreConnect
 import FactoryKit
 import Foundation
-import OversizeCore
-import OversizeModels
 import OversizeAppStoreModels
+import OversizeCore
 
 public actor AppsService {
     @Injected(\.cacheService) private var cacheService: CacheService
@@ -23,21 +22,21 @@ public actor AppsService {
         }
     }
 
-    public func fetchApp(id: String, force: Bool = false) async -> Result<App, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchApp(id: String, force: Bool = false) async -> Result<App, Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
         return await cacheService.fetchWithCache(key: "fetchApp\(id)", force: force) {
             let request = Resources.v1.apps.id(id).get()
             return try await client.send(request)
         }.flatMap {
             guard let app = App(response: $0) else {
-                return .failure(.network(type: .decode))
+                return .failure(NetworkError.decode)
             }
             return .success(app)
         }
     }
 
-    public func fetchAppIncludeBuildsAndAppStoreVersions(id: String, force: Bool = false) async -> Result<App, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchAppIncludeBuildsAndAppStoreVersions(id: String, force: Bool = false) async -> Result<App, Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
         return await cacheService.fetchWithCache(key: "fetchAppIncludeBuildsAndAppStoreVersions\(id)", force: force) {
             let request = Resources.v1.apps.id(id).get(
                 include: [
@@ -48,16 +47,16 @@ public actor AppsService {
             return try await client.send(request)
         }.flatMap {
             guard let app = App(response: $0) else {
-                return .failure(.network(type: .decode))
+                return .failure(NetworkError.decode)
             }
             return .success(app)
         }
     }
 
-    public func fetchAppIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions(appId: String) async -> Result<App, AppError> {
+    public func fetchAppIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions(appId: String) async -> Result<App, Error> {
         do {
             guard let client else {
-                return .failure(.network(type: .unauthorized))
+                return .failure(NetworkError.unauthorized)
             }
             let request = Resources.v1.apps.id(appId).get(
                 include: [
@@ -68,28 +67,28 @@ public actor AppsService {
             )
             let result = try await client.send(request)
             guard let app: App = .init(schema: result.data, included: result.included) else {
-                return .failure(.network(type: .decode))
+                return .failure(NetworkError.decode)
             }
             return .success(app)
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
-    public func fetchApps() async -> Result<[App], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchApps() async -> Result<[App], Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
         let request = Resources.v1.apps.get()
         do {
             let response = try await client.send(request)
             let apps: [App] = App.from(response: response)
             return .success(apps)
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
-    public func fetchAppsIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions(forse: Bool = false) async -> Result<[App], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchAppsIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions(forse: Bool = false) async -> Result<[App], Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
         return await cacheService.fetchWithCache(key: "fetchAppsIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions", force: forse) {
             let request = Resources.v1.apps.get(
                 include: [
@@ -102,8 +101,8 @@ public actor AppsService {
         }.map { App.from(response: $0) }
     }
 
-    public func fetchAppsIncludeActualAppStoreVersionsAndBuilds(limitAppStoreVersions: Int? = nil, forse: Bool = false) async -> Result<[App], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchAppsIncludeActualAppStoreVersionsAndBuilds(limitAppStoreVersions: Int? = nil, forse: Bool = false) async -> Result<[App], Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
         return await cacheService.fetchWithCache(key: "fetchAppsIncludeActualAppStoreVersionsAndBuilds", force: forse) {
             let request = Resources.v1.apps.get(
                 filterAppStoreVersionsAppStoreState: [
@@ -142,9 +141,9 @@ public actor AppsService {
         platform: BundleIDPlatform,
         identifier: String,
         seedID: String? = nil,
-    ) async -> Result<Bool, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
-        guard let bundleIDPlatform: AppStoreAPI.BundleIDPlatform = .init(rawValue: platform.rawValue) else { return .failure(.network(type: .invalidURL)) }
+    ) async -> Result<Bool, Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
+        guard let bundleIDPlatform: AppStoreAPI.BundleIDPlatform = .init(rawValue: platform.rawValue) else { return .failure(NetworkError.invalidURL) }
 
         let requestData: BundleIDCreateRequest.Data = .init(
             type: .bundleIDs,
@@ -161,15 +160,15 @@ public actor AppsService {
             _ = try await client.send(request).data
             return .success(true)
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
     public func patchPrimaryLanguage(
         appId: String,
         locale: AppStoreLanguage,
-    ) async -> Result<App, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    ) async -> Result<App, Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
 
         let requestData: AppUpdateRequest.Data = .init(
             type: .apps,
@@ -180,7 +179,7 @@ public actor AppsService {
         do {
             let data = try await client.send(request).data
             guard let app = App(schema: data) else {
-                return .failure(.network(type: .decode))
+                return .failure(NetworkError.decode)
             }
             return .success(app)
         } catch {
@@ -191,7 +190,7 @@ public actor AppsService {
 }
 
 private extension AppsService {
-    func handleRequestFailure<T>(error: Error, replaces: [String: String] = [:]) -> Result<T, AppError> {
+    func handleRequestFailure<T>(error: Error, replaces: [String: String] = [:]) -> Result<T, Error> {
         if let responseError = error as? ResponseError {
             switch responseError {
             case let .requestFailure(errorResponse, _, _):
@@ -204,13 +203,13 @@ private extension AppsService {
                         detail = detail.replacingOccurrences(of: placeholder, with: replacement)
                     }
 
-                    return .failure(AppError.network(type: .apiError(title, detail)))
+                    return .failure(NetworkError.apiError(title: title, detail: detail))
                 }
-                return .failure(AppError.network(type: .unknown))
+                return .failure(NetworkError.unknown)
             default:
-                return .failure(AppError.network(type: .unknown))
+                return .failure(NetworkError.unknown)
             }
         }
-        return .failure(AppError.network(type: .unknown))
+        return .failure(NetworkError.unknown)
     }
 }

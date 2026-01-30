@@ -5,8 +5,8 @@
 
 import AppStoreAPI
 import AppStoreConnect
-import OversizeModels
 import OversizeAppStoreModels
+import OversizeCore
 
 public actor UsersService {
     private let client: AppStoreConnectClient?
@@ -19,14 +19,14 @@ public actor UsersService {
         }
     }
 
-    public func fetchUsers(versionId _: String) async -> Result<[User], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchUsers(versionId _: String) async -> Result<[User], Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
         let request = Resources.v1.users.get()
         do {
             let data = try await client.send(request).data
             return .success(data)
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 }

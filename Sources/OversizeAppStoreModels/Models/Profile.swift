@@ -26,8 +26,8 @@ public struct Profile: Sendable {
     }
 }
 
-extension Profile {
-    public static func from(_ response: AppStoreAPI.ProfilesResponse, include: (Profile) -> Bool) -> [Profile] {
+public extension Profile {
+    static func from(_ response: AppStoreAPI.ProfilesResponse, include: (Profile) -> Bool) -> [Profile] {
         response.data.compactMap { Profile(schema: $0) }.filter { include($0) }
     }
 }

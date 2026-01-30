@@ -7,7 +7,6 @@ import AppStoreAPI
 import AppStoreConnect
 import Foundation
 import OversizeCore
-import OversizeModels
 
 public actor AppStoreVersionSubmissionsService {
     private let client: AppStoreConnectClient?
@@ -23,9 +22,9 @@ public actor AppStoreVersionSubmissionsService {
     public func postAppStoreVersionSubmission(
         appId: String,
         appStoreVersionsId: String,
-        platform: Platform
-    ) async -> Result<String, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+        platform: Platform,
+    ) async -> Result<String, Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
 
         do {
             let apiPlatform: AppStoreAPI.Platform = switch platform {
@@ -40,9 +39,9 @@ public actor AppStoreVersionSubmissionsService {
                     type: .reviewSubmissions,
                     attributes: .init(platform: apiPlatform),
                     relationships: .init(
-                        app: .init(data: .init(type: .apps, id: appId))
-                    )
-                )
+                        app: .init(data: .init(type: .apps, id: appId)),
+                    ),
+                ),
             )
 
             let createRequest = Resources.v1.reviewSubmissions.post(reviewSubmissionRequest)
@@ -53,13 +52,13 @@ public actor AppStoreVersionSubmissionsService {
                     type: .reviewSubmissionItems,
                     relationships: .init(
                         reviewSubmission: .init(
-                            data: .init(type: .reviewSubmissions, id: reviewSubmission.id)
+                            data: .init(type: .reviewSubmissions, id: reviewSubmission.id),
                         ),
                         appStoreVersion: .init(
-                            data: .init(type: .appStoreVersions, id: appStoreVersionsId)
-                        )
-                    )
-                )
+                            data: .init(type: .appStoreVersions, id: appStoreVersionsId),
+                        ),
+                    ),
+                ),
             )
 
             let itemCreateRequest = Resources.v1.reviewSubmissionItems.post(itemRequest)
@@ -69,8 +68,8 @@ public actor AppStoreVersionSubmissionsService {
                 data: .init(
                     type: .reviewSubmissions,
                     id: reviewSubmission.id,
-                    attributes: .init(isSubmitted: true)
-                )
+                    attributes: .init(isSubmitted: true),
+                ),
             )
 
             let patchRequest = Resources.v1.reviewSubmissions.id(reviewSubmission.id).patch(submitRequest)
@@ -84,14 +83,14 @@ public actor AppStoreVersionSubmissionsService {
     }
 
     public func fetchReviewSubmission(
-        appId: String
-    ) async -> Result<ReviewSubmission?, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+        appId: String,
+    ) async -> Result<ReviewSubmission?, Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
 
         do {
             let request = Resources.v1.reviewSubmissions.get(
                 filterState: [.readyForReview, .waitingForReview, .inReview],
-                filterApp: [appId]
+                filterApp: [appId],
             )
 
             let response = try await client.send(request)
@@ -103,17 +102,17 @@ public actor AppStoreVersionSubmissionsService {
     }
 
     public func cancelReviewSubmission(
-        id: String
-    ) async -> Result<Void, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+        id: String,
+    ) async -> Result<Void, Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
 
         do {
             let cancelRequest = ReviewSubmissionUpdateRequest(
                 data: .init(
                     type: .reviewSubmissions,
                     id: id,
-                    attributes: .init(isCanceled: true)
-                )
+                    attributes: .init(isCanceled: true),
+                ),
             )
 
             let request = Resources.v1.reviewSubmissions.id(id).patch(cancelRequest)
@@ -128,20 +127,20 @@ public actor AppStoreVersionSubmissionsService {
 }
 
 private extension AppStoreVersionSubmissionsService {
-    func handleRequestFailure<T>(error: Error) -> Result<T, AppError> {
+    func handleRequestFailure<T>(error: Error) -> Result<T, Error> {
         if let responseError = error as? ResponseError {
             switch responseError {
             case let .requestFailure(errorResponse, _, _):
                 if let errors = errorResponse?.errors, let firstError = errors.first {
                     let title = firstError.title
                     let detail = firstError.detail
-                    return .failure(AppError.network(type: .apiError(title, detail)))
+                    return .failure(NetworkError.apiError(title: title, detail: detail))
                 }
-                return .failure(AppError.network(type: .unknown))
+                return .failure(NetworkError.unknown)
             default:
-                return .failure(AppError.network(type: .unknown))
+                return .failure(NetworkError.unknown)
             }
         }
-        return .failure(AppError.network(type: .unknown))
+        return .failure(NetworkError.unknown)
     }
 }

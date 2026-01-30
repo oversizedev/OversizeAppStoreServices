@@ -6,9 +6,9 @@
 import AppStoreConnect
 import FactoryKit
 import Foundation
+import OversizeAppStoreModels
 import OversizeCore
 import OversizeServices
-import OversizeAppStoreModels
 
 public struct EnvAuthenticator: Authenticator {
     private let storage: SecureStorageService = .init()
