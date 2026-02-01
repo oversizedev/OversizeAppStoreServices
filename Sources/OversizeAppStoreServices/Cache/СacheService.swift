@@ -40,7 +40,6 @@ public actor CacheService {
 
         do {
             let data = try Data(contentsOf: fileURL)
-            logNotice("Read cache: \(key)")
             return try JSONDecoder().decode(T.self, from: data)
         } catch {
             logError("Failed to load cache for key \(key): \(error)")
@@ -85,7 +84,6 @@ public extension CacheService {
     ) async -> Result<T, Error> {
         if !force {
             if let cachedData: T = await load(key: key, as: T.self) {
-                logNotice("Returning cached data for key: \(key)")
                 return .success(cachedData)
             }
         }

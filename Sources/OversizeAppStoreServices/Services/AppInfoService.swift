@@ -55,10 +55,10 @@ public actor AppInfoService {
         }
     }
 
-    public func fetchAppInfoLocalization(appInfoId: String, locale: String) async -> Result<AppInfoLocalization?, Error> {
+    public func fetchAppInfoLocalization(appInfoId: String, locale: AppStoreLanguage) async -> Result<AppInfoLocalization, Error> {
         guard let client else { return .failure(NetworkError.unauthorized) }
         let request = Resources.v1.appInfos.id(appInfoId).appInfoLocalizations.get(
-            filterLocale: [locale],
+            filterLocale: [locale.rawValue],
         )
         do {
             let data = try await client.send(request).data
