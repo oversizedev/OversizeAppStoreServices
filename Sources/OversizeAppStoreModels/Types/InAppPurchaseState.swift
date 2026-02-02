@@ -35,7 +35,7 @@ public enum InAppPurchaseState: String, CaseIterable, Codable, Sendable {
     }
     #endif
 
-    // Computed property to return display-friendly name
+    /// Computed property to return display-friendly name
     public var displayName: String {
         switch self {
         case .missingMetadata:

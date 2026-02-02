@@ -9,7 +9,7 @@ import Testing
 
 @Suite struct TerritoryRegionTests {
     @Test("Should initialize with valid territory code")
-    func initWithValidCode() throws {
+    func initWithValidCode() {
         #expect(TerritoryRegion(territoryCode: .usa) == .unitedStatesAndCanada)
         #expect(TerritoryRegion(territoryCode: .fra) == .europe)
         #expect(TerritoryRegion(territoryCode: .ind) == .africaMiddleEastIndia)
@@ -18,7 +18,7 @@ import Testing
     }
 
     @Test("Should initialize with valid country ID")
-    func initWithValidCountryID() throws {
+    func initWithValidCountryID() {
         #expect(TerritoryRegion(countryID: "USA") == .unitedStatesAndCanada)
         #expect(TerritoryRegion(countryID: "FRA") == .europe)
         #expect(TerritoryRegion(countryID: "IND") == .africaMiddleEastIndia)
@@ -27,14 +27,14 @@ import Testing
     }
 
     @Test("Should handle invalid country ID")
-    func initWithInvalidCountryID() throws {
+    func initWithInvalidCountryID() {
         #expect(TerritoryRegion(countryID: "INVALID") == .unknown)
         #expect(TerritoryRegion(countryID: "") == .unknown)
         #expect(TerritoryRegion(countryID: "123") == .unknown)
     }
 
     @Test("AllCases should contain all main regions")
-    func testAllCases() throws {
+    func testAllCases() {
         let expectedCount = 5 // Excluding .unknown
         #expect(TerritoryRegion.allCases.count == expectedCount)
         #expect(TerritoryRegion.allCases.contains(.unitedStatesAndCanada))
@@ -46,7 +46,7 @@ import Testing
     }
 
     @Test("Should have correct raw values")
-    func rawValues() throws {
+    func rawValues() {
         #expect(TerritoryRegion.unitedStatesAndCanada.rawValue == "The United States and Canada")
         #expect(TerritoryRegion.europe.rawValue == "Europe")
         #expect(TerritoryRegion.africaMiddleEastIndia.rawValue == "Africa, Middle East, and India")
@@ -56,7 +56,7 @@ import Testing
     }
 
     @Test("Should return .unknown for unhandled territory code")
-    func initWithUnhandledTerritoryCode() throws {
+    func initWithUnhandledTerritoryCode() {
         // TerritoryCode.bgd ("BGD" for Bangladesh) is not handled explicitly in TerritoryRegion initializer
         #expect(TerritoryRegion(territoryCode: .bgd) == .unknown)
     }

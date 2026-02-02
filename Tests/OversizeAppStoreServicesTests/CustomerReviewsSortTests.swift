@@ -9,12 +9,12 @@ import Testing
 
 @Suite struct CustomerReviewsSortTests {
     @Test("CustomerReviewsSort should have same number of cases as AppStoreAPI")
-    func checkCustomerReviewsSortCount() throws {
+    func checkCustomerReviewsSortCount() {
         #expect(OversizeAppStoreServices.CustomerReviewsSort.allCases.count == AppStoreAPI.Resources.V1.Apps.WithID.CustomerReviews.Sort.allCases.count)
     }
 
     @Test("CustomerReviewsSort should have the same cases as AppStoreAPI")
-    func checkCustomerReviewsSortCasesMatch() throws {
+    func checkCustomerReviewsSortCasesMatch() {
         let localCases = Set(OversizeAppStoreServices.CustomerReviewsSort.allCases.map { $0.rawValue })
         let generatedCases = Set(AppStoreAPI.Resources.V1.Apps.WithID.CustomerReviews.Sort.allCases.map { $0.rawValue })
 
@@ -22,7 +22,7 @@ import Testing
     }
 
     @Test("CustomerReviewsSort should match raw values with AppStoreAPI")
-    func checkCustomerReviewsSortRawValues() throws {
+    func checkCustomerReviewsSortRawValues() {
         for sort in OversizeAppStoreServices.CustomerReviewsSort.allCases {
             let generatedSort = AppStoreAPI.Resources.V1.Apps.WithID.CustomerReviews.Sort(rawValue: sort.rawValue)
             #expect(generatedSort != nil, "No matching case in AppStoreAPI for \(sort.rawValue)")
@@ -30,7 +30,7 @@ import Testing
     }
 
     @Test("CustomerReviewsSort should have valid display names")
-    func checkCustomerReviewsSortDisplayNames() throws {
+    func checkCustomerReviewsSortDisplayNames() {
         for sort in OversizeAppStoreServices.CustomerReviewsSort.allCases {
             #expect(!sort.displayName.isEmpty, "Display name should not be empty for \(sort)")
         }

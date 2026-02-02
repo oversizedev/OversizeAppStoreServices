@@ -429,7 +429,7 @@ public actor SubscriptionsService {
                 name: name,
                 numberOfPeriods: numberOfPeriods,
                 offerCode: offerCode,
-                offerMode: offerMode,
+                offerMode: offerMode
             ),
             relationships: .init(
                 subscription: .init(
@@ -653,11 +653,11 @@ extension SubscriptionsService {
 
                     return .failure(NetworkError.apiError(title: title, detail: detail))
                 }
-                return .failure(NetworkError.unknown)
+                return .failure(NetworkError.unknown(error))
             default:
-                return .failure(NetworkError.unknown)
+                return .failure(NetworkError.unknown(error))
             }
         }
-        return .failure(NetworkError.unknown)
+        return .failure(NetworkError.unknown(error))
     }
 }

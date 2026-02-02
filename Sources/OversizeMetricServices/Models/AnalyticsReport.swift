@@ -4,7 +4,6 @@
 //
 
 import AppStoreAPI
-
 import OversizeCore
 
 public struct AnalyticsReport: Identifiable, Hashable, Sendable {

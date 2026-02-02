@@ -9,7 +9,7 @@ import Testing
 
 @Suite struct TerritoryTests {
     @Test("Should initialize correctly from valid schema")
-    func initWithValidSchema() throws {
+    func initWithValidSchema() {
         let schema = AppStoreAPI.Territory(
             id: "USA",
             attributes: .init(currency: "USD"),
@@ -25,7 +25,7 @@ import Testing
     }
 
     @Test("Should return nil for invalid schema")
-    func initWithInvalidSchema() throws {
+    func initWithInvalidSchema() {
         let invalidSchema = AppStoreAPI.Territory(
             id: "INVALID",
             attributes: nil,
@@ -36,7 +36,7 @@ import Testing
     }
 
     @Test("Should have correct display name")
-    func testDisplayName() throws {
+    func testDisplayName() {
         let schema = AppStoreAPI.Territory(
             id: "USA",
             attributes: .init(currency: "USD"),
@@ -47,7 +47,7 @@ import Testing
     }
 
     @Test("Should have correct display flag")
-    func testDisplayFlag() throws {
+    func testDisplayFlag() {
         let schema = AppStoreAPI.Territory(
             id: "USA",
             attributes: .init(currency: "USD"),
@@ -58,7 +58,7 @@ import Testing
     }
 
     @Test("Should handle different currencies correctly")
-    func currencyHandling() throws {
+    func currencyHandling() {
         let territories = [
             ("USA", "USD"),
             ("GBR", "GBP"),
@@ -78,7 +78,7 @@ import Testing
     }
 
     @Test("Should initialize schema with unhandled region as .unknown")
-    func initWithSchemaUnhandledRegion() throws {
+    func initWithSchemaUnhandledRegion() {
         // TerritoryCode.bgd ("BGD" - Bangladesh) is not handled in TerritoryRegion initializer,
         // so the region should be .unknown.
         let schema = AppStoreAPI.Territory(

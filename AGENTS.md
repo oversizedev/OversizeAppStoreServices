@@ -17,7 +17,7 @@
 - Swift 6 with strict concurrency; prefer async/await and `actor` for services.
 - Indentation: 4 spaces; format with `swiftformat .` (see `.swiftformat`).
 - Types use `UpperCamelCase`; methods and properties use `lowerCamelCase`.
-- Return `Result<T, AppError>` from service APIs; avoid throwing where patterns already exist.
+- Return `Result<T, Error>` from service APIs; avoid throwing where patterns already exist.
 - Keep code comments minimal; use `// MARK:` for sectioning when needed.
 
 ## Testing Guidelines

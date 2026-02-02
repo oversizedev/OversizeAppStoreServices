@@ -55,7 +55,8 @@ public actor AppCategoryService {
             return .success(
                 responce.data
                     .compactMap { .init(schema: $0, included: responce.included)
-                    })
+                    },
+            )
         } catch {
             return .failure(NetworkError.noResponse)
         }

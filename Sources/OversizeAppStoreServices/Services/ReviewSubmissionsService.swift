@@ -1,14 +1,15 @@
 //
 // Copyright © 2024 Alexander Romanov
-// AppStoreVersionSubmissionsService.swift, created on 15.11.2024
+// reviewSubmissionsService.swift, created on 15.11.2024
 //
 
 import AppStoreAPI
 import AppStoreConnect
 import Foundation
+import OversizeAppStoreModels
 import OversizeCore
 
-public actor AppStoreVersionSubmissionsService {
+public actor ReviewSubmissionsService {
     private let client: AppStoreConnectClient?
 
     public init() {
@@ -19,11 +20,10 @@ public actor AppStoreVersionSubmissionsService {
         }
     }
 
-    public func postAppStoreVersionSubmission(
+    public func postReviewSubmissions(
         appId: String,
-        appStoreVersionsId: String,
         platform: Platform,
-    ) async -> Result<String, Error> {
+    ) async -> Result<ReviewSubmission, Error> {
         guard let client else { return .failure(NetworkError.unauthorized) }
 
         do {
@@ -47,12 +47,30 @@ public actor AppStoreVersionSubmissionsService {
             let createRequest = Resources.v1.reviewSubmissions.post(reviewSubmissionRequest)
             let reviewSubmission = try await client.send(createRequest).data
 
-            let itemRequest = ReviewSubmissionItemCreateRequest(
+            guard let submission: ReviewSubmission = .init(schema: reviewSubmission) else {
+                return .failure(NetworkError.decode)
+            }
+
+            return .success(submission)
+
+        } catch {
+            return handleRequestFailure(error: error)
+        }
+    }
+
+    public func postReviewSubmissionItems(
+        reviewSubmissionId: String,
+        appStoreVersionsId: String,
+    ) async -> Result<ReviewSubmissionItem, Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
+
+        do {
+            let reviewSubmissionItemCreateRequest = ReviewSubmissionItemCreateRequest(
                 data: .init(
                     type: .reviewSubmissionItems,
                     relationships: .init(
                         reviewSubmission: .init(
-                            data: .init(type: .reviewSubmissions, id: reviewSubmission.id),
+                            data: .init(type: .reviewSubmissions, id: reviewSubmissionId),
                         ),
                         appStoreVersion: .init(
                             data: .init(type: .appStoreVersions, id: appStoreVersionsId),
@@ -61,40 +79,88 @@ public actor AppStoreVersionSubmissionsService {
                 ),
             )
 
-            let itemCreateRequest = Resources.v1.reviewSubmissionItems.post(itemRequest)
-            _ = try await client.send(itemCreateRequest)
+            let itemCreateRequest = Resources.v1.reviewSubmissionItems.post(reviewSubmissionItemCreateRequest)
+            let item = try await client.send(itemCreateRequest).data
 
-            let submitRequest = ReviewSubmissionUpdateRequest(
-                data: .init(
-                    type: .reviewSubmissions,
-                    id: reviewSubmission.id,
-                    attributes: .init(isSubmitted: true),
-                ),
-            )
+            guard let submissionItem: ReviewSubmissionItem = .init(schema: item) else {
+                return .failure(NetworkError.decode)
+            }
 
-            let patchRequest = Resources.v1.reviewSubmissions.id(reviewSubmission.id).patch(submitRequest)
-            _ = try await client.send(patchRequest)
-
-            return .success(reviewSubmission.id)
+            return .success(submissionItem)
 
         } catch {
             return handleRequestFailure(error: error)
         }
     }
 
-    public func fetchReviewSubmission(
+    public func patchReviewSubmissions(
+        reviewSubmissionId: String,
+        isSubmitted: Bool,
+    ) async -> Result<ReviewSubmission, Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
+
+        do {
+            let submitRequest = ReviewSubmissionUpdateRequest(
+                data: .init(
+                    type: .reviewSubmissions,
+                    id: reviewSubmissionId,
+                    attributes: .init(isSubmitted: isSubmitted),
+                ),
+            )
+
+            let patchRequest = Resources.v1.reviewSubmissions.id(reviewSubmissionId).patch(submitRequest)
+            let submission = try await client.send(patchRequest).data
+
+            guard let updated: ReviewSubmission = .init(schema: submission) else {
+                return .failure(NetworkError.decode)
+            }
+
+            return .success(updated)
+
+        } catch {
+            return handleRequestFailure(error: error)
+        }
+    }
+
+    public func postAppStoreVersionSubmission(
         appId: String,
-    ) async -> Result<ReviewSubmission?, Error> {
+        appStoreVersionsId: String,
+        platform: Platform,
+    ) async -> Result<String, Error> {
+        switch await postReviewSubmissions(appId: appId, platform: platform) {
+        case let .success(submission):
+            switch await postReviewSubmissionItems(reviewSubmissionId: submission.id, appStoreVersionsId: appStoreVersionsId) {
+            case .success:
+                break
+            case let .failure(error):
+                return .failure(error)
+            }
+
+            switch await patchReviewSubmissions(reviewSubmissionId: submission.id, isSubmitted: true) {
+            case let .success(updated):
+                return .success(updated.id)
+            case let .failure(error):
+                return .failure(error)
+            }
+        case let .failure(error):
+            return .failure(error)
+        }
+    }
+
+    public func fetchReviewSubmissions(
+        appId: String,
+    ) async -> Result<[ReviewSubmission], Error> {
         guard let client else { return .failure(NetworkError.unauthorized) }
 
         do {
             let request = Resources.v1.reviewSubmissions.get(
-                filterState: [.readyForReview, .waitingForReview, .inReview],
+                //filterState: [.readyForReview, .waitingForReview, .inReview],
                 filterApp: [appId],
             )
 
             let response = try await client.send(request)
-            return .success(response.data.first)
+            let submission = response.data.flatMap { ReviewSubmission(schema: $0) }
+            return .success(submission)
 
         } catch {
             return handleRequestFailure(error: error)
@@ -126,7 +192,7 @@ public actor AppStoreVersionSubmissionsService {
     }
 }
 
-private extension AppStoreVersionSubmissionsService {
+private extension ReviewSubmissionsService {
     func handleRequestFailure<T>(error: Error) -> Result<T, Error> {
         if let responseError = error as? ResponseError {
             switch responseError {
@@ -136,11 +202,11 @@ private extension AppStoreVersionSubmissionsService {
                     let detail = firstError.detail
                     return .failure(NetworkError.apiError(title: title, detail: detail))
                 }
-                return .failure(NetworkError.unknown)
+                return .failure(NetworkError.unknown(error))
             default:
-                return .failure(NetworkError.unknown)
+                return .failure(NetworkError.unknown(error))
             }
         }
-        return .failure(NetworkError.unknown)
+        return .failure(NetworkError.unknown(error))
     }
 }

@@ -9,12 +9,12 @@ import Testing
 
 @Suite struct ReviewTypeTests {
     @Test("ReviewType should have same number of cases as AppStoreAPI")
-    func checkReviewTypeCount() throws {
+    func checkReviewTypeCount() {
         #expect(OversizeAppStoreServices.ReviewType.allCases.count == AppStoreAPI.AppStoreVersion.Attributes.ReviewType.allCases.count)
     }
 
     @Test("ReviewType should have the same cases as AppStoreAPI")
-    func checkReviewTypeCasesMatch() throws {
+    func checkReviewTypeCasesMatch() {
         let localCases = Set(OversizeAppStoreServices.ReviewType.allCases.map { $0.rawValue })
         let generatedCases = Set(AppStoreAPI.AppStoreVersion.Attributes.ReviewType.allCases.map { $0.rawValue })
 
@@ -22,7 +22,7 @@ import Testing
     }
 
     @Test("ReviewType should match raw values with AppStoreAPI")
-    func checkReviewTypeRawValues() throws {
+    func checkReviewTypeRawValues() {
         for type in OversizeAppStoreServices.ReviewType.allCases {
             let generatedType = AppStoreAPI.AppStoreVersion.Attributes.ReviewType(rawValue: type.rawValue)
             #expect(generatedType != nil, "No matching case in AppStoreAPI for \(type.rawValue)")

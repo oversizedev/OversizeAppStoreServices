@@ -107,7 +107,7 @@ public struct Subscription: Sendable, Identifiable {
             }
         }
 
-        // Computed property to determine if the state is editable
+        /// Computed property to determine if the state is editable
         public var isEditable: Bool {
             switch self {
             case .missingMetadata, .developerActionNeeded, .rejected:

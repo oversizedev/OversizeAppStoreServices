@@ -9,12 +9,12 @@ import Testing
 
 @Suite struct SubscriptionOfferModeTests {
     @Test("SubscriptionOfferMode should have same number of cases as AppStoreAPI")
-    func checkSubscriptionOfferModeCount() throws {
+    func checkSubscriptionOfferModeCount() {
         #expect(OversizeAppStoreServices.SubscriptionOfferMode.allCases.count == AppStoreAPI.SubscriptionOfferMode.allCases.count)
     }
 
     @Test("SubscriptionOfferMode should have the same cases as AppStoreAPI")
-    func checkSubscriptionOfferModeCasesMatch() throws {
+    func checkSubscriptionOfferModeCasesMatch() {
         let localCases = Set(OversizeAppStoreServices.SubscriptionOfferMode.allCases.map { $0.rawValue })
         let generatedCases = Set(AppStoreAPI.SubscriptionOfferMode.allCases.map { $0.rawValue })
 
@@ -22,7 +22,7 @@ import Testing
     }
 
     @Test("SubscriptionOfferMode should match raw values with AppStoreAPI")
-    func checkSubscriptionOfferModeRawValues() throws {
+    func checkSubscriptionOfferModeRawValues() {
         for mode in OversizeAppStoreServices.SubscriptionOfferMode.allCases {
             let generatedMode = AppStoreAPI.SubscriptionOfferMode(rawValue: mode.rawValue)
             #expect(generatedMode != nil, "No matching case in AppStoreAPI for \(mode.rawValue)")

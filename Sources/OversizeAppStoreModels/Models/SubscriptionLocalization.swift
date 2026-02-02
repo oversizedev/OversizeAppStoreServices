@@ -36,7 +36,7 @@ public struct SubscriptionLocalization: Codable, Equatable, Identifiable, Sendab
         case approved = "APPROVED"
         case rejected = "REJECTED"
 
-        // Computed property for display name
+        /// Computed property for display name
         public var displayName: String {
             switch self {
             case .prepareForSubmission: "Prepare for Submission"

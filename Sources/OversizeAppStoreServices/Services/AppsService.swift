@@ -205,11 +205,11 @@ private extension AppsService {
 
                     return .failure(NetworkError.apiError(title: title, detail: detail))
                 }
-                return .failure(NetworkError.unknown)
+                return .failure(NetworkError.unknown(error))
             default:
-                return .failure(NetworkError.unknown)
+                return .failure(NetworkError.unknown(error))
             }
         }
-        return .failure(NetworkError.unknown)
+        return .failure(NetworkError.unknown(error))
     }
 }

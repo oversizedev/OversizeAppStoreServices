@@ -21,6 +21,34 @@ public struct Build: Sendable, Identifiable {
 
     public let relationships: Relationships
 
+    public init(
+        id: String,
+        version: String,
+        uploadedDate: Date,
+        expirationDate: Date,
+        iconAssetToken: ImageAsset?,
+        isExpired: Bool?,
+        minOsVersion: String?,
+        lsMinimumSystemVersion: String?,
+        computedMinMacOsVersion: String?,
+        processingState: ProcessingState?,
+        buildAudienceType: BuildAudienceType?,
+        relationships: Relationships
+    ) {
+        self.id = id
+        self.version = version
+        self.uploadedDate = uploadedDate
+        self.expirationDate = expirationDate
+        self.iconAssetToken = iconAssetToken
+        self.isExpired = isExpired
+        self.minOsVersion = minOsVersion
+        self.lsMinimumSystemVersion = lsMinimumSystemVersion
+        self.computedMinMacOsVersion = computedMinMacOsVersion
+        self.processingState = processingState
+        self.buildAudienceType = buildAudienceType
+        self.relationships = relationships
+    }
+
     public init?(schema: AppStoreAPI.Build) {
         guard let version = schema.attributes?.version,
               let uploadedDate = schema.attributes?.uploadedDate,
@@ -56,5 +84,9 @@ public struct Build: Sendable, Identifiable {
 
     public struct Relationships: Sendable, Equatable {
         public let buildBundlesIds: [String]?
+
+        public init(buildBundlesIds: [String]?) {
+            self.buildBundlesIds = buildBundlesIds
+        }
     }
 }

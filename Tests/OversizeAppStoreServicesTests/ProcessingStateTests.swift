@@ -9,12 +9,12 @@ import Testing
 
 @Suite struct ProcessingStateTests {
     @Test("ProcessingState should have same number of cases as AppStoreAPI")
-    func checkProcessingStateCount() throws {
+    func checkProcessingStateCount() {
         #expect(OversizeAppStoreServices.ProcessingState.allCases.count == AppStoreAPI.Build.Attributes.ProcessingState.allCases.count)
     }
 
     @Test("ProcessingState should have the same cases as AppStoreAPI")
-    func checkProcessingStateCasesMatch() throws {
+    func checkProcessingStateCasesMatch() {
         let localCases = Set(OversizeAppStoreServices.ProcessingState.allCases.map { $0.rawValue })
         let generatedCases = Set(AppStoreAPI.Build.Attributes.ProcessingState.allCases.map { $0.rawValue })
 
@@ -22,7 +22,7 @@ import Testing
     }
 
     @Test("ProcessingState should match raw values with AppStoreAPI")
-    func checkProcessingStateRawValues() throws {
+    func checkProcessingStateRawValues() {
         for state in OversizeAppStoreServices.ProcessingState.allCases {
             let generatedState = AppStoreAPI.Build.Attributes.ProcessingState(rawValue: state.rawValue)
             #expect(generatedState != nil, "No matching case in AppStoreAPI for \(state.rawValue)")
@@ -30,7 +30,7 @@ import Testing
     }
 
     @Test("ProcessingState should have valid display names")
-    func checkProcessingStateDisplayNames() throws {
+    func checkProcessingStateDisplayNames() {
         for state in OversizeAppStoreServices.ProcessingState.allCases {
             #expect(!state.displayName.isEmpty, "Display name should not be empty for \(state)")
         }

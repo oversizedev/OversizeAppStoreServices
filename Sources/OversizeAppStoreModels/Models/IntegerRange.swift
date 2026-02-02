@@ -43,8 +43,4 @@ extension IntegerRange: CustomStringConvertible {
 
 // MARK: - Equatable
 
-extension IntegerRange: Equatable {
-    public static func == (lhs: IntegerRange, rhs: IntegerRange) -> Bool {
-        lhs.minimum == rhs.minimum && lhs.maximum == rhs.maximum
-    }
-}
+extension IntegerRange: Equatable {}

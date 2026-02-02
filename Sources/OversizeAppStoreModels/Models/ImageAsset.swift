@@ -40,9 +40,8 @@ extension ImageAsset {
     }
 
     static func constructURLString(baseURL: String, width: Int, height: Int, format: String) -> String {
-        let replacedURL = baseURL.replacingOccurrences(of: "{w}", with: "\(width)")
+        baseURL.replacingOccurrences(of: "{w}", with: "\(width)")
             .replacingOccurrences(of: "{h}", with: "\(height)")
             .replacingOccurrences(of: "{f}", with: format)
-        return replacedURL
     }
 }

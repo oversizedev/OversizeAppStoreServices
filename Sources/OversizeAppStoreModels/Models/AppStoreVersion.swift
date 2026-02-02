@@ -22,6 +22,36 @@ public struct AppStoreVersion: Sendable, Identifiable {
     public let included: Included?
     public let relationships: Relationships?
 
+    public init(
+        id: String,
+        versionString: String,
+        platform: Platform,
+        storeState: AppStoreVersionState,
+        state: AppVersionState,
+        copyright: String,
+        reviewType: ReviewType?,
+        releaseType: ReleaseType?,
+        earliestReleaseDate: Date?,
+        isDownloadable: Bool?,
+        createdDate: Date?,
+        included: Included?,
+        relationships: Relationships?
+    ) {
+        self.id = id
+        self.versionString = versionString
+        self.platform = platform
+        self.storeState = storeState
+        self.state = state
+        self.copyright = copyright
+        self.reviewType = reviewType
+        self.releaseType = releaseType
+        self.earliestReleaseDate = earliestReleaseDate
+        self.isDownloadable = isDownloadable
+        self.createdDate = createdDate
+        self.included = included
+        self.relationships = relationships
+    }
+
     public init?(schema: AppStoreAPI.AppStoreVersion, included: [AppStoreAPI.AppStoreVersionsResponse.IncludedItem]? = nil) {
         guard let storeState = schema.attributes?.appStoreState?.rawValue,
               let storeStateType: AppStoreVersionState = .init(rawValue: storeState),
@@ -90,9 +120,27 @@ public struct AppStoreVersion: Sendable, Identifiable {
         public let ageRatingDeclaration: AgeRatingDeclaration?
         public let appStoreVersionLocalizations: [AppStoreVersionLocalization]?
         public let appStoreReviewDetail: [AppStoreReviewDetail]?
+
+        public init(
+            app: App?,
+            build: Build?,
+            ageRatingDeclaration: AgeRatingDeclaration?,
+            appStoreVersionLocalizations: [AppStoreVersionLocalization]?,
+            appStoreReviewDetail: [AppStoreReviewDetail]?
+        ) {
+            self.app = app
+            self.build = build
+            self.ageRatingDeclaration = ageRatingDeclaration
+            self.appStoreVersionLocalizations = appStoreVersionLocalizations
+            self.appStoreReviewDetail = appStoreReviewDetail
+        }
     }
 
     public struct Relationships: Sendable {
         public let appStoreVersionLocalizationsIds: [String]?
+
+        public init(appStoreVersionLocalizationsIds: [String]?) {
+            self.appStoreVersionLocalizationsIds = appStoreVersionLocalizationsIds
+        }
     }
 }

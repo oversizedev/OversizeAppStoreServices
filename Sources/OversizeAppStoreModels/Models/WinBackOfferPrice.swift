@@ -30,7 +30,7 @@ public struct WinBackOfferPrice: Sendable, Identifiable {
         )
     }
 
-    // Static method to create array from collection response
+    /// Static method to create array from collection response
     public static func array(from response: WinBackOfferPricesResponse) -> [WinBackOfferPrice] {
         response.data.compactMap {
             WinBackOfferPrice(schema: $0, included: response.included)

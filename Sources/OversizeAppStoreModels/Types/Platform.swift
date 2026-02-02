@@ -14,7 +14,7 @@ public enum Platform: String, CaseIterable, Codable, Sendable, Identifiable {
     case tvOs = "TV_OS"
     case visionOs = "VISION_OS"
 
-    // Computed property for display name
+    /// Computed property for display name
     public var displayName: String {
         switch self {
         case .ios:
@@ -43,5 +43,7 @@ public enum Platform: String, CaseIterable, Codable, Sendable, Identifiable {
     }
     #endif
 
-    public var id: String { rawValue }
+    public var id: String {
+        rawValue
+    }
 }

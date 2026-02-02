@@ -13,7 +13,9 @@ import OversizeServices
 public struct EnvAuthenticator: Authenticator {
     private let storage: SecureStorageService = .init()
     private var jwt: JWT
-    public var api: API { jwt.api }
+    public var api: API {
+        jwt.api
+    }
 
     public init(
         api: API = .appStoreConnect,

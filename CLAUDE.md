@@ -82,7 +82,7 @@ Uses **Factory Kit** for service registration and injection:
 | AppCategoryService | Category browsing | Primary/secondary categories, subcategories |
 | CertificateService | Certificate management | Fetch certificates |
 | UsersService | User management | Fetch App Store Connect users |
-| AppStoreVersionSubmissionsService | Version submissions | Submission status tracking |
+| reviewSubmissionsService | Version submissions | Submission status tracking |
 
 ### Metric Services (OversizeMetricServices)
 
@@ -112,7 +112,7 @@ Uses **Factory Kit** for service registration and injection:
 
 ### Error Handling
 
-All service methods return `Result<T, AppError>`:
+All service methods return `Result<T, Error>`:
 - No exceptions thrown
 - Graceful degradation when client initialization fails
 - Custom error mapping from AppStoreConnect ResponseError
@@ -127,7 +127,7 @@ Service Method Call
 → Fetch from AppStoreConnectClient if needed
 → Transform API response to domain models
 → Save to cache
-→ Return Result<T, AppError>
+→ Return Result<T, Error>
 ```
 
 ## Code Organization
@@ -181,7 +181,7 @@ Test coverage focuses on:
 ### Creating a New Service
 1. Define as `public actor ServiceName`
 2. Initialize `AppStoreConnectClient` with `EnvAuthenticator()`
-3. Use `Result<T, AppError>` return types
+3. Use `Result<T, Error>` return types
 4. Implement caching with `@Injected(\.cacheService)`
 5. Register in `ServiceRegistering.swift`
 

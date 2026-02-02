@@ -9,7 +9,7 @@ import Testing
 
 @Suite struct AppStoreLanguageTests {
     @Test("Should have correct raw values")
-    func rawValues() throws {
+    func rawValues() {
         #expect(AppStoreLanguage.englishUS.rawValue == "en-US")
         #expect(AppStoreLanguage.russian.rawValue == "ru")
         #expect(AppStoreLanguage.japanese.rawValue == "ja")
@@ -18,7 +18,7 @@ import Testing
     }
 
     @Test("Should have correct display names")
-    func displayNames() throws {
+    func displayNames() {
         #expect(AppStoreLanguage.englishUS.displayName == "English (US)")
         #expect(AppStoreLanguage.russian.displayName == "Russian")
         #expect(AppStoreLanguage.japanese.displayName == "Japanese")
@@ -27,7 +27,7 @@ import Testing
     }
 
     @Test("Should have correct flag emojis")
-    func flagEmojis() throws {
+    func flagEmojis() {
         #expect(AppStoreLanguage.englishUS.flagEmoji == "🇺🇸")
         #expect(AppStoreLanguage.russian.flagEmoji == "🇷🇺")
         #expect(AppStoreLanguage.japanese.flagEmoji == "🇯🇵")
@@ -36,7 +36,7 @@ import Testing
     }
 
     @Test("Should conform to Identifiable correctly")
-    func identifiable() throws {
+    func identifiable() {
         #expect(AppStoreLanguage.englishUS.id == "en-US")
         #expect(AppStoreLanguage.russian.id == "ru")
         #expect(AppStoreLanguage.japanese.id == "ja")

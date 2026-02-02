@@ -11,12 +11,12 @@ import Testing
     // MARK: - InAppPurchaseType Tests
 
     @Test("InAppPurchaseType should have same number of cases as AppStoreAPI")
-    func checkInAppPurchaseTypeCount() throws {
+    func checkInAppPurchaseTypeCount() {
         #expect(OversizeAppStoreServices.InAppPurchaseType.allCases.count == AppStoreAPI.InAppPurchaseType.allCases.count)
     }
 
     @Test("InAppPurchaseType should have the same cases as AppStoreAPI")
-    func checkInAppPurchaseTypeCasesMatch() throws {
+    func checkInAppPurchaseTypeCasesMatch() {
         let localCases = Set(OversizeAppStoreServices.InAppPurchaseType.allCases.map { $0.rawValue })
         let generatedCases = Set(AppStoreAPI.InAppPurchaseType.allCases.map { $0.rawValue })
 
@@ -24,7 +24,7 @@ import Testing
     }
 
     @Test("InAppPurchaseType values should match expected raw values and display names")
-    func checkInAppPurchaseTypeValues() throws {
+    func checkInAppPurchaseTypeValues() {
         for type in OversizeAppStoreServices.InAppPurchaseType.allCases {
             switch type {
             case .consumable:
@@ -41,7 +41,7 @@ import Testing
     }
 
     @Test("InAppPurchaseType should match raw values with AppStoreAPI")
-    func checkInAppPurchaseTypeRawValues() throws {
+    func checkInAppPurchaseTypeRawValues() {
         for type in OversizeAppStoreServices.InAppPurchaseType.allCases {
             let generatedType = AppStoreAPI.InAppPurchaseType(rawValue: type.rawValue)
             #expect(generatedType != nil, "No matching case in AppStoreAPI for \(type.rawValue)")

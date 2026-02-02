@@ -9,12 +9,12 @@ import Testing
 
 @Suite struct SubscriptionOfferEligibilityTests {
     @Test("SubscriptionOfferEligibility should have same number of cases as AppStoreAPI")
-    func checkSubscriptionOfferEligibilityCount() throws {
+    func checkSubscriptionOfferEligibilityCount() {
         #expect(OversizeAppStoreServices.SubscriptionOfferEligibility.allCases.count == AppStoreAPI.SubscriptionOfferEligibility.allCases.count)
     }
 
     @Test("SubscriptionOfferEligibility should have the same cases as AppStoreAPI")
-    func checkSubscriptionOfferEligibilityCasesMatch() throws {
+    func checkSubscriptionOfferEligibilityCasesMatch() {
         let localCases = Set(OversizeAppStoreServices.SubscriptionOfferEligibility.allCases.map { $0.rawValue })
         let generatedCases = Set(AppStoreAPI.SubscriptionOfferEligibility.allCases.map { $0.rawValue })
 
@@ -22,7 +22,7 @@ import Testing
     }
 
     @Test("SubscriptionOfferEligibility should match raw values with AppStoreAPI")
-    func checkSubscriptionOfferEligibilityRawValues() throws {
+    func checkSubscriptionOfferEligibilityRawValues() {
         for eligibility in OversizeAppStoreServices.SubscriptionOfferEligibility.allCases {
             let generatedEligibility = AppStoreAPI.SubscriptionOfferEligibility(rawValue: eligibility.rawValue)
             #expect(generatedEligibility != nil, "No matching case in AppStoreAPI for \(eligibility.rawValue)")
