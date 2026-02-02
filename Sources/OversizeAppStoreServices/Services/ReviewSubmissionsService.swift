@@ -5,12 +5,14 @@
 
 import AppStoreAPI
 import AppStoreConnect
+import FactoryKit
 import Foundation
 import OversizeAppStoreModels
 import OversizeCore
 
 public actor ReviewSubmissionsService {
     private let client: AppStoreConnectClient?
+    @Injected(\.cacheService) private var cacheService: CacheService
 
     public init() {
         do {
@@ -159,11 +161,57 @@ public actor ReviewSubmissionsService {
             )
 
             let response = try await client.send(request)
-            let submission = response.data.flatMap { ReviewSubmission(schema: $0) }
+            let submission = response.data.compactMap { ReviewSubmission(schema: $0) }
             return .success(submission)
 
         } catch {
             return handleRequestFailure(error: error)
+        }
+    }
+
+    public func fetchReviewSubmissionsIncludedAll(
+        appId: String,
+        force: Bool = false,
+    ) async -> Result<[ReviewSubmission], Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
+
+        return await cacheService.fetchWithCache(key: "fetchReviewSubmissionsIncludedAll\(appId)", force: force) {
+            let request = Resources.v1.reviewSubmissions.get(
+                filterApp: [appId],
+                include: [
+                    .app,
+                    .items,
+                    .appStoreVersionForReview,
+                    .submittedByActor,
+                    .lastUpdatedByActor,
+                ],
+                limitItems: 200,
+            )
+            return try await client.send(request)
+        }.map { response in
+            response.data.compactMap { ReviewSubmission(schema: $0, included: response.included) }
+        }
+    }
+
+    public func fetchReviewSubmissionItemsIncludedAll(
+        reviewSubmissionId: String,
+        force: Bool = false,
+    ) async -> Result<[ReviewSubmissionItem], Error> {
+        guard let client else { return .failure(NetworkError.unauthorized) }
+
+        return await cacheService.fetchWithCache(key: "fetchReviewSubmissionItemsIncludedAll\(reviewSubmissionId)", force: force) {
+            let request = Resources.v1.reviewSubmissions.id(reviewSubmissionId).items.get(
+                limit: 200,
+                include: [
+                    .appStoreVersion,
+                    .appCustomProductPageVersion,
+                    .appStoreVersionExperiment,
+                    .appEvent,
+                ],
+            )
+            return try await client.send(request)
+        }.map { (response: AppStoreAPI.ReviewSubmissionItemsResponse) in
+            response.data.compactMap { ReviewSubmissionItem(schema: $0, included: response.included) }
         }
     }
 
