@@ -17,12 +17,12 @@ public struct ReviewSubmissionItem: Sendable, Identifiable {
             appStoreVersionExperimentV2Id: schema.relationships?.appStoreVersionExperimentV2?.data?.id,
             appEventId: schema.relationships?.appEvent?.data?.id,
         )
-        self.included = nil
+        included = nil
     }
 
     public init?(
         schema: AppStoreAPI.ReviewSubmissionItem,
-        included: [AppStoreAPI.ReviewSubmissionItemsResponse.IncludedItem]?
+        included: [AppStoreAPI.ReviewSubmissionItemsResponse.IncludedItem]?,
     ) {
         id = schema.id
         state = schema.attributes?.state.flatMap { State(rawValue: $0.rawValue) }
@@ -114,7 +114,7 @@ public struct ReviewSubmissionItem: Sendable, Identifiable {
         public let appStoreVersionExperimentV2Id: String?
         public let appEventId: String?
     }
-    
+
     public struct Included: Sendable {
         public let appStoreVersion: AppStoreVersion?
         public let appCustomProductPageVersion: AppCustomProductPageVersion?

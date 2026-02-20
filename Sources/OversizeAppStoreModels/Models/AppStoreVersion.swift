@@ -35,7 +35,7 @@ public struct AppStoreVersion: Sendable, Identifiable {
         isDownloadable: Bool?,
         createdDate: Date?,
         included: Included?,
-        relationships: Relationships?
+        relationships: Relationships?,
     ) {
         self.id = id
         self.versionString = versionString
@@ -126,7 +126,7 @@ public struct AppStoreVersion: Sendable, Identifiable {
             build: Build?,
             ageRatingDeclaration: AgeRatingDeclaration?,
             appStoreVersionLocalizations: [AppStoreVersionLocalization]?,
-            appStoreReviewDetail: [AppStoreReviewDetail]?
+            appStoreReviewDetail: [AppStoreReviewDetail]?,
         ) {
             self.app = app
             self.build = build

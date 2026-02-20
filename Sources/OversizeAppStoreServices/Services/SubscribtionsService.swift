@@ -429,7 +429,7 @@ public actor SubscriptionsService {
                 name: name,
                 numberOfPeriods: numberOfPeriods,
                 offerCode: offerCode,
-                offerMode: offerMode
+                offerMode: offerMode,
             ),
             relationships: .init(
                 subscription: .init(

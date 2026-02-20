@@ -24,7 +24,7 @@ public struct AppStoreVersionLocalization: Identifiable, Hashable, Sendable {
         marketingURL: URL?,
         promotionalText: String?,
         supportURL: URL?,
-        whatsNew: String?
+        whatsNew: String?,
     ) {
         self.id = id
         self.locale = locale

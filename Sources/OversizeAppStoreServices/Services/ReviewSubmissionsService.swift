@@ -22,7 +22,7 @@ public actor ReviewSubmissionsService {
         }
     }
 
-    public func postReviewSubmissions(
+    public func postReviewSubmission(
         appId: String,
         platform: Platform,
     ) async -> Result<ReviewSubmission, Error> {
@@ -124,12 +124,12 @@ public actor ReviewSubmissionsService {
         }
     }
 
-    public func postAppStoreVersionSubmission(
+    public func postAppStoreVersionSubmissionWithItems(
         appId: String,
         appStoreVersionsId: String,
         platform: Platform,
-    ) async -> Result<String, Error> {
-        switch await postReviewSubmissions(appId: appId, platform: platform) {
+    ) async -> Result<ReviewSubmission, Error> {
+        switch await postReviewSubmission(appId: appId, platform: platform) {
         case let .success(submission):
             switch await postReviewSubmissionItems(reviewSubmissionId: submission.id, appStoreVersionsId: appStoreVersionsId) {
             case .success:
@@ -137,10 +137,9 @@ public actor ReviewSubmissionsService {
             case let .failure(error):
                 return .failure(error)
             }
-
             switch await patchReviewSubmissions(reviewSubmissionId: submission.id, isSubmitted: true) {
-            case let .success(updated):
-                return .success(updated.id)
+            case let .success(reviewSubmission):
+                return .success(reviewSubmission)
             case let .failure(error):
                 return .failure(error)
             }
@@ -149,17 +148,11 @@ public actor ReviewSubmissionsService {
         }
     }
 
-    public func fetchReviewSubmissions(
-        appId: String,
-    ) async -> Result<[ReviewSubmission], Error> {
+    public func fetchReviewSubmissions(appId: String) async -> Result<[ReviewSubmission], Error> {
         guard let client else { return .failure(NetworkError.unauthorized) }
 
         do {
-            let request = Resources.v1.reviewSubmissions.get(
-                //filterState: [.readyForReview, .waitingForReview, .inReview],
-                filterApp: [appId],
-            )
-
+            let request = Resources.v1.reviewSubmissions.get(filterApp: [appId])
             let response = try await client.send(request)
             let submission = response.data.compactMap { ReviewSubmission(schema: $0) }
             return .success(submission)
@@ -185,7 +178,6 @@ public actor ReviewSubmissionsService {
                     .submittedByActor,
                     .lastUpdatedByActor,
                 ],
-                limitItems: 200,
             )
             return try await client.send(request)
         }.map { response in

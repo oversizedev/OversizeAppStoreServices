@@ -33,7 +33,7 @@ public struct Build: Sendable, Identifiable {
         computedMinMacOsVersion: String?,
         processingState: ProcessingState?,
         buildAudienceType: BuildAudienceType?,
-        relationships: Relationships
+        relationships: Relationships,
     ) {
         self.id = id
         self.version = version
