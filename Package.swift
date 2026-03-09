@@ -21,7 +21,8 @@ let localDependencies: [PackageDescription.Package.Dependency] = commonDependenc
     .package(name: "OversizeServices", path: "../OversizeServices"),
 ]
 
-let dependencies: [PackageDescription.Package.Dependency] = localDependencies
+let isLocalDev = FileManager.default.fileExists(atPath: "\(NSHomeDirectory())/Developer/Packages/OversizeCore")
+let dependencies: [PackageDescription.Package.Dependency] = isLocalDev ? localDependencies : remoteDependencies
 
 let package = Package(
     name: "OversizeAppStoreServices",

@@ -7,7 +7,7 @@ import AppStoreAPI
 @testable import OversizeAppStoreServices
 import Testing
 
-@Suite struct ReviewTypeTests {
+struct ReviewTypeTests {
     @Test("ReviewType should have same number of cases as AppStoreAPI")
     func checkReviewTypeCount() {
         #expect(OversizeAppStoreServices.ReviewType.allCases.count == AppStoreAPI.AppStoreVersion.Attributes.ReviewType.allCases.count)

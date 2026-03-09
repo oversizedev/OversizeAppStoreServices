@@ -7,7 +7,7 @@ import AppStoreAPI
 @testable import OversizeAppStoreServices
 import Testing
 
-@Suite struct ContentRightsDeclarationTests {
+struct ContentRightsDeclarationTests {
     @Test("ContentRightsDeclaration should have same number of cases as AppStoreAPI")
     func checkContentRightsDeclarationCount() {
         #expect(OversizeAppStoreServices.ContentRightsDeclaration.allCases.count == AppStoreAPI.App.Attributes.ContentRightsDeclaration.allCases.count)

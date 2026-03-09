@@ -7,7 +7,7 @@ import AppStoreAPI
 @testable import OversizeAppStoreServices
 import Testing
 
-@Suite struct AppStoreLanguageTests {
+struct AppStoreLanguageTests {
     @Test("Should have correct raw values")
     func rawValues() {
         #expect(AppStoreLanguage.englishUS.rawValue == "en-US")

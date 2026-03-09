@@ -7,7 +7,7 @@ import AppStoreAPI
 @testable import OversizeAppStoreServices
 import Testing
 
-@Suite struct SubscriptionOfferDurationTests {
+struct SubscriptionOfferDurationTests {
     @Test("SubscriptionOfferDuration should have same number of cases as AppStoreAPI")
     func checkSubscriptionOfferDurationCount() {
         #expect(OversizeAppStoreServices.SubscriptionOfferDuration.allCases.count == AppStoreAPI.SubscriptionOfferDuration.allCases.count)

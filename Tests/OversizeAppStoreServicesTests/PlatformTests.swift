@@ -7,7 +7,7 @@ import AppStoreAPI
 @testable import OversizeAppStoreServices
 import Testing
 
-@Suite struct PlatformTests {
+struct PlatformTests {
     @Test("Platform should have same number of cases as AppStoreAPI")
     func checkPlatformCount() {
         #expect(OversizeAppStoreServices.Platform.allCases.count == AppStoreAPI.Platform.allCases.count)

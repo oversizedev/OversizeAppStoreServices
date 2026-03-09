@@ -7,7 +7,7 @@ import AppStoreAPI
 @testable import OversizeAppStoreServices
 import Testing
 
-@Suite struct BuildAudienceTypeTests {
+struct BuildAudienceTypeTests {
     @Test("BuildAudienceType should have same number of cases as AppStoreAPI")
     func checkBuildAudienceTypeCount() {
         #expect(OversizeAppStoreServices.BuildAudienceType.allCases.count == AppStoreAPI.BuildAudienceType.allCases.count)

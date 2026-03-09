@@ -7,7 +7,7 @@ import AppStoreAPI
 @testable import OversizeAppStoreServices
 import Testing
 
-@Suite struct TerritoryTests {
+struct TerritoryTests {
     @Test("Should initialize correctly from valid schema")
     func initWithValidSchema() {
         let schema = AppStoreAPI.Territory(

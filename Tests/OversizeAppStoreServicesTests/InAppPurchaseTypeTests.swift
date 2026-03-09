@@ -7,7 +7,7 @@ import AppStoreAPI
 @testable import OversizeAppStoreServices
 import Testing
 
-@Suite struct InAppPurchaseTypeTests {
+struct InAppPurchaseTypeTests {
     // MARK: - InAppPurchaseType Tests
 
     @Test("InAppPurchaseType should have same number of cases as AppStoreAPI")

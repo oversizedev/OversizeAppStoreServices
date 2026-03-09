@@ -7,7 +7,7 @@ import AppStoreAPI
 @testable import OversizeAppStoreServices
 import Testing
 
-@Suite struct CustomerReviewsSortTests {
+struct CustomerReviewsSortTests {
     @Test("CustomerReviewsSort should have same number of cases as AppStoreAPI")
     func checkCustomerReviewsSortCount() {
         #expect(OversizeAppStoreServices.CustomerReviewsSort.allCases.count == AppStoreAPI.Resources.V1.Apps.WithID.CustomerReviews.Sort.allCases.count)

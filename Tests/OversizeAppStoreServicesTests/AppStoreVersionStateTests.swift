@@ -7,7 +7,7 @@ import AppStoreAPI
 @testable import OversizeAppStoreServices
 import Testing
 
-@Suite struct AppStoreVersionStateTests {
+struct AppStoreVersionStateTests {
     @Test("AppStoreVersionState should have same number of cases as AppStoreAPI")
     func checkAppStoreVersionStateCount() {
         #expect(OversizeAppStoreServices.AppStoreVersionState.allCases.count == AppStoreAPI.AppStoreVersionState.allCases.count)

@@ -7,7 +7,7 @@ import AppStoreAPI
 @testable import OversizeAppStoreServices
 import Testing
 
-@Suite struct ProcessingStateTests {
+struct ProcessingStateTests {
     @Test("ProcessingState should have same number of cases as AppStoreAPI")
     func checkProcessingStateCount() {
         #expect(OversizeAppStoreServices.ProcessingState.allCases.count == AppStoreAPI.Build.Attributes.ProcessingState.allCases.count)

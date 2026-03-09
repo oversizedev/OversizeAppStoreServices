@@ -7,7 +7,7 @@ import AppStoreAPI
 @testable import OversizeAppStoreServices
 import Testing
 
-@Suite struct AppStoreAgeRatingTests {
+struct AppStoreAgeRatingTests {
     @Test("AppStoreAgeRating should have same number of cases as AppStoreAPI")
     func checkAppStoreAgeRatingCount() {
         #expect(OversizeAppStoreServices.AppStoreAgeRating.allCases.count == AppStoreAPI.AppStoreAgeRating.allCases.count)

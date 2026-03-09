@@ -7,7 +7,7 @@ import AppStoreAPI
 @testable import OversizeAppStoreServices
 import Testing
 
-@Suite struct SubscriptionOfferEligibilityTests {
+struct SubscriptionOfferEligibilityTests {
     @Test("SubscriptionOfferEligibility should have same number of cases as AppStoreAPI")
     func checkSubscriptionOfferEligibilityCount() {
         #expect(OversizeAppStoreServices.SubscriptionOfferEligibility.allCases.count == AppStoreAPI.SubscriptionOfferEligibility.allCases.count)

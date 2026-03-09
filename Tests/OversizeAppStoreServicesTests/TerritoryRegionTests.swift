@@ -7,7 +7,7 @@ import AppStoreAPI
 @testable import OversizeAppStoreServices
 import Testing
 
-@Suite struct TerritoryRegionTests {
+struct TerritoryRegionTests {
     @Test("Should initialize with valid territory code")
     func initWithValidCode() {
         #expect(TerritoryRegion(territoryCode: .usa) == .unitedStatesAndCanada)
