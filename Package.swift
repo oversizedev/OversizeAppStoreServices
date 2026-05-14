@@ -6,7 +6,7 @@ import PackageDescription
 
 let commonDependencies: [PackageDescription.Package.Dependency] = [
     .package(url: "https://github.com/aaronsky/asc-swift.git", .upToNextMajor(from: "1.5.0")),
-    .package(url: "https://github.com/hmlongco/Factory.git", .upToNextMajor(from: "2.5.0")),
+    .package(url: "https://github.com/hmlongco/Factory.git", .upToNextMajor(from: "3.0.2")),
     .package(url: "https://github.com/1024jp/GzipSwift", .upToNextMajor(from: "6.1.0")),
     .package(url: "https://github.com/dehesa/CodableCSV.git", .upToNextMajor(from: "0.6.7")),
 ]
