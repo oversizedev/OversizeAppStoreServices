@@ -137,7 +137,7 @@ public actor AppScreenshotsService {
             try await withThrowingTaskGroup(of: Void.self) { group in
                 for operation in uploadOperations {
                     group.addTask { [client] in
-                        try await client.upload(operation: operation, from: fileData)
+                        try await client.upload(operation: operation.schema, from: fileData)
                     }
                 }
                 try await group.waitForAll()
