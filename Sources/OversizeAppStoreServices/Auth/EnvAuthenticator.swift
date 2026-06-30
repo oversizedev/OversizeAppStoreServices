@@ -3,24 +3,34 @@
 // EnvAuthenticator.swift, created on 22.07.2024
 //
 
+#if canImport(Darwin)
 import AppStoreConnect
-import FactoryKit
 import Foundation
-import OversizeAppStoreModels
 import OversizeCore
 import OversizeServices
 
 public struct EnvAuthenticator: Authenticator {
     private let storage: SecureStorageService = .init()
-    private var jwt: JWT
+    private let configuredAPI: API
+    private var jwt: JWT?
     public var api: API {
-        jwt.api
+        configuredAPI
     }
 
     public init(
         api: API = .appStoreConnect,
+    ) {
+        configuredAPI = api
+    }
 
-    ) throws {
+    public mutating func token() throws -> String {
+        var resolvedJWT = try jwt ?? makeJWT()
+        let token = try resolvedJWT.token()
+        jwt = resolvedJWT
+        return token
+    }
+
+    private func makeJWT() throws -> JWT {
         guard let keyLabel = UserDefaults.standard.string(forKey: "AppStore.Account") else {
             logError("Get UserDefaults value for 'AppStore.Account'")
             throw Error.missingEnvironmentVariable("AppStore.Account")
@@ -38,17 +48,13 @@ public struct EnvAuthenticator: Authenticator {
 
         let privateKey = try JWT.PrivateKey(pemRepresentation: appStoreCertificate.password)
 
-        jwt = JWT(
-            api: api,
+        return JWT(
+            api: configuredAPI,
             keyID: appStoreCertificate.login,
             issuerID: appStoreIssuerID,
             expiryDuration: 20 * 60,
             privateKey: privateKey,
         )
-    }
-
-    public mutating func token() throws -> String {
-        try jwt.token()
     }
 }
 
@@ -57,3 +63,4 @@ public extension EnvAuthenticator {
         case missingEnvironmentVariable(String)
     }
 }
+#endif

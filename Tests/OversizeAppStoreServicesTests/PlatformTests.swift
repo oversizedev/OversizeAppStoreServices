@@ -36,10 +36,12 @@ struct PlatformTests {
         }
     }
 
+    #if canImport(SwiftUI)
     @Test("Platform should have valid icons")
     func checkPlatformIcons() {
         for platform in OversizeAppStoreServices.Platform.allCases {
             #expect(platform.icon != nil, "Icon should not be nil for \(platform)")
         }
     }
+    #endif
 }

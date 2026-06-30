@@ -4,7 +4,6 @@
 //
 
 import Foundation
-import OversizeAppStoreModels
 import OversizeCore
 
 public actor CacheService {
@@ -26,9 +25,8 @@ public actor CacheService {
         do {
             let jsonData = try JSONEncoder().encode(data)
             try jsonData.write(to: fileURL, options: .atomic)
-            logData("Saved cache: \(key)")
         } catch {
-            logError("Failed to save cache for key \(key): \(error)")
+            print("CacheService: Failed to save cache for key \(key): \(error)")
         }
     }
 
@@ -42,7 +40,7 @@ public actor CacheService {
             let data = try Data(contentsOf: fileURL)
             return try JSONDecoder().decode(T.self, from: data)
         } catch {
-            logError("Failed to load cache for key \(key): \(error)")
+            print("CacheService: Failed to load cache for key \(key): \(error)")
             return nil
         }
     }
@@ -60,9 +58,8 @@ public actor CacheService {
 
             try FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
 
-            logData("Cache cleared successfully")
         } catch {
-            logError("Failed to clear cache: \(error)")
+            print("CacheService: Failed to clear cache: \(error)")
         }
     }
 
@@ -80,7 +77,7 @@ public extension CacheService {
     func fetchWithCache<T: Codable & Sendable>(
         key: String,
         force: Bool = false,
-        fetcher: () async throws -> T,
+        fetcher: @Sendable () async throws -> T,
     ) async -> Result<T, Error> {
         if !force {
             if let cachedData: T = await load(key: key, as: T.self) {
@@ -89,16 +86,12 @@ public extension CacheService {
         }
 
         do {
-            logNetwork(force ? "Force fetching: \(key)" : "Fetching: \(key)")
             let fetchedData = try await fetcher()
-            await save(fetchedData, key: key) // Save new data to cache
+            await save(fetchedData, key: key)
             return .success(fetchedData)
-        } catch let error as NetworkError {
-            logError("Failed to fetch data for key \(key): \(error)")
-            return .failure(error)
         } catch {
-            logError("Unexpected error during fetch for key \(key): \(error)")
-            return .failure(NetworkError.noResponse)
+            let mapped = error.asNetworkError
+            return .failure(mapped)
         }
     }
 }

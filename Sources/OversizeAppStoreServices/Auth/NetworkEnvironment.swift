@@ -4,7 +4,6 @@
 //
 
 import Foundation
-import OversizeAppStoreModels
 
 /// Environment wrapper that loads values from a local file, falling back on a `ProcessInfo`.
 public struct NetworkEnvironment {

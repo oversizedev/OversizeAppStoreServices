@@ -5,22 +5,21 @@
 
 import AppStoreAPI
 import AppStoreConnect
+#if canImport(CryptoKit)
 import CryptoKit
-import FactoryKit
+#else
+import Crypto
+#endif
 import Foundation
-import OversizeAppStoreModels
 import OversizeCore
 
 public actor AppScreenshotsService {
-    @Injected(\.cacheService) private var cacheService: CacheService
-    private let client: AppStoreConnectClient?
+    private let cacheService: CacheService
+    private let client: AppStoreConnectClient
 
-    public init() {
-        do {
-            client = try AppStoreConnectClient(authenticator: EnvAuthenticator())
-        } catch {
-            client = nil
-        }
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheService: CacheService = CacheService()) {
+        self.client = AppStoreConnectClient(authenticator: authenticator)
+        self.cacheService = cacheService
     }
 
     public func fetchAppScreenshotSets(
@@ -28,7 +27,7 @@ public actor AppScreenshotsService {
         screenshotDisplayType: ScreenshotDisplayType? = nil,
         force: Bool = false,
     ) async -> Result<[AppScreenshotSet], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         let cacheKey = "fetchScreenshotSets\(localizationId)\(screenshotDisplayType?.rawValue ?? "")"
 
@@ -49,7 +48,7 @@ public actor AppScreenshotsService {
         localizationId: String,
         screenshotDisplayType: ScreenshotDisplayType,
     ) async -> Result<AppScreenshotSet, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         do {
             let request = Resources.v1.appScreenshotSets.post(
@@ -73,20 +72,20 @@ public actor AppScreenshotsService {
             let screenshotSet = AppScreenshotSet(schema: response.data)
             return .success(screenshotSet)
         } catch {
-            logError(error.localizedDescription)
+            print("AppScreenshotsService error: \(error.localizedDescription)")
             return .failure(NetworkError.noResponse)
         }
     }
 
     public func deleteScreenshotSet(id: String) async -> Result<Void, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         do {
             let request = Resources.v1.appScreenshotSets.id(id).delete
             _ = try await client.send(request)
             return .success(())
         } catch {
-            logError(error.localizedDescription)
+            print("AppScreenshotsService error: \(error.localizedDescription)")
             return .failure(NetworkError.noResponse)
         }
     }
@@ -96,7 +95,7 @@ public actor AppScreenshotsService {
         fileName: String,
         fileSize: Int,
     ) async -> Result<AppScreenshot, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         do {
             let request = Resources.v1.appScreenshots.post(
@@ -123,7 +122,7 @@ public actor AppScreenshotsService {
             let screenshot = AppScreenshot(schema: response.data)
             return .success(screenshot)
         } catch {
-            logError(error.localizedDescription)
+            print("AppScreenshotsService error: \(error.localizedDescription)")
             return .failure(NetworkError.noResponse)
         }
     }
@@ -132,20 +131,20 @@ public actor AppScreenshotsService {
         fileData: Data,
         uploadOperations: [UploadOperation],
     ) async -> Result<Void, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         do {
             try await withThrowingTaskGroup(of: Void.self) { group in
                 for operation in uploadOperations {
-                    group.addTask {
-                        try await client.upload(operation: operation, from: fileData)
+                    group.addTask { [client] in
+                        try await client.upload(operation: operation.schema, from: fileData)
                     }
                 }
                 try await group.waitForAll()
             }
             return .success(())
         } catch {
-            logError(error.localizedDescription)
+            print("AppScreenshotsService error: \(error.localizedDescription)")
             return .failure(NetworkError.noResponse)
         }
     }
@@ -154,7 +153,7 @@ public actor AppScreenshotsService {
         screenshotId: String,
         sourceFileChecksum: String,
     ) async -> Result<AppScreenshot, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         do {
             let request = Resources.v1.appScreenshots.id(screenshotId)
@@ -175,20 +174,20 @@ public actor AppScreenshotsService {
             let screenshot = AppScreenshot(schema: response.data)
             return .success(screenshot)
         } catch {
-            logError(error.localizedDescription)
+            print("AppScreenshotsService error: \(error.localizedDescription)")
             return .failure(NetworkError.noResponse)
         }
     }
 
     public func deleteAppScreenshot(id: String) async -> Result<Void, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         do {
             let request = Resources.v1.appScreenshots.id(id).delete
             _ = try await client.send(request)
             return .success(())
         } catch {
-            logError(error.localizedDescription)
+            print("AppScreenshotsService error: \(error.localizedDescription)")
             return .failure(NetworkError.noResponse)
         }
     }
@@ -197,7 +196,7 @@ public actor AppScreenshotsService {
         screenshotSetId: String,
         screenshotIds: [String],
     ) async -> Result<Void, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         do {
             let relationships: [AppStoreAPI.AppScreenshotSetAppScreenshotsLinkagesRequest.Datum] = screenshotIds.map {
@@ -211,7 +210,7 @@ public actor AppScreenshotsService {
             _ = try await client.send(request)
             return .success(())
         } catch {
-            logError(error.localizedDescription)
+            print("AppScreenshotsService error: \(error.localizedDescription)")
             return .failure(NetworkError.noResponse)
         }
     }

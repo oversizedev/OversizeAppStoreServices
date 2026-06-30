@@ -5,18 +5,13 @@
 
 import AppStoreAPI
 import AppStoreConnect
-import OversizeAppStoreModels
 import OversizeCore
 
 public actor CustomerReviewService {
-    private let client: AppStoreConnectClient?
+    private let client: AppStoreConnectClient
 
-    public init() {
-        do {
-            client = try AppStoreConnectClient(authenticator: EnvAuthenticator())
-        } catch {
-            client = nil
-        }
+    public init(authenticator: some AppStoreConnect.Authenticator) {
+        self.client = AppStoreConnectClient(authenticator: authenticator)
     }
 
     public func fetchCustomerReviews(version: AppStoreVersion) async -> Result<[CustomerReview], Error> {
@@ -24,19 +19,19 @@ public actor CustomerReviewService {
     }
 
     public func fetchAppCustomerReviews(appId: String) async -> Result<[CustomerReview], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         let request = Resources.v1.apps.id(appId).customerReviews.get(sort: [.minusCreatedDate])
         do {
             let data = try await client.send(request).data
             return .success(data.compactMap { .init(schema: $0) })
         } catch {
-            return .failure(NetworkError.noResponse)
+            return .failure(error.asNetworkError)
         }
     }
 
     public func fetchAppCustomerReviewsIncludeResponse(appId: String, sort: CustomerReviewsSort = .minusCreatedDate) async -> Result<[CustomerReview], Error> {
-        guard let client, let sort: Resources.V1.Apps.WithID.CustomerReviews.Sort = .init(rawValue: sort.rawValue) else {
-            return .failure(NetworkError.unauthorized)
+        guard let sort: Resources.V1.Apps.WithID.CustomerReviews.Sort = .init(rawValue: sort.rawValue) else {
+            return .failure(NetworkError.invalidURL)
         }
         let request = Resources.v1.apps.id(appId).customerReviews.get(
             sort: [sort],
@@ -44,20 +39,21 @@ public actor CustomerReviewService {
         )
         do {
             let result = try await client.send(request)
-            return .success(result.data.compactMap { .init(schema: $0, included: result.included) })
+            let responses: [AppStoreAPI.CustomerReviewResponseV1]? = result.included
+            return .success(result.data.compactMap { .init(schema: $0, included: responses) })
         } catch {
-            return .failure(NetworkError.noResponse)
+            return .failure(error.asNetworkError)
         }
     }
 
     public func fetchCustomerReviews(versionId: String) async -> Result<[CustomerReview], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         let request = Resources.v1.appStoreVersions.id(versionId).customerReviews.get()
         do {
             let data = try await client.send(request).data
             return .success(data.compactMap { .init(schema: $0) })
         } catch {
-            return .failure(NetworkError.noResponse)
+            return .failure(error.asNetworkError)
         }
     }
 
@@ -77,10 +73,6 @@ public actor CustomerReviewService {
         customerReviewsId: String,
         responseBody: String,
     ) async -> Result<CustomerReviewResponseV1, Error> {
-        guard let client else {
-            return .failure(NetworkError.unauthorized)
-        }
-
         let requestAttributes: CustomerReviewResponseV1CreateRequest.Data.Attributes = .init(
             responseBody: responseBody,
         )
@@ -100,7 +92,7 @@ public actor CustomerReviewService {
             }
             return .success(versionLocalization)
         } catch {
-            return .failure(NetworkError.noResponse)
+            return .failure(error.asNetworkError)
         }
     }
 }

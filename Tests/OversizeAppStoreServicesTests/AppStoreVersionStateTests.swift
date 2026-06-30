@@ -36,10 +36,12 @@ struct AppStoreVersionStateTests {
         }
     }
 
+    #if canImport(SwiftUI)
     @Test("AppStoreVersionState should have valid status colors")
     func checkAppStoreVersionStateColors() {
         for state in OversizeAppStoreServices.AppStoreVersionState.allCases {
             #expect(state.statusColor != nil, "Status color should not be nil for \(state)")
         }
     }
+    #endif
 }

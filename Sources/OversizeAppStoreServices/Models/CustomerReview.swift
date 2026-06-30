@@ -29,8 +29,8 @@ public struct CustomerReview: Sendable, Identifiable {
         createdDate = schema.attributes?.createdDate
         self.territory = .init(rawValue: territory)
 
-        if let customerReviewResponseV1 = included?.first(where: { $0.id == schema.relationships?.response?.data?.id }) {
-            self.included = .init(customerReviewResponse: .init(schema: customerReviewResponseV1))
+        if let match = included?.first(where: { $0.id == schema.relationships?.response?.data?.id }) {
+            self.included = .init(customerReviewResponse: .init(schema: match))
         } else {
             self.included = nil
         }

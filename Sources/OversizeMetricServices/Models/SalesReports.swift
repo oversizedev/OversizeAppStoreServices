@@ -5,7 +5,6 @@
 
 import CodableCSV
 import Foundation
-import OversizeCore
 
 public struct SalesReports: Sendable {
     public let reports: [Report]
@@ -25,29 +24,11 @@ public struct SalesReports: Sendable {
 
     init?(data: Data) {
         guard let csvString = String(data: data, encoding: .utf8) else { return nil }
-        logNotice("Row CSV data:")
+        print("Row CSV data:")
         print(csvString)
 
         do {
             return nil
-
-//            let reader = try CSVReader(input: csvString) {
-//                $0.headerStrategy = .firstLine
-//                $0.delimiters.field = "\t"
-//                $0.presample = true
-//            }
-//
-//            reports = reader.compactMap {
-//                 .init(
-//                     startDate: $0.element(0).valueOrEmpty,
-//                 )
-//             }
-//
-//            // Assign the extracted total values
-//            self.totalRows = totalRows
-//            self.totalAmount = totalAmount
-//            self.totalUnits = totalUnits
-
         } catch {
             return nil
         }

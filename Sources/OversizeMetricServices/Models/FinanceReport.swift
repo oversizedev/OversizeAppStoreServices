@@ -1,6 +1,5 @@
 import CodableCSV
 import Foundation
-import OversizeCore
 
 public struct FinanceReports: Sendable {
     public let reports: [Report]
@@ -85,8 +84,6 @@ public struct FinanceReports: Sendable {
         guard let csvString = String(data: data, encoding: .utf8) else { return nil }
 
         do {
-            let unwantedKeywords = ["Total_Rows", "Total_Amount", "Total_Units"]
-
             let lines = csvString.components(separatedBy: "\n")
 
             var totalRows: Int? = nil
@@ -116,28 +113,28 @@ public struct FinanceReports: Sendable {
 
             reports = reader.compactMap {
                 .init(
-                    startDate: $0.element(0).valueOrEmpty,
-                    endDate: $0.element(1).valueOrEmpty,
-                    upc: $0.element(2),
-                    isrcIsbn: $0.element(3),
-                    vendorIdentifier: $0.element(4).valueOrEmpty,
-                    quantity: $0.element(5),
-                    partnerShare: $0.element(6),
-                    extendedPartnerShare: $0.element(7),
-                    partnerShareCurrency: $0.element(8),
-                    salesOrReturn: $0.element(9),
-                    appleIdentifier: $0.element(10),
-                    artistShowDeveloperAuthor: $0.element(11),
-                    title: $0.element(12),
-                    labelStudioNetworkPublisher: $0.element(13),
-                    grid: $0.element(14),
-                    productTypeIdentifier: $0.element(15),
-                    isanOtherIdentifier: $0.element(16),
-                    countryOfSale: $0.element(17),
-                    preOrderFlag: $0.element(18),
-                    promoCode: $0.element(19),
-                    customerPrice: $0.element(20).valueOrEmpty,
-                    customerCurrency: $0.element(21),
+                    startDate: $0[safe: 0] ?? "",
+                    endDate: $0[safe: 1] ?? "",
+                    upc: $0[safe: 2],
+                    isrcIsbn: $0[safe: 3],
+                    vendorIdentifier: $0[safe: 4] ?? "",
+                    quantity: $0[safe: 5],
+                    partnerShare: $0[safe: 6],
+                    extendedPartnerShare: $0[safe: 7],
+                    partnerShareCurrency: $0[safe: 8],
+                    salesOrReturn: $0[safe: 9],
+                    appleIdentifier: $0[safe: 10],
+                    artistShowDeveloperAuthor: $0[safe: 11],
+                    title: $0[safe: 12],
+                    labelStudioNetworkPublisher: $0[safe: 13],
+                    grid: $0[safe: 14],
+                    productTypeIdentifier: $0[safe: 15],
+                    isanOtherIdentifier: $0[safe: 16],
+                    countryOfSale: $0[safe: 17],
+                    preOrderFlag: $0[safe: 18],
+                    promoCode: $0[safe: 19],
+                    customerPrice: $0[safe: 20] ?? "",
+                    customerCurrency: $0[safe: 21],
                 )
             }
 
@@ -148,5 +145,11 @@ public struct FinanceReports: Sendable {
         } catch {
             return nil
         }
+    }
+}
+
+private extension Array {
+    subscript(safe index: Int) -> Element? {
+        indices.contains(index) ? self[index] : nil
     }
 }

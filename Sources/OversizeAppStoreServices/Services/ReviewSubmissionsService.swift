@@ -5,28 +5,23 @@
 
 import AppStoreAPI
 import AppStoreConnect
-import FactoryKit
 import Foundation
-import OversizeAppStoreModels
 import OversizeCore
 
 public actor ReviewSubmissionsService {
-    private let client: AppStoreConnectClient?
-    @Injected(\.cacheService) private var cacheService: CacheService
+    private let client: AppStoreConnectClient
+    private let cacheService: CacheService
 
-    public init() {
-        do {
-            client = try AppStoreConnectClient(authenticator: EnvAuthenticator())
-        } catch {
-            client = nil
-        }
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheService: CacheService = CacheService()) {
+        self.client = AppStoreConnectClient(authenticator: authenticator)
+        self.cacheService = cacheService
     }
 
     public func postReviewSubmission(
         appId: String,
         platform: Platform,
     ) async -> Result<ReviewSubmission, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         do {
             let apiPlatform: AppStoreAPI.Platform = switch platform {
@@ -64,7 +59,7 @@ public actor ReviewSubmissionsService {
         reviewSubmissionId: String,
         appStoreVersionsId: String,
     ) async -> Result<ReviewSubmissionItem, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         do {
             let reviewSubmissionItemCreateRequest = ReviewSubmissionItemCreateRequest(
@@ -100,7 +95,7 @@ public actor ReviewSubmissionsService {
         isSubmitted: Bool,
         isCanceled: Bool? = nil,
     ) async -> Result<ReviewSubmission, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         do {
             let submitRequest = ReviewSubmissionUpdateRequest(
@@ -152,7 +147,7 @@ public actor ReviewSubmissionsService {
     }
 
     public func fetchReviewSubmissions(appId: String) async -> Result<[ReviewSubmission], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         do {
             let request = Resources.v1.reviewSubmissions.get(filterApp: [appId])
@@ -169,7 +164,7 @@ public actor ReviewSubmissionsService {
         appId: String,
         force: Bool = false,
     ) async -> Result<[ReviewSubmission], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         return await cacheService.fetchWithCache(key: "fetchReviewSubmissionsIncludedAll\(appId)", force: force) {
             let request = Resources.v1.reviewSubmissions.get(
@@ -192,7 +187,7 @@ public actor ReviewSubmissionsService {
         reviewSubmissionId: String,
         force: Bool = false,
     ) async -> Result<[ReviewSubmissionItem], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         return await cacheService.fetchWithCache(key: "fetchReviewSubmissionItemsIncludedAll\(reviewSubmissionId)", force: force) {
             let request = Resources.v1.reviewSubmissions.id(reviewSubmissionId).items.get(
@@ -211,7 +206,7 @@ public actor ReviewSubmissionsService {
     }
 
     public func cancelReviewSubmission(id: String) async -> Result<Void, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         do {
             let cancelRequest = ReviewSubmissionUpdateRequest(
@@ -233,7 +228,7 @@ public actor ReviewSubmissionsService {
     }
 
     public func cancelIrisReviewSubmission(id: String) async -> Result<Void, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         struct CancelBody: Encodable, Sendable {
             struct DataPayload: Encodable, Sendable {
@@ -271,7 +266,7 @@ private extension ReviewSubmissionsService {
         appId: String,
         platform: Platform,
     ) async -> Result<ReviewSubmission, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         let filterPlatform: Resources.V1.ReviewSubmissions.FilterPlatform = switch platform {
         case .ios: .iOS
