@@ -196,7 +196,14 @@ public actor ReviewSubmissionsService {
                     .appStoreVersion,
                     .appCustomProductPageVersion,
                     .appStoreVersionExperiment,
+                    .appStoreVersionExperimentV2,
                     .appEvent,
+                    .backgroundAssetVersion,
+                    .gameCenterAchievementVersion,
+                    .gameCenterActivityVersion,
+                    .gameCenterChallengeVersion,
+                    .gameCenterLeaderboardSetVersion,
+                    .gameCenterLeaderboardVersion,
                 ],
             )
             return try await client.send(request)

@@ -17,6 +17,7 @@ public struct ReviewSubmissionItem: Sendable, Identifiable {
             appStoreVersionExperimentV2Id: schema.relationships?.appStoreVersionExperimentV2?.data?.id,
             appEventId: schema.relationships?.appEvent?.data?.id,
             backgroundAssetVersionId: schema.relationships?.backgroundAssetVersion?.data?.id,
+            gameCenterAchievementVersionId: schema.relationships?.gameCenterAchievementVersion?.data?.id,
             gameCenterActivityVersionId: schema.relationships?.gameCenterActivityVersion?.data?.id,
             gameCenterChallengeVersionId: schema.relationships?.gameCenterChallengeVersion?.data?.id,
             gameCenterLeaderboardSetVersionId: schema.relationships?.gameCenterLeaderboardSetVersion?.data?.id,
@@ -38,6 +39,7 @@ public struct ReviewSubmissionItem: Sendable, Identifiable {
             appStoreVersionExperimentV2Id: schema.relationships?.appStoreVersionExperimentV2?.data?.id,
             appEventId: schema.relationships?.appEvent?.data?.id,
             backgroundAssetVersionId: schema.relationships?.backgroundAssetVersion?.data?.id,
+            gameCenterAchievementVersionId: schema.relationships?.gameCenterAchievementVersion?.data?.id,
             gameCenterActivityVersionId: schema.relationships?.gameCenterActivityVersion?.data?.id,
             gameCenterChallengeVersionId: schema.relationships?.gameCenterChallengeVersion?.data?.id,
             gameCenterLeaderboardSetVersionId: schema.relationships?.gameCenterLeaderboardSetVersion?.data?.id,
@@ -124,6 +126,7 @@ public struct ReviewSubmissionItem: Sendable, Identifiable {
         public let appStoreVersionExperimentV2Id: String?
         public let appEventId: String?
         public let backgroundAssetVersionId: String?
+        public let gameCenterAchievementVersionId: String?
         public let gameCenterActivityVersionId: String?
         public let gameCenterChallengeVersionId: String?
         public let gameCenterLeaderboardSetVersionId: String?
