@@ -5,8 +5,6 @@
 
 import AppStoreAPI
 
-import OversizeCore
-
 public struct PrereleaseVersion: Sendable {
     public let id: String
     public let version: String

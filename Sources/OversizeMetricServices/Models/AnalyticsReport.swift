@@ -5,8 +5,6 @@
 
 import AppStoreAPI
 
-import OversizeCore
-
 public struct AnalyticsReport: Identifiable, Hashable, Sendable {
     public let id: String
     public var name: String
@@ -28,5 +26,11 @@ public struct AnalyticsReport: Identifiable, Hashable, Sendable {
         case commerce = "COMMERCE"
         case frameworkUsage = "FRAMEWORK_USAGE"
         case performance = "PERFORMANCE"
+    }
+}
+
+public extension [AnalyticsReport] {
+    func pickSearchTermReport() -> AnalyticsReport? {
+        first(where: { $0.name.localizedCaseInsensitiveContains("search") }) ?? first
     }
 }

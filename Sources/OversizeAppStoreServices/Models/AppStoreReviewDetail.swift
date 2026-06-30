@@ -1,11 +1,10 @@
 //
 // Copyright © 2024 Alexander Romanov
-// AppInfoLocalization_2.swift, created on 31.10.2024
+// AppStoreReviewDetail.swift, created on 31.10.2024
 //
 
 import AppStoreAPI
 import Foundation
-import OversizeCore
 
 public struct AppStoreReviewDetail: Sendable {
     public let id: String

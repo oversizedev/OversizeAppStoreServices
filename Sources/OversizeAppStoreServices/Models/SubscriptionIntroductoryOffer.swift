@@ -5,7 +5,6 @@
 
 import AppStoreAPI
 import Foundation
-import OversizeCore
 
 public struct SubscriptionIntroductoryOffer: Sendable, Identifiable {
     public let id: String
@@ -84,7 +83,7 @@ public struct SubscriptionIntroductoryOffer: Sendable, Identifiable {
     }
 }
 
-extension SubscriptionIntroductoryOffer {
+public extension SubscriptionIntroductoryOffer {
     static func from(response: AppStoreAPI.SubscriptionIntroductoryOffersResponse) -> [SubscriptionIntroductoryOffer] {
         response.data.compactMap { SubscriptionIntroductoryOffer(schema: $0, included: response.included) }
     }

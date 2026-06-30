@@ -4,9 +4,7 @@
 //
 
 import AppStoreAPI
-
 import Foundation
-import OversizeCore
 
 public struct AnalyticsReportRequest: Identifiable, Sendable {
     public let id: String

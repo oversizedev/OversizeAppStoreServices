@@ -4,7 +4,6 @@
 //
 
 import AppStoreAPI
-
 import Foundation
 
 public struct Certificate: Sendable {
@@ -15,7 +14,7 @@ public struct Certificate: Sendable {
     public let content: String
     public var expirationDate: Date
 
-    init?(schema: AppStoreAPI.Certificate) {
+    public init?(schema: AppStoreAPI.Certificate) {
         guard let name = schema.attributes?.name,
               let type = CertificateType(rawValue: schema.attributes?.certificateType?.rawValue ?? ""),
               let content = schema.attributes?.certificateContent,
@@ -32,14 +31,14 @@ public struct Certificate: Sendable {
     }
 }
 
-extension Certificate {
+public extension Certificate {
     static func from(response: AppStoreAPI.CertificatesResponse, include: (Certificate) -> Bool) -> [Certificate] {
         response.data.compactMap { Certificate(schema: $0) }.filter { include($0) }
     }
 }
 
 private extension AppStoreAPI.CertificateType {
-    init?(from certType: CertificateType) {
+    public init?(from certType: CertificateType) {
         guard let resolved = Self(rawValue: certType.rawValue) else { return nil }
         self = resolved
     }

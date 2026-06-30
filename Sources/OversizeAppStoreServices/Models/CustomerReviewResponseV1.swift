@@ -17,7 +17,7 @@ public struct CustomerReviewResponseV1: Sendable, Identifiable {
     public let lastModifiedDate: Date
     public let state: State
 
-    init?(schema: AppStoreAPI.CustomerReviewResponseV1) {
+    public init?(schema: AppStoreAPI.CustomerReviewResponseV1) {
         guard let attributes = schema.attributes,
               let responseBody = attributes.responseBody,
               let lastModifiedDate = attributes.lastModifiedDate,

@@ -14,7 +14,6 @@ public struct SubscriptionOfferCode: Identifiable, Sendable {
     public let duration: SubscriptionOfferDuration?
     public let offerMode: SubscriptionOfferMode?
     public let numberOfPeriods: Int?
-    public let totalNumberOfCodes: Int?
     public let isActive: Bool?
 
     public let relationships: Relationships?
@@ -30,7 +29,6 @@ public struct SubscriptionOfferCode: Identifiable, Sendable {
         duration = .init(rawValue: attributes.duration?.rawValue ?? "")
         offerMode = .init(rawValue: attributes.offerMode?.rawValue ?? "")
         numberOfPeriods = attributes.numberOfPeriods
-        totalNumberOfCodes = attributes.totalNumberOfCodes
         isActive = attributes.isActive
 
         relationships = .init(

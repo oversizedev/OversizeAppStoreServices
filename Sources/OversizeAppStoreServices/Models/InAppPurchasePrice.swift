@@ -4,7 +4,6 @@
 //
 
 import AppStoreAPI
-import OversizeCore
 
 public struct InAppPurchasePrice: Sendable, Identifiable {
     public let id: String

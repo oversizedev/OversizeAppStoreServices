@@ -4,7 +4,6 @@
 //
 
 import AppStoreAPI
-import OversizeCore
 
 public struct SubscriptionPricePoint: Identifiable, Sendable {
     public let id: String

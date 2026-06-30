@@ -7,24 +7,18 @@ import AppStoreAPI
 import AppStoreConnect
 import CodableCSV
 import Foundation
+import OversizeCore
 import Gzip
 import OversizeAppStoreServices
-import OversizeCore
-import OversizeModels
 
 public actor SalesAndFinanceService {
-    private let client: AppStoreConnectClient?
+    private let client: AppStoreConnectClient
 
-    public init() {
-        do {
-            client = try AppStoreConnectClient(authenticator: EnvAuthenticator())
-        } catch {
-            client = nil
-        }
+    public init(authenticator: some AppStoreConnect.Authenticator) {
+        self.client = AppStoreConnectClient(authenticator: authenticator)
     }
 
-    public func fetchSalesURL(vendorNumber: String) async -> Result<URL, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchSalesURL(vendorNumber: String) async -> Result<URL, Error> {
         let request = Resources.v1.salesReports.get(
             filterVendorNumber: [vendorNumber],
             filterReportType: [
@@ -51,19 +45,17 @@ public actor SalesAndFinanceService {
             let data = try await client.download(request)
             return .success(data)
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
-    public func fetchMonthlyInstalls(vendorNumber: String, reportDate: String) async -> Result<[InstallReport], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
-
+    public func fetchMonthlyInstalls(vendorNumber: String, reportDate: String) async -> Result<[InstallReport], Error> {
         let request = Resources.v1.salesReports.get(
             filterVendorNumber: [vendorNumber],
             filterReportType: [.installs],
             filterReportSubType: [.summary],
             filterFrequency: [.monthly],
-            filterReportDate: [reportDate], // Format "2024-11"
+            filterReportDate: [reportDate],
         )
         do {
             let fileURL = try await client.download(request)
@@ -71,7 +63,7 @@ public actor SalesAndFinanceService {
             let decompressedData = try decompressGzip(data: fileData)
 
             guard let csvString = String(data: decompressedData, encoding: .utf8) else {
-                return .failure(.network(type: .decode))
+                return .failure(NetworkError.decode)
             }
 
             let cleanedCSVString: String = {
@@ -91,7 +83,7 @@ public actor SalesAndFinanceService {
             }()
 
             guard let cleanedData = cleanedCSVString.data(using: .utf8) else {
-                return .failure(.network(type: .decode))
+                return .failure(NetworkError.decode)
             }
 
             let decoder = CSVDecoder {
@@ -101,14 +93,12 @@ public actor SalesAndFinanceService {
             let reports = try decoder.decode([InstallReport].self, from: cleanedData)
             return .success(reports)
         } catch {
-            logError("FetchSalesReports", error: error)
-            return .failure(.network(type: .noResponse))
+            print("FetchSalesReports error: \(error)")
+            return .failure(NetworkError.noResponse)
         }
     }
 
-    public func fetchSales(vendorNumber: String) async -> Result<[SalesSummaryReport], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
-
+    public func fetchSales(vendorNumber: String) async -> Result<[SalesSummaryReport], Error> {
         let request = Resources.v1.salesReports.get(
             filterVendorNumber: [vendorNumber],
             filterReportType: [.sales],
@@ -128,13 +118,12 @@ public actor SalesAndFinanceService {
             let reports = try decoder.decode([SalesSummaryReport].self, from: decompressedData)
             return .success(reports)
         } catch {
-            logError("FetchSalesReports", error: error)
-            return .failure(.network(type: .noResponse))
+            print("FetchSalesReports error: \(error)")
+            return .failure(NetworkError.noResponse)
         }
     }
 
-    public func fetchFinanceReportsURL(vendorNumbers: [String], regionCodes: [String], reportDates: [String]) async -> Result<URL, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchFinanceReportsURL(vendorNumbers: [String], regionCodes: [String], reportDates: [String]) async -> Result<URL, Error> {
         let request = Resources.v1.financeReports.get(
             filterVendorNumber: vendorNumbers,
             filterReportType: [.financial, .financeDetail],
@@ -145,13 +134,11 @@ public actor SalesAndFinanceService {
             let data = try await client.download(request)
             return .success(data)
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
-    public func fetchFinanceReports(vendorNumbers: [String], regionCodes: [String], reportDates: [String]) async -> Result<FinanceReports, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
-
+    public func fetchFinanceReports(vendorNumbers: [String], regionCodes: [String], reportDates: [String]) async -> Result<FinanceReports, Error> {
         let request = Resources.v1.financeReports.get(
             filterVendorNumber: vendorNumbers,
             filterReportType: [.financial, .financeDetail],
@@ -164,21 +151,20 @@ public actor SalesAndFinanceService {
             let fileData = try Data(contentsOf: fileURL)
             let decompressedData = try decompressGzip(data: fileData)
             let reports = FinanceReports(data: decompressedData)
-            guard let reports else { return .failure(.network(type: .decode)) }
+            guard let reports else { return .failure(NetworkError.decode) }
             return .success(reports)
-        } catch let error as AppError {
-            logError("FetchFinanceReports", error: error)
+        } catch let error as NetworkError {
+            print("FetchFinanceReports error: \(error)")
             return .failure(error)
         } catch {
-            logError("FetchFinanceReports", error: error)
-            return .failure(.network(type: .noResponse))
+            print("FetchFinanceReports error: \(error)")
+            return .failure(NetworkError.noResponse)
         }
     }
 
     private func decompressGzip(data: Data) throws -> Data {
         guard data.isGzipped else {
-            logError("Gzip decompression failed")
-            throw AppError.network(type: .decode)
+            throw NetworkError.decode
         }
         return try data.gunzipped()
     }

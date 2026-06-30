@@ -4,9 +4,7 @@
 //
 
 import AppStoreAPI
-
 import Foundation
-import OversizeCore
 
 public struct AppStoreVersionLocalization: Identifiable, Hashable, Sendable {
     public let id: String
@@ -18,7 +16,27 @@ public struct AppStoreVersionLocalization: Identifiable, Hashable, Sendable {
     public let supportURL: URL?
     public let whatsNew: String?
 
-    init?(schema: AppStoreAPI.AppStoreVersionLocalization) {
+    public init(
+        id: String,
+        locale: AppStoreLanguage,
+        description: String?,
+        keywords: String,
+        marketingURL: URL?,
+        promotionalText: String?,
+        supportURL: URL?,
+        whatsNew: String?,
+    ) {
+        self.id = id
+        self.locale = locale
+        self.description = description
+        self.keywords = keywords
+        self.marketingURL = marketingURL
+        self.promotionalText = promotionalText
+        self.supportURL = supportURL
+        self.whatsNew = whatsNew
+    }
+
+    public init?(schema: AppStoreAPI.AppStoreVersionLocalization) {
         guard let localeRawValue = schema.attributes?.locale,
               let locale: AppStoreLanguage = .init(rawValue: localeRawValue) else { return nil }
         id = schema.id

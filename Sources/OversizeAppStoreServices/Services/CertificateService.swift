@@ -6,38 +6,34 @@
 import AppStoreAPI
 import AppStoreConnect
 import Foundation
-import OversizeModels
+import OversizeCore
 
 public actor CertificateService {
-    private let client: AppStoreConnectClient?
+    private let client: AppStoreConnectClient
 
-    public init() {
-        do {
-            client = try AppStoreConnectClient(authenticator: EnvAuthenticator())
-        } catch {
-            client = nil
-        }
+    public init(authenticator: some AppStoreConnect.Authenticator) {
+        self.client = AppStoreConnectClient(authenticator: authenticator)
     }
 
-    public func fetchProfiles() async -> Result<[Profile], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchProfiles() async -> Result<[Profile], Error> {
+
         let request = Resources.v1.profiles.get()
         do {
             let data = try await client.send(request)
             return .success(Profile.from(data, include: { $0.isActive }))
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
-    func fetchActiveCertificates() async throws -> Result<[Certificate], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    func fetchActiveCertificates() async throws -> Result<[Certificate], Error> {
+
         let request = Resources.v1.certificates.get()
         do {
             let data = try await client.send(request)
             return .success(Certificate.from(response: data, include: { $0.expirationDate > Date() }))
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 }

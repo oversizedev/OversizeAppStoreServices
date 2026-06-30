@@ -4,7 +4,9 @@
 //
 
 import Foundation
+#if !os(Linux)
 import SwiftUI
+#endif
 
 public enum Platform: String, CaseIterable, Codable, Sendable, Identifiable {
     case ios = "IOS"
@@ -12,7 +14,7 @@ public enum Platform: String, CaseIterable, Codable, Sendable, Identifiable {
     case tvOs = "TV_OS"
     case visionOs = "VISION_OS"
 
-    // Computed property for display name
+    /// Computed property for display name
     public var displayName: String {
         switch self {
         case .ios:
@@ -26,7 +28,7 @@ public enum Platform: String, CaseIterable, Codable, Sendable, Identifiable {
         }
     }
 
-    // Computed property for icon
+    #if !os(Linux)
     public var icon: Image {
         switch self {
         case .ios:
@@ -39,6 +41,9 @@ public enum Platform: String, CaseIterable, Codable, Sendable, Identifiable {
             Image(systemName: "vision.pro")
         }
     }
+    #endif
 
-    public var id: String { rawValue }
+    public var id: String {
+        rawValue
+    }
 }

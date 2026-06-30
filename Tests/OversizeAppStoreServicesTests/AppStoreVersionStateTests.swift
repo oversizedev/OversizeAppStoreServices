@@ -7,14 +7,14 @@ import AppStoreAPI
 @testable import OversizeAppStoreServices
 import Testing
 
-@Suite struct AppStoreVersionStateTests {
+struct AppStoreVersionStateTests {
     @Test("AppStoreVersionState should have same number of cases as AppStoreAPI")
-    func checkAppStoreVersionStateCount() throws {
+    func checkAppStoreVersionStateCount() {
         #expect(OversizeAppStoreServices.AppStoreVersionState.allCases.count == AppStoreAPI.AppStoreVersionState.allCases.count)
     }
 
     @Test("AppStoreVersionState should have the same cases as AppStoreAPI")
-    func checkAppStoreVersionStateCasesMatch() throws {
+    func checkAppStoreVersionStateCasesMatch() {
         let localCases = Set(OversizeAppStoreServices.AppStoreVersionState.allCases.map { $0.rawValue })
         let generatedCases = Set(AppStoreAPI.AppStoreVersionState.allCases.map { $0.rawValue })
 
@@ -22,7 +22,7 @@ import Testing
     }
 
     @Test("AppStoreVersionState should match raw values with AppStoreAPI")
-    func checkAppStoreVersionStateRawValues() throws {
+    func checkAppStoreVersionStateRawValues() {
         for state in OversizeAppStoreServices.AppStoreVersionState.allCases {
             let generatedState = AppStoreAPI.AppStoreVersionState(rawValue: state.rawValue)
             #expect(generatedState != nil, "No matching case in AppStoreAPI for \(state.rawValue)")
@@ -30,16 +30,18 @@ import Testing
     }
 
     @Test("AppStoreVersionState should have correct display names")
-    func checkAppStoreVersionStateDisplayNames() throws {
+    func checkAppStoreVersionStateDisplayNames() {
         for state in OversizeAppStoreServices.AppStoreVersionState.allCases {
             #expect(!state.displayName.isEmpty, "Display name should not be empty for \(state)")
         }
     }
 
+    #if canImport(SwiftUI)
     @Test("AppStoreVersionState should have valid status colors")
-    func checkAppStoreVersionStateColors() throws {
+    func checkAppStoreVersionStateColors() {
         for state in OversizeAppStoreServices.AppStoreVersionState.allCases {
             #expect(state.statusColor != nil, "Status color should not be nil for \(state)")
         }
     }
+    #endif
 }

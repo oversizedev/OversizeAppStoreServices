@@ -6,3 +6,5 @@ DerivedData/
 .netrc
 Package.resolved
 /.swiftpm
+/AGENTS.md
+/CLAUDE.md

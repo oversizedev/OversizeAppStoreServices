@@ -6,37 +6,33 @@
 import AppStoreAPI
 import AppStoreConnect
 import Foundation
-import OversizeModels
+import OversizeCore
 
 public actor AppStoreReviewService {
-    private let client: AppStoreConnectClient?
+    private let client: AppStoreConnectClient
 
-    public init() {
-        do {
-            client = try AppStoreConnectClient(authenticator: EnvAuthenticator())
-        } catch {
-            client = nil
-        }
+    public init(authenticator: some AppStoreConnect.Authenticator) {
+        self.client = AppStoreConnectClient(authenticator: authenticator)
     }
 
-    public func fetchAppStoreReviewDetail(versionId: String) async -> Result<AppStoreReviewDetail, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchAppStoreReviewDetail(versionId: String) async -> Result<AppStoreReviewDetail, Error> {
+
         let request = Resources.v1.appStoreVersions.id(versionId).appStoreReviewDetail.get(
             include: [.appStoreReviewAttachments],
         )
         do {
             let data = try await client.send(request).data
             guard let appStoreReviewDetail: AppStoreReviewDetail = .init(schema: data) else {
-                return .failure(.network(type: .decode))
+                return .failure(NetworkError.decode)
             }
             return .success(appStoreReviewDetail)
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
-    public func fetchAppStoreReviewDetailAttachments(versionId: String) async -> Result<[AppStoreReviewAttachment], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchAppStoreReviewDetailAttachments(versionId: String) async -> Result<[AppStoreReviewAttachment], Error> {
+
         let request = Resources.v1.appStoreReviewDetails.id(
             versionId,
         ).appStoreReviewAttachments.get()
@@ -45,7 +41,7 @@ public actor AppStoreReviewService {
             let data = try await client.send(request).data
             return .success(data)
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
@@ -59,8 +55,8 @@ public actor AppStoreReviewService {
         demoAccountPassword: String?,
         isDemoAccountRequired: Bool?,
         notes: String?,
-    ) async -> Result<AppStoreReviewDetail, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    ) async -> Result<AppStoreReviewDetail, Error> {
+
 
         let requestAttributes: AppStoreReviewDetailUpdateRequest.Data.Attributes = .init(
             contactFirstName: contactFirstName?.isEmpty == true ? nil : contactFirstName,
@@ -86,11 +82,11 @@ public actor AppStoreReviewService {
         do {
             let data = try await client.send(request).data
             guard let appStoreReviewDetail: AppStoreReviewDetail = .init(schema: data) else {
-                return .failure(.network(type: .decode))
+                return .failure(NetworkError.decode)
             }
             return .success(appStoreReviewDetail)
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
@@ -104,8 +100,8 @@ public actor AppStoreReviewService {
         demoAccountPassword: String?,
         isDemoAccountRequired: Bool?,
         notes: String?,
-    ) async -> Result<AppStoreReviewDetail, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    ) async -> Result<AppStoreReviewDetail, Error> {
+
 
         let requestAttributes: AppStoreReviewDetailCreateRequest.Data.Attributes = .init(
             contactFirstName: contactFirstName,
@@ -136,11 +132,11 @@ public actor AppStoreReviewService {
         do {
             let data = try await client.send(request).data
             guard let appStoreReviewDetail: AppStoreReviewDetail = .init(schema: data) else {
-                return .failure(.network(type: .decode))
+                return .failure(NetworkError.decode)
             }
             return .success(appStoreReviewDetail)
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 }

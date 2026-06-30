@@ -7,14 +7,14 @@ import AppStoreAPI
 @testable import OversizeAppStoreServices
 import Testing
 
-@Suite struct PlatformTests {
+struct PlatformTests {
     @Test("Platform should have same number of cases as AppStoreAPI")
-    func checkPlatformCount() throws {
+    func checkPlatformCount() {
         #expect(OversizeAppStoreServices.Platform.allCases.count == AppStoreAPI.Platform.allCases.count)
     }
 
     @Test("Platform should have the same cases as AppStoreAPI")
-    func checkPlatformCasesMatch() throws {
+    func checkPlatformCasesMatch() {
         let localCases = Set(OversizeAppStoreServices.Platform.allCases.map { $0.rawValue })
         let generatedCases = Set(AppStoreAPI.Platform.allCases.map { $0.rawValue })
 
@@ -22,7 +22,7 @@ import Testing
     }
 
     @Test("Platform should match raw values with AppStoreAPI")
-    func checkPlatformRawValues() throws {
+    func checkPlatformRawValues() {
         for platform in OversizeAppStoreServices.Platform.allCases {
             let generatedPlatform = AppStoreAPI.Platform(rawValue: platform.rawValue)
             #expect(generatedPlatform != nil, "No matching case in AppStoreAPI for \(platform.rawValue)")
@@ -30,16 +30,18 @@ import Testing
     }
 
     @Test("Platform should have valid display names")
-    func checkPlatformDisplayNames() throws {
+    func checkPlatformDisplayNames() {
         for platform in OversizeAppStoreServices.Platform.allCases {
             #expect(!platform.displayName.isEmpty, "Display name should not be empty for \(platform)")
         }
     }
 
+    #if canImport(SwiftUI)
     @Test("Platform should have valid icons")
-    func checkPlatformIcons() throws {
+    func checkPlatformIcons() {
         for platform in OversizeAppStoreServices.Platform.allCases {
             #expect(platform.icon != nil, "Icon should not be nil for \(platform)")
         }
     }
+    #endif
 }

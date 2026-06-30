@@ -5,38 +5,34 @@
 
 import AppStoreAPI
 import AppStoreConnect
-import FactoryKit
 import Foundation
-import OversizeModels
+import OversizeCore
 
 public actor VersionsService {
-    @Injected(\.cacheService) private var cacheService: CacheService
-    private let client: AppStoreConnectClient?
+    private let cacheService: CacheService
+    private let client: AppStoreConnectClient
 
-    public init() {
-        do {
-            client = try AppStoreConnectClient(authenticator: EnvAuthenticator())
-        } catch {
-            client = nil
-        }
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheService: CacheService = CacheService()) {
+        self.client = AppStoreConnectClient(authenticator: authenticator)
+        self.cacheService = cacheService
     }
 
-    public func fetchAppStoreVersion(appStoreVersionId: String) async -> Result<AppStoreVersion, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchAppStoreVersion(appStoreVersionId: String) async -> Result<AppStoreVersion, Error> {
+
         let request = Resources.v1.appStoreVersions.id(appStoreVersionId).get()
         do {
             let data = try await client.send(request).data
             guard let appStoreVersion: AppStoreVersion = .init(schema: data) else {
-                return .failure(.network(type: .decode))
+                return .failure(NetworkError.decode)
             }
             return .success(appStoreVersion)
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
-    public func fetchAppVersions(appId: String, platform: Platform? = nil, force: Bool = false) async -> Result<[AppStoreVersion], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchAppVersions(appId: String, platform: Platform? = nil, force: Bool = false) async -> Result<[AppStoreVersion], Error> {
+
         let filterPlatforms: [Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform]? = if let platform, let filteredPlatform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform = .init(rawValue: platform.rawValue) {
             [filteredPlatform]
         } else {
@@ -51,8 +47,8 @@ public actor VersionsService {
         }
     }
 
-    public func fetchEditableAppStoreVersion(appId: String, platform: Platform? = nil, force: Bool = false) async -> Result<[AppStoreVersion], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchEditableAppStoreVersion(appId: String, platform: Platform? = nil, force: Bool = false) async -> Result<[AppStoreVersion], Error> {
+
         let filterPlatforms: [Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform]? = if let platform, let filteredPlatform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform = .init(rawValue: platform.rawValue) {
             [filteredPlatform]
         } else {
@@ -76,8 +72,8 @@ public actor VersionsService {
         }
     }
 
-    public func fetchRelisedAppVersions(appId: String) async -> Result<[AppStoreVersion], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchRelisedAppVersions(appId: String) async -> Result<[AppStoreVersion], Error> {
+
         let request = Resources.v1.apps.id(appId).appStoreVersions.get(
             filterAppVersionState: [
                 .replacedWithNewVersion,
@@ -88,12 +84,12 @@ public actor VersionsService {
             let data = try await client.send(request).data
             return .success(data.compactMap { .init(schema: $0) })
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
-    public func fetchActualAppStoreVersions(appId: String, platform: Platform? = nil, force: Bool = false) async -> Result<[AppStoreVersion], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchActualAppStoreVersions(appId: String, platform: Platform? = nil, force: Bool = false) async -> Result<[AppStoreVersion], Error> {
+
         let filterPlatforms: [Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform]? = if let platform, let filteredPlatform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform = .init(rawValue: platform.rawValue) {
             [filteredPlatform]
         } else {
@@ -126,8 +122,8 @@ public actor VersionsService {
         }
     }
 
-    public func fetchActualAppStoreVersionsIncludeBuilds(appId: String, platform: Platform? = nil, limit: Int? = nil, force: Bool = false) async -> Result<[AppStoreVersion], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchActualAppStoreVersionsIncludeBuilds(appId: String, platform: Platform? = nil, limit: Int? = nil, force: Bool = false) async -> Result<[AppStoreVersion], Error> {
+
         let filterPlatforms: [Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform]? = if let platform, let filteredPlatform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform = .init(rawValue: platform.rawValue) {
             [filteredPlatform]
         } else {
@@ -165,19 +161,19 @@ public actor VersionsService {
         }
     }
 
-    public func fetchAppVersions(appId: String, platform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform) async -> Result<[AppStoreVersion], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchAppVersions(appId: String, platform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform) async -> Result<[AppStoreVersion], Error> {
+
         let request = Resources.v1.apps.id(appId).appStoreVersions.get(filterPlatform: [platform])
         do {
             let data = try await client.send(request).data
             return .success(data.compactMap { .init(schema: $0) })
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
-    public func fetchAllVersionLocalizations(forVersion versionId: String) async throws -> Result<[(String, AppStoreLanguage)], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchAllVersionLocalizations(forVersion versionId: String) async throws -> Result<[(String, AppStoreLanguage)], Error> {
+
         let request = Resources.v1.appStoreVersions.id(versionId).appStoreVersionLocalizations.get()
         do {
             let data = try await client.send(request).data
@@ -188,12 +184,12 @@ public actor VersionsService {
                 return (localization.id, language)
             })
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
-    public func fetchAppVersionLocalizations(versionId: String, force: Bool = false) async -> Result<[AppStoreVersionLocalization], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchAppVersionLocalizations(versionId: String, force: Bool = false) async -> Result<[AppStoreVersionLocalization], Error> {
+
         return await cacheService.fetchWithCache(key: "fetchAppVersionLocalizations\(versionId)", force: force) {
             let request = Resources.v1.appStoreVersions.id(versionId).appStoreVersionLocalizations.get()
             return try await client.send(request).data
@@ -202,8 +198,8 @@ public actor VersionsService {
         }
     }
 
-    public func patchBuild(versionId: String, buildId: String) async -> Result<AppStoreVersion, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func patchBuild(versionId: String, buildId: String) async -> Result<AppStoreVersion, Error> {
+
 
         let relationships: AppStoreVersionUpdateRequest.Data.Relationships = .init(
             build: .init(data: .init(type: .builds, id: buildId)),
@@ -220,11 +216,11 @@ public actor VersionsService {
         do {
             let data = try await client.send(request).data
             guard let versionLocalization: AppStoreVersion = .init(schema: data) else {
-                return .failure(.network(type: .decode))
+                return .failure(NetworkError.decode)
             }
             return .success(versionLocalization)
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
@@ -237,8 +233,8 @@ public actor VersionsService {
         keywords: String? = nil,
         marketingURL: URL? = nil,
         supportURL: URL? = nil,
-    ) async -> Result<AppStoreVersionLocalization, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    ) async -> Result<AppStoreVersionLocalization, Error> {
+
 
         let requestAttributes: AppStoreVersionLocalizationCreateRequest.Data.Attributes = .init(
             description: description,
@@ -265,11 +261,11 @@ public actor VersionsService {
         do {
             let data = try await client.send(request).data
             guard let versionLocalization: AppStoreVersionLocalization = .init(schema: data) else {
-                return .failure(.network(type: .decode))
+                return .failure(NetworkError.decode)
             }
             return .success(versionLocalization)
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
@@ -281,8 +277,8 @@ public actor VersionsService {
         keywords: String? = nil,
         marketingURL: URL? = nil,
         supportURL: URL? = nil,
-    ) async -> Result<AppStoreVersionLocalization, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    ) async -> Result<AppStoreVersionLocalization, Error> {
+
 
         let requestAttributes: AppStoreVersionLocalizationUpdateRequest.Data.Attributes = .init(
             description: description,
@@ -304,11 +300,11 @@ public actor VersionsService {
         do {
             let data = try await client.send(request).data
             guard let versionLocalization: AppStoreVersionLocalization = .init(schema: data) else {
-                return .failure(.network(type: .decode))
+                return .failure(NetworkError.decode)
             }
             return .success(versionLocalization)
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
@@ -320,8 +316,8 @@ public actor VersionsService {
         releaseType: ReleaseType? = nil,
         earliestReleaseDate _: Date? = nil,
         isDownloadable: Bool? = nil,
-    ) async -> Result<AppStoreVersion, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    ) async -> Result<AppStoreVersion, Error> {
+
 
         let requestAttributes: AppStoreVersionUpdateRequest.Data.Attributes = .init(
             versionString: versionString,
@@ -343,11 +339,11 @@ public actor VersionsService {
         do {
             let data = try await client.send(request).data
             guard let versionLocalization: AppStoreVersion = .init(schema: data) else {
-                return .failure(.network(type: .decode))
+                return .failure(NetworkError.decode)
             }
             return .success(versionLocalization)
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
@@ -359,9 +355,9 @@ public actor VersionsService {
         reviewType: ReviewType? = nil,
         releaseType: ReleaseType? = nil,
         earliestReleaseDate: Date? = nil,
-    ) async -> Result<AppStoreVersion, AppError> {
-        guard let client, let platform: AppStoreAPI.Platform = .init(rawValue: platform.rawValue) else {
-            return .failure(.network(type: .unauthorized))
+    ) async -> Result<AppStoreVersion, Error> {
+        guard let platform: AppStoreAPI.Platform = .init(rawValue: platform.rawValue) else {
+            return .failure(NetworkError.invalidURL)
         }
 
         let requestAttributes: AppStoreVersionCreateRequest.Data.Attributes = .init(
@@ -388,32 +384,32 @@ public actor VersionsService {
         do {
             let data = try await client.send(request).data
             guard let appStoreVersion: AppStoreVersion = .init(schema: data) else {
-                return .failure(.network(type: .decode))
+                return .failure(NetworkError.decode)
             }
             return .success(appStoreVersion)
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 
-    public func deleteAppStoreVersionLocalizationsLocalization(localizationId: String) async -> Result<Bool, AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func deleteAppStoreVersionLocalizationsLocalization(localizationId: String) async -> Result<Bool, Error> {
+
         let request = Resources.v1.appStoreVersionLocalizations.id(localizationId).delete
         do {
             let _ = try await client.send(request)
             return .success(true)
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 }
 
 public extension VersionsService {
-    func fetchAppVersions(_ app: App) async -> Result<[AppStoreVersion], AppError> {
+    func fetchAppVersions(_ app: App) async -> Result<[AppStoreVersion], Error> {
         await fetchAppVersions(appId: app.id)
     }
 
-    func fetchAppVersions(_ app: App, platform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform) async -> Result<[AppStoreVersion], AppError> {
+    func fetchAppVersions(_ app: App, platform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform) async -> Result<[AppStoreVersion], Error> {
         await fetchAppVersions(appId: app.id, platform: platform)
     }
 }

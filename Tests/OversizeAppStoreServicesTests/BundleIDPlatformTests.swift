@@ -7,14 +7,14 @@ import AppStoreAPI
 @testable import OversizeAppStoreServices
 import Testing
 
-@Suite struct BundleIDPlatformTests {
+struct BundleIDPlatformTests {
     @Test("BundleIDPlatform should have same number of cases as AppStoreAPI")
-    func checkBundleIDPlatformCount() throws {
+    func checkBundleIDPlatformCount() {
         #expect(OversizeAppStoreServices.BundleIDPlatform.allCases.count == AppStoreAPI.BundleIDPlatform.allCases.count)
     }
 
     @Test("BundleIDPlatform should have the same cases as AppStoreAPI")
-    func checkBundleIDPlatformCasesMatch() throws {
+    func checkBundleIDPlatformCasesMatch() {
         let localCases = Set(OversizeAppStoreServices.BundleIDPlatform.allCases.map { $0.rawValue })
         let generatedCases = Set(AppStoreAPI.BundleIDPlatform.allCases.map { $0.rawValue })
 
@@ -22,7 +22,7 @@ import Testing
     }
 
     @Test("BundleIDPlatform should match raw values with AppStoreAPI")
-    func checkBundleIDPlatformRawValues() throws {
+    func checkBundleIDPlatformRawValues() {
         for platform in OversizeAppStoreServices.BundleIDPlatform.allCases {
             let generatedPlatform = AppStoreAPI.BundleIDPlatform(rawValue: platform.rawValue)
             #expect(generatedPlatform != nil, "No matching case in AppStoreAPI for \(platform.rawValue)")

@@ -10,7 +10,9 @@ public enum ReleaseType: String, CaseIterable, Codable, Sendable, Identifiable {
     case afterApproval = "AFTER_APPROVAL"
     case scheduled = "SCHEDULED"
 
-    public var id: String { rawValue }
+    public var id: String {
+        rawValue
+    }
 
     public var displayName: String {
         switch self {

@@ -5,27 +5,23 @@
 
 import AppStoreAPI
 import AppStoreConnect
-import OversizeModels
+import OversizeCore
 
 public actor UsersService {
-    private let client: AppStoreConnectClient?
+    private let client: AppStoreConnectClient
 
-    public init() {
-        do {
-            client = try AppStoreConnectClient(authenticator: EnvAuthenticator())
-        } catch {
-            client = nil
-        }
+    public init(authenticator: some AppStoreConnect.Authenticator) {
+        self.client = AppStoreConnectClient(authenticator: authenticator)
     }
 
-    public func fetchUsers(versionId _: String) async -> Result<[User], AppError> {
-        guard let client else { return .failure(.network(type: .unauthorized)) }
+    public func fetchUsers(versionId _: String) async -> Result<[User], Error> {
+
         let request = Resources.v1.users.get()
         do {
             let data = try await client.send(request).data
             return .success(data)
         } catch {
-            return .failure(.network(type: .noResponse))
+            return .failure(NetworkError.noResponse)
         }
     }
 }

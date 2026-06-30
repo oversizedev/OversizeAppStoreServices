@@ -4,7 +4,6 @@
 //
 
 import AppStoreAPI
-
 import Foundation
 
 public struct CustomerReview: Sendable, Identifiable {
@@ -18,7 +17,7 @@ public struct CustomerReview: Sendable, Identifiable {
 
     public let included: Included?
 
-    init?(schema: AppStoreAPI.CustomerReview, included: [AppStoreAPI.CustomerReviewResponseV1]? = nil) {
+    public init?(schema: AppStoreAPI.CustomerReview, included: [AppStoreAPI.CustomerReviewResponseV1]? = nil) {
         guard let rating = schema.attributes?.rating,
               let territory = schema.attributes?.territory?.rawValue
         else { return nil }
@@ -30,8 +29,8 @@ public struct CustomerReview: Sendable, Identifiable {
         createdDate = schema.attributes?.createdDate
         self.territory = .init(rawValue: territory)
 
-        if let customerReviewResponseV1 = included?.first(where: { $0.id == schema.relationships?.response?.data?.id }) {
-            self.included = .init(customerReviewResponse: .init(schema: customerReviewResponseV1))
+        if let match = included?.first(where: { $0.id == schema.relationships?.response?.data?.id }) {
+            self.included = .init(customerReviewResponse: .init(schema: match))
         } else {
             self.included = nil
         }

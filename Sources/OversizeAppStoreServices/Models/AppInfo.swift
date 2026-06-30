@@ -5,8 +5,6 @@
 
 import AppStoreAPI
 
-import OversizeCore
-
 public struct AppInfo: Sendable {
     public let id: String
 
