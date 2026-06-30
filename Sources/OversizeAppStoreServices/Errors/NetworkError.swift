@@ -1,3 +1,1 @@
-import OversizeCore
-
-public typealias NetworkError = OversizeCore.NetworkError
+@_exported import OversizeCore
