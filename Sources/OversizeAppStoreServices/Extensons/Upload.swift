@@ -5,6 +5,9 @@
 
 import AppStoreConnect
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 public extension AppStoreConnectClient {
     func upload(
