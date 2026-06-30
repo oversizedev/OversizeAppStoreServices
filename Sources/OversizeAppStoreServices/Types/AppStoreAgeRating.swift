@@ -8,8 +8,7 @@ import Foundation
 public enum AppStoreAgeRating: String, CaseIterable, Codable, Sendable {
     case all = "ALL"
     case l = "L"
-    case zeroZero = "ZERO_ZERO"
-    case onePlus = "ONE_PLUS"
+case onePlus = "ONE_PLUS"
     case twoPlus = "TWO_PLUS"
     case threePlus = "THREE_PLUS"
     case fourPlus = "FOUR_PLUS"
