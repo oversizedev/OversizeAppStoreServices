@@ -6,6 +6,9 @@
 import AppStoreAPI
 import AppStoreConnect
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 import OversizeCore
 import Gzip
 import OversizeAppStoreServices
