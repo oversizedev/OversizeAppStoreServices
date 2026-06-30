@@ -7,6 +7,7 @@ let commonDependencies: [PackageDescription.Package.Dependency] = [
     .package(url: "https://github.com/aaronsky/asc-swift.git", .upToNextMajor(from: "1.5.0")),
     .package(url: "https://github.com/1024jp/GzipSwift", .upToNextMajor(from: "6.1.0")),
     .package(url: "https://github.com/dehesa/CodableCSV.git", .upToNextMajor(from: "0.6.7")),
+    .package(url: "https://github.com/apple/swift-crypto.git", .upToNextMajor(from: "3.0.0")),
 ]
 
 let remoteKitDependencies: [PackageDescription.Package.Dependency] = [
@@ -54,6 +55,7 @@ let package = Package(
                 .product(name: "FactoryKit", package: "Factory", condition: .when(platforms: applePlatforms)),
                 .product(name: "OversizeCore", package: "OversizeCore"),
                 .product(name: "OversizeServices", package: "OversizeServices", condition: .when(platforms: applePlatforms)),
+                .product(name: "Crypto", package: "swift-crypto", condition: .when(platforms: [.linux])),
             ],
         ),
         .target(

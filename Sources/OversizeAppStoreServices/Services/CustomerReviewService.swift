@@ -39,9 +39,7 @@ public actor CustomerReviewService {
         )
         do {
             let result = try await client.send(request)
-            let responses: [AppStoreAPI.CustomerReviewResponseV1]? = result.included?.compactMap { included in
-                if case let .customerReviewResponseV1(response) = included { response } else { nil }
-            }
+            let responses: [AppStoreAPI.CustomerReviewResponseV1]? = result.included
             return .success(result.data.compactMap { .init(schema: $0, included: responses) })
         } catch {
             return .failure(error.asNetworkError)
