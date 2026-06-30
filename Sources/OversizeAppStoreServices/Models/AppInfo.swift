@@ -15,6 +15,7 @@ public struct AppInfo: Sendable {
     public let brazilAgeRating: BrazilAgeRating?
     public let brazilAgeRatingV2: BrazilAgeRatingV2?
     public let koreaAgeRating: KoreaAgeRating?
+    public let kidsAgeBand: KidsAgeBand?
 
     public let relationships: Relationships?
     public let included: Included?
@@ -29,6 +30,7 @@ public struct AppInfo: Sendable {
         brazilAgeRating = attributes.brazilAgeRating.flatMap { BrazilAgeRating(rawValue: $0.rawValue) }
         brazilAgeRatingV2 = attributes.brazilAgeRatingV2.flatMap { BrazilAgeRatingV2(rawValue: $0.rawValue) }
         koreaAgeRating = attributes.koreaAgeRating.flatMap { KoreaAgeRating(rawValue: $0.rawValue) }
+        kidsAgeBand = attributes.kidsAgeBand.flatMap { KidsAgeBand(rawValue: $0.rawValue) }
 
         relationships = .init(
             primaryCategoryId: schema.relationships?.primaryCategory?.data?.id,

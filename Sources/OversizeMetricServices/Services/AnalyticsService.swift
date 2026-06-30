@@ -187,37 +187,39 @@ public actor AnalyticsService {
                 return .success([])
             case let .success(segments):
                 let processingDate = latestInstance.attributes?.processingDate ?? ""
-                print("Downloading \(segments.count) segment(s) for date: \(processingDate)")
-                var accumulated: [String: SearchTermMetric] = [:]
-                for (index, segment) in segments.enumerated() {
-                    guard let segmentURL = segment.attributes?.url else {
-                        print("Segment \(index) has no URL, skipping")
-                        continue
-                    }
-                    print("Downloading segment \(index + 1)/\(segments.count) (\(segment.attributes?.sizeInBytes ?? 0) bytes)")
-                    let result = await downloadAndParseSearchTerms(segmentURL: segmentURL, processingDate: processingDate)
-                    switch result {
-                    case let .success(metrics):
-                        print("Parsed \(metrics.count) search terms from segment \(index + 1)")
-                        for metric in metrics {
-                            if let existing = accumulated[metric.searchTerm] {
-                                accumulated[metric.searchTerm] = SearchTermMetric(
-                                    searchTerm: metric.searchTerm,
-                                    impressions: existing.impressions + metric.impressions,
-                                    downloads: existing.downloads + metric.downloads,
-                                    processingDate: processingDate,
-                                )
-                            } else {
-                                accumulated[metric.searchTerm] = metric
+                let segmentURLs = segments.compactMap { $0.attributes?.url }
+                print("Downloading \(segmentURLs.count) segment(s) concurrently for date: \(processingDate)")
+                do {
+                    let allMetrics = try await withThrowingTaskGroup(of: [SearchTermMetric].self) { group in
+                        for url in segmentURLs {
+                            group.addTask { [self] in
+                                try await self.downloadAndParseSearchTerms(segmentURL: url, processingDate: processingDate).get()
                             }
                         }
-                    case let .failure(error):
-                        print("Failed to download/parse segment \(index + 1): \(error)")
-                        return .failure(error)
+                        var merged: [SearchTermMetric] = []
+                        for try await metrics in group {
+                            merged.append(contentsOf: metrics)
+                        }
+                        return merged
                     }
+                    var accumulated: [String: SearchTermMetric] = [:]
+                    for metric in allMetrics {
+                        if let existing = accumulated[metric.searchTerm] {
+                            accumulated[metric.searchTerm] = SearchTermMetric(
+                                searchTerm: metric.searchTerm,
+                                impressions: existing.impressions + metric.impressions,
+                                downloads: existing.downloads + metric.downloads,
+                                processingDate: processingDate,
+                            )
+                        } else {
+                            accumulated[metric.searchTerm] = metric
+                        }
+                    }
+                    print("Search term metrics loaded: \(accumulated.count) unique terms")
+                    return .success(Array(accumulated.values))
+                } catch {
+                    return .failure(error)
                 }
-                print("Search term metrics loaded: \(accumulated.count) unique terms")
-                return .success(Array(accumulated.values))
             }
         }
     }

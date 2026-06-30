@@ -36,6 +36,9 @@ extension Error {
             }
         }
         if let networkError = self as? NetworkError { return networkError }
+        #if canImport(Darwin)
+        if (self as? EnvAuthenticator.Error) != nil { return .unauthorized }
+        #endif
         return .noResponse
     }
 
