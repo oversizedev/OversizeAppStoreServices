@@ -38,11 +38,23 @@ jobs:
       package: OversizeMetricServices
     secrets: inherit
 
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-latest
+    if: github.event_name != 'push' || !startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: swift build -v
+      - name: Test
+        run: swift test -v
+
   bump:
     name: Bump version
     needs:
       - build-app-store-services
       - build-metric-services
+      - build-linux
     if: github.ref == 'refs/heads/main'
     uses: oversizedev/GithubWorkflows/.github/workflows/bump.yml@main
     secrets: inherit

@@ -6,6 +6,7 @@
 import AppStoreAPI
 import AppStoreConnect
 import Foundation
+import OversizeCore
 
 public actor AppCategoryService {
     private let client: AppStoreConnectClient

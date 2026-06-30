@@ -5,6 +5,7 @@
 
 import AppStoreAPI
 import AppStoreConnect
+import OversizeCore
 
 public actor UsersService {
     private let client: AppStoreConnectClient

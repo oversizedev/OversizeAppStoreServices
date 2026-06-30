@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import OversizeCore
 
 public actor CacheService {
     private let cacheDirectory: URL

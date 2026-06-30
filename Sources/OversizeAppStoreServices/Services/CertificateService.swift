@@ -6,6 +6,7 @@
 import AppStoreAPI
 import AppStoreConnect
 import Foundation
+import OversizeCore
 
 public actor CertificateService {
     private let client: AppStoreConnectClient

@@ -52,7 +52,7 @@ let package = Package(
             dependencies: [
                 .product(name: "AppStoreConnect", package: "asc-swift"),
                 .product(name: "FactoryKit", package: "Factory", condition: .when(platforms: applePlatforms)),
-                .product(name: "OversizeCore", package: "OversizeCore", condition: .when(platforms: applePlatforms)),
+                .product(name: "OversizeCore", package: "OversizeCore"),
                 .product(name: "OversizeServices", package: "OversizeServices", condition: .when(platforms: applePlatforms)),
             ],
         ),
@@ -63,6 +63,7 @@ let package = Package(
                 .product(name: "Gzip", package: "GzipSwift"),
                 .product(name: "CodableCSV", package: "CodableCSV"),
                 .product(name: "FactoryKit", package: "Factory", condition: .when(platforms: applePlatforms)),
+                .product(name: "OversizeCore", package: "OversizeCore"),
                 "OversizeAppStoreServices",
             ],
         ),

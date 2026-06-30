@@ -7,6 +7,7 @@ import AppStoreAPI
 import AppStoreConnect
 import CryptoKit
 import Foundation
+import OversizeCore
 
 public actor AppScreenshotsService {
     private let cacheService: CacheService

@@ -5,6 +5,7 @@
 
 import AppStoreAPI
 import AppStoreConnect
+import OversizeCore
 
 public actor CustomerReviewService {
     private let client: AppStoreConnectClient

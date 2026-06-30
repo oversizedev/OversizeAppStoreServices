@@ -5,6 +5,7 @@
 
 import AppStoreConnect
 import Foundation
+import OversizeCore
 
 extension Error {
     var asNetworkError: NetworkError {

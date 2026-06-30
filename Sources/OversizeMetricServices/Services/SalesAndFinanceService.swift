@@ -7,6 +7,7 @@ import AppStoreAPI
 import AppStoreConnect
 import CodableCSV
 import Foundation
+import OversizeCore
 import Gzip
 import OversizeAppStoreServices
 
