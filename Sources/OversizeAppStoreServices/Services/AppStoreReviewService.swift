@@ -6,22 +6,16 @@
 import AppStoreAPI
 import AppStoreConnect
 import Foundation
-import OversizeAppStoreModels
-import OversizeCore
 
 public actor AppStoreReviewService {
-    private let client: AppStoreConnectClient?
+    private let client: AppStoreConnectClient
 
-    public init() {
-        do {
-            client = try AppStoreConnectClient(authenticator: EnvAuthenticator())
-        } catch {
-            client = nil
-        }
+    public init(authenticator: some AppStoreConnect.Authenticator) {
+        self.client = AppStoreConnectClient(authenticator: authenticator)
     }
 
     public func fetchAppStoreReviewDetail(versionId: String) async -> Result<AppStoreReviewDetail, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         let request = Resources.v1.appStoreVersions.id(versionId).appStoreReviewDetail.get(
             include: [.appStoreReviewAttachments],
         )
@@ -37,7 +31,7 @@ public actor AppStoreReviewService {
     }
 
     public func fetchAppStoreReviewDetailAttachments(versionId: String) async -> Result<[AppStoreReviewAttachment], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         let request = Resources.v1.appStoreReviewDetails.id(
             versionId,
         ).appStoreReviewAttachments.get()
@@ -61,7 +55,7 @@ public actor AppStoreReviewService {
         isDemoAccountRequired: Bool?,
         notes: String?,
     ) async -> Result<AppStoreReviewDetail, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         let requestAttributes: AppStoreReviewDetailUpdateRequest.Data.Attributes = .init(
             contactFirstName: contactFirstName?.isEmpty == true ? nil : contactFirstName,
@@ -106,7 +100,7 @@ public actor AppStoreReviewService {
         isDemoAccountRequired: Bool?,
         notes: String?,
     ) async -> Result<AppStoreReviewDetail, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         let requestAttributes: AppStoreReviewDetailCreateRequest.Data.Attributes = .init(
             contactFirstName: contactFirstName,

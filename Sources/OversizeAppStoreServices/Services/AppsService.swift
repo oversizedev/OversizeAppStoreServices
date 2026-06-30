@@ -5,25 +5,18 @@
 
 import AppStoreAPI
 import AppStoreConnect
-import FactoryKit
 import Foundation
-import OversizeAppStoreModels
-import OversizeCore
 
 public actor AppsService {
-    @Injected(\.cacheService) private var cacheService: CacheService
-    private let client: AppStoreConnectClient?
+    private let cacheService: CacheService
+    private let client: AppStoreConnectClient
 
-    public init() {
-        do {
-            client = try AppStoreConnectClient(authenticator: EnvAuthenticator())
-        } catch {
-            client = nil
-        }
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheService: CacheService = CacheService()) {
+        self.client = AppStoreConnectClient(authenticator: authenticator)
+        self.cacheService = cacheService
     }
 
     public func fetchApp(id: String, force: Bool = false) async -> Result<App, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
         return await cacheService.fetchWithCache(key: "fetchApp\(id)", force: force) {
             let request = Resources.v1.apps.id(id).get()
             return try await client.send(request)
@@ -36,7 +29,6 @@ public actor AppsService {
     }
 
     public func fetchAppIncludeBuildsAndAppStoreVersions(id: String, force: Bool = false) async -> Result<App, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
         return await cacheService.fetchWithCache(key: "fetchAppIncludeBuildsAndAppStoreVersions\(id)", force: force) {
             let request = Resources.v1.apps.id(id).get(
                 include: [
@@ -55,9 +47,6 @@ public actor AppsService {
 
     public func fetchAppIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions(appId: String) async -> Result<App, Error> {
         do {
-            guard let client else {
-                return .failure(NetworkError.unauthorized)
-            }
             let request = Resources.v1.apps.id(appId).get(
                 include: [
                     .builds,
@@ -76,7 +65,7 @@ public actor AppsService {
     }
 
     public func fetchApps() async -> Result<[App], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         let request = Resources.v1.apps.get()
         do {
             let response = try await client.send(request)
@@ -88,7 +77,7 @@ public actor AppsService {
     }
 
     public func fetchAppsIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions(forse: Bool = false) async -> Result<[App], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         return await cacheService.fetchWithCache(key: "fetchAppsIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions", force: forse) {
             let request = Resources.v1.apps.get(
                 include: [
@@ -102,7 +91,7 @@ public actor AppsService {
     }
 
     public func fetchAppsIncludeActualAppStoreVersionsAndBuilds(limitAppStoreVersions: Int? = nil, forse: Bool = false) async -> Result<[App], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         return await cacheService.fetchWithCache(key: "fetchAppsIncludeActualAppStoreVersionsAndBuilds", force: forse) {
             let request = Resources.v1.apps.get(
                 filterAppStoreVersionsAppStoreState: [
@@ -142,7 +131,7 @@ public actor AppsService {
         identifier: String,
         seedID: String? = nil,
     ) async -> Result<Bool, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         guard let bundleIDPlatform: AppStoreAPI.BundleIDPlatform = .init(rawValue: platform.rawValue) else { return .failure(NetworkError.invalidURL) }
 
         let requestData: BundleIDCreateRequest.Data = .init(
@@ -168,7 +157,7 @@ public actor AppsService {
         appId: String,
         locale: AppStoreLanguage,
     ) async -> Result<App, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         let requestData: AppUpdateRequest.Data = .init(
             type: .apps,

@@ -5,25 +5,19 @@
 
 import AppStoreAPI
 import AppStoreConnect
-import FactoryKit
 import Foundation
-import OversizeAppStoreModels
-import OversizeCore
 
 public actor SubscriptionsService {
-    private let client: AppStoreConnectClient?
-    @Injected(\.cacheService) private var cacheService: CacheService
+    private let client: AppStoreConnectClient
+    private let cacheService: CacheService
 
-    public init() {
-        do {
-            client = try AppStoreConnectClient(authenticator: EnvAuthenticator())
-        } catch {
-            client = nil
-        }
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheService: CacheService = CacheService()) {
+        self.client = AppStoreConnectClient(authenticator: authenticator)
+        self.cacheService = cacheService
     }
 
     public func fetchAppSubscriptionGroups(appId: String, force: Bool = false) async -> Result<[SubscriptionGroup], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         return await cacheService.fetchWithCache(key: "fetchAppSubscriptionGroups\(appId)", force: force) {
             let request = Resources.v1.apps.id(appId).subscriptionGroups.get()
             return try await client.send(request)
@@ -33,7 +27,7 @@ public actor SubscriptionsService {
     }
 
     public func fetchAppSubscriptionGroupsIncludedSubscriptionsAndLocalizations(appId: String, force: Bool = false) async -> Result<[SubscriptionGroup], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         return await cacheService.fetchWithCache(key: "fetchAppSubscriptionGroupsIncludedSubscriptionsAndLocalizations\(appId)", force: force) {
             let request = Resources.v1.apps.id(appId).subscriptionGroups.get(
                 include: [
@@ -48,7 +42,7 @@ public actor SubscriptionsService {
     }
 
     public func fetchSubscription(subscriptionId: String, force: Bool = false) async -> Result<Subscription, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         return await cacheService.fetchWithCache(key: "fetchSubscription\(subscriptionId)", force: force) {
             let request = Resources.v1.subscriptions.id(subscriptionId).get()
             return try await client.send(request)
@@ -61,7 +55,7 @@ public actor SubscriptionsService {
     }
 
     public func fetchSubscriptionIncludedAll(subscriptionId: String, force: Bool = false) async -> Result<Subscription, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         return await cacheService.fetchWithCache(key: "fetchSubscriptionIncludedAll\(subscriptionId)", force: force) {
             let request = Resources.v1.subscriptions.id(subscriptionId).get(
                 include: [
@@ -87,7 +81,7 @@ public actor SubscriptionsService {
     }
 
     public func postSubscriptionGroup(appId: String, referenceName: String) async -> Result<SubscriptionGroup, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         let requestData: SubscriptionGroupCreateRequest.Data = .init(
             type: .subscriptionGroups,
             attributes: .init(referenceName: referenceName),
@@ -118,7 +112,7 @@ public actor SubscriptionsService {
         customAppName: String? = nil,
         locale: AppStoreLanguage,
     ) async -> Result<SubscriptionGroupLocalization, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         let requestData: SubscriptionGroupLocalizationCreateRequest.Data = .init(
             type: .subscriptionGroupLocalizations,
             attributes: .init(
@@ -156,7 +150,7 @@ public actor SubscriptionsService {
         reviewNote: String? = nil,
         groupLevel: Int? = nil,
     ) async -> Result<Subscription, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         var subscriptionPeriodRequest: SubscriptionCreateRequest.Data.Attributes.SubscriptionPeriod? {
             if let subscriptionPeriod {
@@ -203,7 +197,7 @@ public actor SubscriptionsService {
         subscriptionPricePointId: String,
         force: Bool = false,
     ) async -> Result<[SubscriptionPricePoint], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         return await cacheService.fetchWithCache(key: "fetchSubscriptionPricePointsEqualizations\(subscriptionPricePointId)", force: force) {
             let request = Resources.v1.subscriptionPricePoints.id(subscriptionPricePointId).equalizations.get(limit: 200, include: [.territory])
             return try await client.send(request)
@@ -217,12 +211,9 @@ public actor SubscriptionsService {
         filterTerritory: [Territory]? = nil,
         force: Bool = false,
     ) async -> Result<[SubscriptionPricePoint], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
 
-        var filterTerritorIds: [String]? = nil
-        if let filterTerritory {
-            filterTerritorIds = filterTerritory.compactMap { $0.id }
-        }
+
+        let filterTerritorIds: [String]? = filterTerritory.map { $0.compactMap { $0.id } }
 
         return await cacheService.fetchWithCache(key: "fetchSubscriptionPricePoints\(subscriptionId)\(filterTerritorIds?.joined(separator: "-"))", force: force) {
             let request = Resources.v1.subscriptions.id(subscriptionId).pricePoints.get(filterTerritory: filterTerritorIds, limit: 2000, include: [.territory])
@@ -237,7 +228,7 @@ public actor SubscriptionsService {
         isAvailableInNewTerritories: Bool,
         availableTerritories: [Territory],
     ) async -> Result<SubscriptionAvailability, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         let requestData = SubscriptionAvailabilityCreateRequest.Data(
             type: .subscriptionAvailabilities,
@@ -272,12 +263,9 @@ public actor SubscriptionsService {
         filterTerritory: [Territory]? = nil,
         force: Bool = false,
     ) async -> Result<[SubscriptionIntroductoryOffer], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
 
-        var filterTerritoryIds: [String]? = nil
-        if let filterTerritory {
-            filterTerritoryIds = filterTerritory.compactMap { $0.id }
-        }
+
+        let filterTerritoryIds: [String]? = filterTerritory.map { $0.compactMap { $0.id } }
 
         return await cacheService.fetchWithCache(key: "fetchSubscriptionIntroductoryOffers\(subscriptionId)\(filterTerritoryIds?.joined(separator: "-"))", force: force) {
             let request = Resources.v1.subscriptions.id(subscriptionId).introductoryOffers.get(
@@ -298,7 +286,7 @@ public actor SubscriptionsService {
         subscriptionId: String,
         force: Bool = false,
     ) async -> Result<SubscriptionAvailability, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         return await cacheService.fetchWithCache(key: "fetchSubscriptionAvailability\(subscriptionId)", force: force) {
             let request = Resources.v1.subscriptions.id(subscriptionId).subscriptionAvailability.get(
                 limitAvailableTerritories: 50,
@@ -317,12 +305,7 @@ public actor SubscriptionsService {
         filterTerritory: [Territory]? = nil,
         force: Bool = false,
     ) async -> Result<[SubscriptionPrice], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
-
-        var filterTerritoryIds: [String]? = nil
-        if let filterTerritory {
-            filterTerritoryIds = filterTerritory.compactMap { $0.id }
-        }
+        let filterTerritoryIds: [String]? = filterTerritory.map { $0.compactMap { $0.id } }
 
         return await cacheService.fetchWithCache(key: "fetchSubscriptionPrices\(subscriptionId)\(filterTerritoryIds?.joined(separator: "-"))", force: force) {
             let request = Resources.v1.subscriptions.id(subscriptionId).prices.get(
@@ -345,7 +328,7 @@ public actor SubscriptionsService {
         reviewNote: String? = nil,
         groupLevel: Int? = nil,
     ) async -> Result<Subscription, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         var subscriptionPeriodRequest: SubscriptionUpdateRequest.Data.Attributes.SubscriptionPeriod? {
             if let subscriptionPeriod {
@@ -386,7 +369,7 @@ public actor SubscriptionsService {
         subscriptionAvailabilitiyId: String,
         force: Bool = false,
     ) async -> Result<[Territory], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         return await cacheService.fetchWithCache(key: "fetchSubscriptionAvailabilitiesAvailableTerritories\(subscriptionAvailabilitiyId)", force: force) {
             let request = Resources.v1.subscriptionAvailabilities.id(subscriptionAvailabilitiyId).availableTerritories.get(limit: 200)
             return try await client.send(request).data
@@ -399,7 +382,7 @@ public actor SubscriptionsService {
         subscriptionPromotionalOfferId: String,
         force: Bool = false,
     ) async -> Result<[SubscriptionPromotionalOfferPrice], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         return await cacheService.fetchWithCache(key: "fetchSubscriptionPromotionalOfferPrices\(subscriptionPromotionalOfferId)", force: force) {
             let request = Resources.v1.subscriptionPromotionalOffers.id(subscriptionPromotionalOfferId).prices.get()
             return try await client.send(request)
@@ -417,7 +400,7 @@ public actor SubscriptionsService {
         numberOfPeriods: Int,
         subscriptionPromotionalOfferPriceId: String,
     ) async -> Result<SubscriptionPromotionalOffer, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         guard let duration: AppStoreAPI.SubscriptionOfferDuration = .init(rawValue: duration.rawValue),
               let offerMode: AppStoreAPI.SubscriptionOfferMode = .init(rawValue: offerMode.rawValue) else { return .failure(NetworkError.invalidURL) }
@@ -456,7 +439,7 @@ public actor SubscriptionsService {
         description: String?,
         locale: AppStoreLanguage,
     ) async -> Result<SubscriptionLocalization, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         let requestData = SubscriptionLocalizationCreateRequest.Data(
             type: .subscriptionLocalizations,
@@ -489,7 +472,7 @@ public actor SubscriptionsService {
         pricePountId _: String,
         prices: [SubscriptionPricePoint],
     ) async -> Result<Subscription, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         let includedItems: [SubscriptionUpdateRequest.IncludedItem] = prices.enumerated().map { index, price in
             let temporaryId = "${newprice-\(index)}"
@@ -555,7 +538,7 @@ public actor SubscriptionsService {
         numberOfPeriods: Int,
         territories: [Territory],
     ) async -> Result<Subscription, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         guard let duration: AppStoreAPI.SubscriptionOfferDuration = .init(rawValue: duration.rawValue),
               let offerMode: AppStoreAPI.SubscriptionOfferMode = .init(rawValue: offerMode.rawValue)
@@ -567,8 +550,8 @@ public actor SubscriptionsService {
             let temporaryId = "${newIntroOffer-\(index)}"
 
             let attributes = SubscriptionIntroductoryOfferInlineCreate.Attributes(
-                startDate: startDate?.toString(),
-                endDate: endDate?.toString(),
+                startDate: startDate.map { Self.dateToString($0) },
+                endDate: endDate.map { Self.dateToString($0) },
                 duration: duration,
                 offerMode: offerMode,
                 numberOfPeriods: numberOfPeriods,
@@ -626,7 +609,7 @@ public actor SubscriptionsService {
     }
 
     public func deleteSubscription(subscriptionsId: String) async -> Result<Bool, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         let request = Resources.v1.subscriptions.id(subscriptionsId).delete
         do {
             let _ = try await client.send(request)
@@ -659,5 +642,15 @@ extension SubscriptionsService {
             }
         }
         return .failure(NetworkError.unknown(error))
+    }
+}
+
+private extension SubscriptionsService {
+    static func dateToString(_ date: Date, format: String = "yyyy-MM-dd") -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = format
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter.string(from: date)
     }
 }

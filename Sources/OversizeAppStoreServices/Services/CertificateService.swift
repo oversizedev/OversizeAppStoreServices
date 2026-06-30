@@ -6,22 +6,16 @@
 import AppStoreAPI
 import AppStoreConnect
 import Foundation
-import OversizeAppStoreModels
-import OversizeCore
 
 public actor CertificateService {
-    private let client: AppStoreConnectClient?
+    private let client: AppStoreConnectClient
 
-    public init() {
-        do {
-            client = try AppStoreConnectClient(authenticator: EnvAuthenticator())
-        } catch {
-            client = nil
-        }
+    public init(authenticator: some AppStoreConnect.Authenticator) {
+        self.client = AppStoreConnectClient(authenticator: authenticator)
     }
 
     public func fetchProfiles() async -> Result<[Profile], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         let request = Resources.v1.profiles.get()
         do {
             let data = try await client.send(request)
@@ -32,7 +26,7 @@ public actor CertificateService {
     }
 
     func fetchActiveCertificates() async throws -> Result<[Certificate], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         let request = Resources.v1.certificates.get()
         do {
             let data = try await client.send(request)

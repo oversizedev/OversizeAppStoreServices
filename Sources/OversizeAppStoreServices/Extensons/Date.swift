@@ -5,6 +5,8 @@
 
 import Foundation
 
+// On Apple platforms the identical conformance is provided by OversizeCore.
+#if !canImport(Darwin)
 extension Date: @retroactive RawRepresentable {
     public var rawValue: String {
         let formatter = ISO8601DateFormatter()
@@ -16,3 +18,4 @@ extension Date: @retroactive RawRepresentable {
         self = formatter.date(from: rawValue) ?? Date()
     }
 }
+#endif

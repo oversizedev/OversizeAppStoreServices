@@ -5,25 +5,19 @@
 
 import AppStoreAPI
 import AppStoreConnect
-import FactoryKit
 import Foundation
-import OversizeAppStoreModels
-import OversizeCore
 
 public actor BuildsService {
-    @Injected(\.cacheService) private var cacheService: CacheService
-    private let client: AppStoreConnectClient?
+    private let cacheService: CacheService
+    private let client: AppStoreConnectClient
 
-    public init() {
-        do {
-            client = try AppStoreConnectClient(authenticator: EnvAuthenticator())
-        } catch {
-            client = nil
-        }
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheService: CacheService = CacheService()) {
+        self.client = AppStoreConnectClient(authenticator: authenticator)
+        self.cacheService = cacheService
     }
 
     public func fetchBuild(buildId: String, forse: Bool = false) async -> Result<Build, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         return await cacheService.fetchWithCache(key: "fetchBuild\(buildId)", force: forse) {
             let request = Resources.v1.builds.id(buildId).get()
             return try await client.send(request)
@@ -36,7 +30,7 @@ public actor BuildsService {
     }
 
     public func fetchBuildBundlesId(buildBundlesId: String, forse: Bool = false) async -> Result<[BuildBundleFileSize], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         return await cacheService.fetchWithCache(key: "buildBundlesId\(buildBundlesId)", force: forse) {
             let request = Resources.v1.buildBundles.id(buildBundlesId).buildBundleFileSizes.get()
             return try await client.send(request).data
@@ -46,7 +40,7 @@ public actor BuildsService {
     }
 
     public func fetchAppBuilds(appId: String) async -> Result<[Build], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         let request = Resources.v1.builds.get(filterApp: [appId])
         do {
             let data = try await client.send(request).data
@@ -57,7 +51,7 @@ public actor BuildsService {
     }
 
     public func fetchPreReleaseVersionBuilds(appId: String, versionString: String, platfrom: Platform) async -> Result<[Build], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         guard let preReleaseVersionPlatform: Resources.V1.Builds.FilterPreReleaseVersionPlatform = .init(rawValue: platfrom.rawValue) else {
             return .failure(NetworkError.invalidURL)
         }
@@ -71,7 +65,7 @@ public actor BuildsService {
     }
 
     public func fetchAppStoreVersionsBuild(versionId: String) async -> Result<Build?, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         let request = Resources.v1.appStoreVersions.id(versionId).build.get()
         do {
             let data = try await client.send(request).data
@@ -82,7 +76,7 @@ public actor BuildsService {
     }
 
     public func fetchAppStoreVersionsBuildImageUrl(versionId: String) async -> Result<URL?, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         let request = Resources.v1.appStoreVersions.id(versionId).build.get(
             fieldsBuilds: [.iconAssetToken],
         )

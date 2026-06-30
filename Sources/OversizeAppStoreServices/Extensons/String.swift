@@ -5,7 +5,9 @@
 
 import Foundation
 
-public extension String {
+// Kept internal so consumers (e.g. the kit) resolve the identical OversizeCore helpers
+// without ambiguity, while the models keep them available on non-Apple platforms.
+extension String {
     func toDate(formatOptions: ISO8601DateFormatter.Options = .withFullDate) -> Date? {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = formatOptions
@@ -13,7 +15,7 @@ public extension String {
     }
 }
 
-public extension String? {
+extension Optional where Wrapped == String {
     var valueOrEmpty: String {
         guard let unwrapped = self else {
             return ""

@@ -4,7 +4,6 @@
 //
 
 import AppStoreAPI
-import OversizeCore
 
 public struct AnalyticsReport: Identifiable, Hashable, Sendable {
     public let id: String
@@ -27,5 +26,17 @@ public struct AnalyticsReport: Identifiable, Hashable, Sendable {
         case commerce = "COMMERCE"
         case frameworkUsage = "FRAMEWORK_USAGE"
         case performance = "PERFORMANCE"
+    }
+}
+
+public extension [AnalyticsReport] {
+    func pickSearchTermReport() -> AnalyticsReport? {
+        let keywords: [String] = ["search", "discovery", "engagement"]
+        for keyword in keywords {
+            if let match = first(where: { $0.name.localizedCaseInsensitiveContains(keyword) }) {
+                return match
+            }
+        }
+        return first
     }
 }

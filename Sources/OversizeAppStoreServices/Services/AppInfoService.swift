@@ -5,25 +5,19 @@
 
 import AppStoreAPI
 import AppStoreConnect
-import FactoryKit
 import Foundation
-import OversizeAppStoreModels
-import OversizeCore
 
 public actor AppInfoService {
-    @Injected(\.cacheService) private var cacheService: CacheService
-    private let client: AppStoreConnectClient?
+    private let cacheService: CacheService
+    private let client: AppStoreConnectClient
 
-    public init() {
-        do {
-            client = try AppStoreConnectClient(authenticator: EnvAuthenticator())
-        } catch {
-            client = nil
-        }
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheService: CacheService = CacheService()) {
+        self.client = AppStoreConnectClient(authenticator: authenticator)
+        self.cacheService = cacheService
     }
 
     public func fetchAppInfos(appId: String, force: Bool = false) async -> Result<[AppInfo], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         return await cacheService.fetchWithCache(key: "fetchAppInfos\(appId)", force: force) {
             let request = Resources.v1.apps.id(appId).appInfos.get()
             return try await client.send(request).data
@@ -33,7 +27,7 @@ public actor AppInfoService {
     }
 
     public func fetchAppInfoIncludedCategory(appId: String) async -> Result<[AppInfo], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         let request = Resources.v1.apps.id(appId).appInfos.get(include: [.primaryCategory, .secondaryCategory, .ageRatingDeclaration])
         do {
             let responce = try await client.send(request)
@@ -41,12 +35,12 @@ public actor AppInfoService {
                 .init(schema: $0, included: responce.included)
             })
         } catch {
-            return .failure(NetworkError.noResponse)
+            return .failure(error.asNetworkError)
         }
     }
 
     public func fetchAppInfoLocalizations(appInfoId: String, force: Bool = false) async -> Result<[AppInfoLocalization], Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         return await cacheService.fetchWithCache(key: "fetchAppInfoLocalizations\(appInfoId)", force: force) {
             let request = Resources.v1.appInfos.id(appInfoId).appInfoLocalizations.get()
             return try await client.send(request).data
@@ -56,7 +50,7 @@ public actor AppInfoService {
     }
 
     public func fetchAppInfoLocalization(appInfoId: String, locale: AppStoreLanguage) async -> Result<AppInfoLocalization, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         let request = Resources.v1.appInfos.id(appInfoId).appInfoLocalizations.get(
             filterLocale: [locale.rawValue],
         )
@@ -67,7 +61,7 @@ public actor AppInfoService {
             }
             return .success(appInfoLocalization)
         } catch {
-            return .failure(NetworkError.noResponse)
+            return .failure(error.asNetworkError)
         }
     }
 
@@ -91,7 +85,7 @@ public actor AppInfoService {
         violenceRealistic: AgeRatingDeclarationUpdateRequest.Data.Attributes.ViolenceRealistic?,
         koreaAgeRatingOverride: AgeRatingDeclarationUpdateRequest.Data.Attributes.KoreaAgeRatingOverride?,
     ) async -> Result<AgeRatingDeclaration, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         let requestAttributes: AgeRatingDeclarationUpdateRequest.Data.Attributes = .init(
             alcoholTobaccoOrDrugUseOrReferences: alcoholTobaccoOrDrugUseOrReferences,
@@ -130,7 +124,7 @@ public actor AppInfoService {
             }
             return .success(ageRatingDeclaration)
         } catch {
-            return .failure(NetworkError.noResponse)
+            return .failure(error.asNetworkError)
         }
     }
 
@@ -142,7 +136,7 @@ public actor AppInfoService {
         privacyChoicesURL: URL? = nil,
         privacyPolicyText: String? = nil,
     ) async -> Result<AppInfoLocalization, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         let requestAttributes: AppInfoLocalizationUpdateRequest.Data.Attributes = .init(
             name: name,
@@ -169,7 +163,7 @@ public actor AppInfoService {
             }
             return .success(versionLocalization)
         } catch {
-            return .failure(NetworkError.noResponse)
+            return .failure(error.asNetworkError)
         }
     }
 
@@ -182,7 +176,7 @@ public actor AppInfoService {
         privacyChoicesURL: String? = nil,
         privacyPolicyText: String? = nil,
     ) async -> Result<AppInfoLocalization, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         let requestAttributes: AppInfoLocalizationCreateRequest.Data.Attributes = .init(
             locale: language.rawValue,
@@ -212,7 +206,7 @@ public actor AppInfoService {
             }
             return .success(versionLocalization)
         } catch {
-            return .failure(NetworkError.noResponse)
+            return .failure(error.asNetworkError)
         }
     }
 }

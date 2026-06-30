@@ -6,18 +6,12 @@
 import AppStoreAPI
 import AppStoreConnect
 import Foundation
-import OversizeAppStoreModels
-import OversizeCore
 
 public actor AppCategoryService {
-    private let client: AppStoreConnectClient?
+    private let client: AppStoreConnectClient
 
-    public init() {
-        do {
-            client = try AppStoreConnectClient(authenticator: EnvAuthenticator())
-        } catch {
-            client = nil
-        }
+    public init(authenticator: some AppStoreConnect.Authenticator) {
+        self.client = AppStoreConnectClient(authenticator: authenticator)
     }
 
     public func fetchAppCategoryIds(platform: Platform) async -> Result<[String], Error> {
@@ -25,7 +19,7 @@ public actor AppCategoryService {
             return .failure(NetworkError.invalidURL)
         }
 
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         let request = Resources.v1.appCategories.get(
             filterPlatforms: [appCategoriesPlatform],
             isExistsParent: false,
@@ -43,7 +37,7 @@ public actor AppCategoryService {
             return .failure(NetworkError.invalidURL)
         }
 
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
         let request = Resources.v1.appCategories.get(
             filterPlatforms: [appCategoriesPlatform],
             isExistsParent: false,
@@ -71,7 +65,7 @@ public actor AppCategoryService {
         secondarySubcategoryOneId: String? = nil,
         secondarySubcategoryTwoId: String? = nil,
     ) async -> Result<AppInfo, Error> {
-        guard let client else { return .failure(NetworkError.unauthorized) }
+
 
         let primaryCategory: AppInfoUpdateRequest.Data.Relationships.PrimaryCategory? = primaryCategoryId != nil ? .init(data: .init(id: primaryCategoryId!)) : nil
         let primarySubcategoryOne: AppInfoUpdateRequest.Data.Relationships.PrimarySubcategoryOne? = primarySubcategoryOneId != nil ? .init(data: .init(id: primarySubcategoryOneId!)) : nil
