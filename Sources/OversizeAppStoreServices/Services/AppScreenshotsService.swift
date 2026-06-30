@@ -218,7 +218,6 @@ public actor AppScreenshotsService {
     public func calculateChecksum(for data: Data) -> String {
         var md5 = Insecure.MD5()
         md5.update(data: data)
-        let digest = md5.finalize()
-        return digest.description
+        return md5.finalize().map { String(format: "%02x", $0) }.joined()
     }
 }

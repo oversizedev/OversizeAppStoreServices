@@ -16,6 +16,11 @@ public struct ReviewSubmissionItem: Sendable, Identifiable {
             appStoreVersionExperimentId: schema.relationships?.appStoreVersionExperiment?.data?.id,
             appStoreVersionExperimentV2Id: schema.relationships?.appStoreVersionExperimentV2?.data?.id,
             appEventId: schema.relationships?.appEvent?.data?.id,
+            backgroundAssetVersionId: schema.relationships?.backgroundAssetVersion?.data?.id,
+            gameCenterActivityVersionId: schema.relationships?.gameCenterActivityVersion?.data?.id,
+            gameCenterChallengeVersionId: schema.relationships?.gameCenterChallengeVersion?.data?.id,
+            gameCenterLeaderboardSetVersionId: schema.relationships?.gameCenterLeaderboardSetVersion?.data?.id,
+            gameCenterLeaderboardVersionId: schema.relationships?.gameCenterLeaderboardVersion?.data?.id,
         )
         included = nil
     }
@@ -32,6 +37,11 @@ public struct ReviewSubmissionItem: Sendable, Identifiable {
             appStoreVersionExperimentId: schema.relationships?.appStoreVersionExperiment?.data?.id,
             appStoreVersionExperimentV2Id: schema.relationships?.appStoreVersionExperimentV2?.data?.id,
             appEventId: schema.relationships?.appEvent?.data?.id,
+            backgroundAssetVersionId: schema.relationships?.backgroundAssetVersion?.data?.id,
+            gameCenterActivityVersionId: schema.relationships?.gameCenterActivityVersion?.data?.id,
+            gameCenterChallengeVersionId: schema.relationships?.gameCenterChallengeVersion?.data?.id,
+            gameCenterLeaderboardSetVersionId: schema.relationships?.gameCenterLeaderboardSetVersion?.data?.id,
+            gameCenterLeaderboardVersionId: schema.relationships?.gameCenterLeaderboardVersion?.data?.id,
         )
 
         var appStoreVersion: AppStoreVersion?
@@ -65,27 +75,27 @@ public struct ReviewSubmissionItem: Sendable, Identifiable {
                         appEvent = .init(schema: value)
                     }
                 case let .backgroundAssetVersion(value):
-                    if backgroundAssetVersion == nil {
+                    if schema.relationships?.backgroundAssetVersion?.data?.id == value.id {
                         backgroundAssetVersion = .init(schema: value)
                     }
                 case let .gameCenterAchievementVersionV2(value):
-                    if gameCenterAchievementVersionV2 == nil {
+                    if schema.relationships?.gameCenterAchievementVersion?.data?.id == value.id {
                         gameCenterAchievementVersionV2 = .init(schema: value)
                     }
                 case let .gameCenterActivityVersion(value):
-                    if gameCenterActivityVersion == nil {
+                    if schema.relationships?.gameCenterActivityVersion?.data?.id == value.id {
                         gameCenterActivityVersion = .init(schema: value)
                     }
                 case let .gameCenterChallengeVersion(value):
-                    if gameCenterChallengeVersion == nil {
+                    if schema.relationships?.gameCenterChallengeVersion?.data?.id == value.id {
                         gameCenterChallengeVersion = .init(schema: value)
                     }
                 case let .gameCenterLeaderboardSetVersionV2(value):
-                    if gameCenterLeaderboardSetVersionV2 == nil {
+                    if schema.relationships?.gameCenterLeaderboardSetVersion?.data?.id == value.id {
                         gameCenterLeaderboardSetVersionV2 = .init(schema: value)
                     }
                 case let .gameCenterLeaderboardVersionV2(value):
-                    if gameCenterLeaderboardVersionV2 == nil {
+                    if schema.relationships?.gameCenterLeaderboardVersion?.data?.id == value.id {
                         gameCenterLeaderboardVersionV2 = .init(schema: value)
                     }
                 @unknown default:
@@ -113,6 +123,11 @@ public struct ReviewSubmissionItem: Sendable, Identifiable {
         public let appStoreVersionExperimentId: String?
         public let appStoreVersionExperimentV2Id: String?
         public let appEventId: String?
+        public let backgroundAssetVersionId: String?
+        public let gameCenterActivityVersionId: String?
+        public let gameCenterChallengeVersionId: String?
+        public let gameCenterLeaderboardSetVersionId: String?
+        public let gameCenterLeaderboardVersionId: String?
     }
 
     public struct Included: Sendable {

@@ -33,11 +33,10 @@ public struct AppScreenshotSet: Identifiable, Sendable {
         }
 
         if let includedItems = included {
+            let screenshotIds = Set(schema.relationships?.appScreenshots?.data?.map(\.id) ?? [])
             let screenshotSchemas = includedItems.compactMap { item -> AppStoreAPI.AppScreenshot? in
-                if case let .appScreenshot(screenshot) = item {
-                    return screenshot
-                }
-                return nil
+                guard case let .appScreenshot(screenshot) = item else { return nil }
+                return screenshotIds.contains(screenshot.id) ? screenshot : nil
             }
             appScreenshots = screenshotSchemas.map { AppScreenshot(schema: $0) }
         }

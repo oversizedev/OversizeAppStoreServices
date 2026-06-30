@@ -85,16 +85,24 @@ public struct AppStoreVersion: Sendable, Identifiable {
         var includedGameCenterAppVersion: AppStoreAPI.GameCenterAppVersion?
         var includedRoutingAppCoverage: AppStoreAPI.RoutingAppCoverage?
 
+        let localizationIds = Set(schema.relationships?.appStoreVersionLocalizations?.data?.map(\.id) ?? [])
+        let buildId = schema.relationships?.build?.data?.id
+        let reviewDetailId = schema.relationships?.appStoreReviewDetail?.data?.id
+
         for includedItem in included ?? [] {
             switch includedItem {
             case let .app(app):
                 includedApp = app
             case let .build(build):
-                includedBuild = build
+                if buildId == build.id { includedBuild = build }
             case let .appStoreVersionLocalization(localization):
-                includedAppStoreVersionLocalizations.append(localization)
+                if localizationIds.contains(localization.id) {
+                    includedAppStoreVersionLocalizations.append(localization)
+                }
             case let .appStoreReviewDetail(reviewDetail):
-                includedAppStoreReviewDetails.append(reviewDetail)
+                if reviewDetailId == reviewDetail.id {
+                    includedAppStoreReviewDetails.append(reviewDetail)
+                }
             case let .appStoreVersionExperiment(experiment):
                 includedAppStoreVersionExperiments.append(experiment)
             case let .appStoreVersionPhasedRelease(phasedRelease):
