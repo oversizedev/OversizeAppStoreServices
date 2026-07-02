@@ -32,17 +32,17 @@ public struct EnvAuthenticator: Authenticator {
 
     private func makeJWT() throws -> JWT {
         guard let keyLabel = UserDefaults.standard.string(forKey: "AppStore.Account") else {
-            logError("Get UserDefaults value for 'AppStore.Account'")
+            Log.error("Get UserDefaults value for 'AppStore.Account'")
             throw Error.missingEnvironmentVariable("AppStore.Account")
         }
 
         guard let appStoreIssuerID = storage.getPassword(for: "DevConnector-IssuerID-" + keyLabel) else {
-            logError("Get Keychain value for IssuerID")
+            Log.error("Get Keychain value for IssuerID")
             throw Error.missingEnvironmentVariable("AppStore.Key.Default")
         }
 
         guard let appStoreCertificate = storage.getCredentials(with: "DevConnector-Certificate-" + keyLabel) else {
-            logError("Get Keychain value for Certificate")
+            Log.error("Get Keychain value for Certificate")
             throw Error.missingEnvironmentVariable("AppStore.Key.Default")
         }
 
