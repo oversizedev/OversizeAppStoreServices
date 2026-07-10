@@ -13,12 +13,11 @@ public actor VersionsService {
     private let client: AppStoreConnectClient
 
     public init(authenticator: some AppStoreConnect.Authenticator, cacheService: CacheService = CacheService()) {
-        self.client = AppStoreConnectClient(authenticator: authenticator)
+        client = AppStoreConnectClient(authenticator: authenticator)
         self.cacheService = cacheService
     }
 
     public func fetchAppStoreVersion(appStoreVersionId: String) async -> Result<AppStoreVersion, Error> {
-
         let request = Resources.v1.appStoreVersions.id(appStoreVersionId).get()
         do {
             let data = try await client.send(request).data
@@ -32,7 +31,6 @@ public actor VersionsService {
     }
 
     public func fetchAppVersions(appId: String, platform: Platform? = nil, force: Bool = false) async -> Result<[AppStoreVersion], Error> {
-
         let filterPlatforms: [Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform]? = if let platform, let filteredPlatform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform = .init(rawValue: platform.rawValue) {
             [filteredPlatform]
         } else {
@@ -48,7 +46,6 @@ public actor VersionsService {
     }
 
     public func fetchEditableAppStoreVersion(appId: String, platform: Platform? = nil, force: Bool = false) async -> Result<[AppStoreVersion], Error> {
-
         let filterPlatforms: [Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform]? = if let platform, let filteredPlatform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform = .init(rawValue: platform.rawValue) {
             [filteredPlatform]
         } else {
@@ -73,7 +70,6 @@ public actor VersionsService {
     }
 
     public func fetchRelisedAppVersions(appId: String) async -> Result<[AppStoreVersion], Error> {
-
         let request = Resources.v1.apps.id(appId).appStoreVersions.get(
             filterAppVersionState: [
                 .replacedWithNewVersion,
@@ -89,7 +85,6 @@ public actor VersionsService {
     }
 
     public func fetchActualAppStoreVersions(appId: String, platform: Platform? = nil, force: Bool = false) async -> Result<[AppStoreVersion], Error> {
-
         let filterPlatforms: [Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform]? = if let platform, let filteredPlatform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform = .init(rawValue: platform.rawValue) {
             [filteredPlatform]
         } else {
@@ -123,7 +118,6 @@ public actor VersionsService {
     }
 
     public func fetchActualAppStoreVersionsIncludeBuilds(appId: String, platform: Platform? = nil, limit: Int? = nil, force: Bool = false) async -> Result<[AppStoreVersion], Error> {
-
         let filterPlatforms: [Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform]? = if let platform, let filteredPlatform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform = .init(rawValue: platform.rawValue) {
             [filteredPlatform]
         } else {
@@ -162,7 +156,6 @@ public actor VersionsService {
     }
 
     public func fetchAppVersions(appId: String, platform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform) async -> Result<[AppStoreVersion], Error> {
-
         let request = Resources.v1.apps.id(appId).appStoreVersions.get(filterPlatform: [platform])
         do {
             let data = try await client.send(request).data
@@ -173,7 +166,6 @@ public actor VersionsService {
     }
 
     public func fetchAllVersionLocalizations(forVersion versionId: String) async throws -> Result<[(String, AppStoreLanguage)], Error> {
-
         let request = Resources.v1.appStoreVersions.id(versionId).appStoreVersionLocalizations.get()
         do {
             let data = try await client.send(request).data
@@ -189,8 +181,7 @@ public actor VersionsService {
     }
 
     public func fetchAppVersionLocalizations(versionId: String, force: Bool = false) async -> Result<[AppStoreVersionLocalization], Error> {
-
-        return await cacheService.fetchWithCache(key: "fetchAppVersionLocalizations\(versionId)", force: force) {
+        await cacheService.fetchWithCache(key: "fetchAppVersionLocalizations\(versionId)", force: force) {
             let request = Resources.v1.appStoreVersions.id(versionId).appStoreVersionLocalizations.get()
             return try await client.send(request).data
         }.map { data in
@@ -199,8 +190,6 @@ public actor VersionsService {
     }
 
     public func patchBuild(versionId: String, buildId: String) async -> Result<AppStoreVersion, Error> {
-
-
         let relationships: AppStoreVersionUpdateRequest.Data.Relationships = .init(
             build: .init(data: .init(type: .builds, id: buildId)),
         )
@@ -234,8 +223,6 @@ public actor VersionsService {
         marketingURL: URL? = nil,
         supportURL: URL? = nil,
     ) async -> Result<AppStoreVersionLocalization, Error> {
-
-
         let requestAttributes: AppStoreVersionLocalizationCreateRequest.Data.Attributes = .init(
             description: description,
             locale: locale.rawValue,
@@ -278,8 +265,6 @@ public actor VersionsService {
         marketingURL: URL? = nil,
         supportURL: URL? = nil,
     ) async -> Result<AppStoreVersionLocalization, Error> {
-
-
         let requestAttributes: AppStoreVersionLocalizationUpdateRequest.Data.Attributes = .init(
             description: description,
             keywords: keywords,
@@ -317,8 +302,6 @@ public actor VersionsService {
         earliestReleaseDate _: Date? = nil,
         isDownloadable: Bool? = nil,
     ) async -> Result<AppStoreVersion, Error> {
-
-
         let requestAttributes: AppStoreVersionUpdateRequest.Data.Attributes = .init(
             versionString: versionString,
             copyright: copyright,
@@ -393,7 +376,6 @@ public actor VersionsService {
     }
 
     public func deleteAppStoreVersionLocalizationsLocalization(localizationId: String) async -> Result<Bool, Error> {
-
         let request = Resources.v1.appStoreVersionLocalizations.id(localizationId).delete
         do {
             let _ = try await client.send(request)

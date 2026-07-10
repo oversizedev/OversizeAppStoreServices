@@ -13,13 +13,12 @@ public actor BuildsService {
     private let client: AppStoreConnectClient
 
     public init(authenticator: some AppStoreConnect.Authenticator, cacheService: CacheService = CacheService()) {
-        self.client = AppStoreConnectClient(authenticator: authenticator)
+        client = AppStoreConnectClient(authenticator: authenticator)
         self.cacheService = cacheService
     }
 
     public func fetchBuild(buildId: String, forse: Bool = false) async -> Result<Build, Error> {
-
-        return await cacheService.fetchWithCache(key: "fetchBuild\(buildId)", force: forse) {
+        await cacheService.fetchWithCache(key: "fetchBuild\(buildId)", force: forse) {
             let request = Resources.v1.builds.id(buildId).get()
             return try await client.send(request)
         }.flatMap {
@@ -31,8 +30,7 @@ public actor BuildsService {
     }
 
     public func fetchBuildBundlesId(buildBundlesId: String, forse: Bool = false) async -> Result<[BuildBundleFileSize], Error> {
-
-        return await cacheService.fetchWithCache(key: "buildBundlesId\(buildBundlesId)", force: forse) {
+        await cacheService.fetchWithCache(key: "buildBundlesId\(buildBundlesId)", force: forse) {
             let request = Resources.v1.buildBundles.id(buildBundlesId).buildBundleFileSizes.get()
             return try await client.send(request).data
         }.map { data in
@@ -41,7 +39,6 @@ public actor BuildsService {
     }
 
     public func fetchAppBuilds(appId: String) async -> Result<[Build], Error> {
-
         let request = Resources.v1.builds.get(filterApp: [appId])
         do {
             let data = try await client.send(request).data
@@ -52,7 +49,6 @@ public actor BuildsService {
     }
 
     public func fetchPreReleaseVersionBuilds(appId: String, versionString: String, platfrom: Platform) async -> Result<[Build], Error> {
-
         guard let preReleaseVersionPlatform: Resources.V1.Builds.FilterPreReleaseVersionPlatform = .init(rawValue: platfrom.rawValue) else {
             return .failure(NetworkError.invalidURL)
         }
@@ -66,7 +62,6 @@ public actor BuildsService {
     }
 
     public func fetchAppStoreVersionsBuild(versionId: String) async -> Result<Build?, Error> {
-
         let request = Resources.v1.appStoreVersions.id(versionId).build.get()
         do {
             let data = try await client.send(request).data
@@ -77,7 +72,6 @@ public actor BuildsService {
     }
 
     public func fetchAppStoreVersionsBuildImageUrl(versionId: String) async -> Result<URL?, Error> {
-
         let request = Resources.v1.appStoreVersions.id(versionId).build.get(
             fieldsBuilds: [.iconAssetToken],
         )

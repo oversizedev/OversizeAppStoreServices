@@ -62,5 +62,9 @@ public extension Container {
     var cacheService: Factory<CacheService> {
         self { CacheService() }
     }
+
+    var appStoreConnectCredentialsStorage: Factory<AppStoreConnectCredentialsStorage> {
+        self { AppStoreConnectCredentialsStorage() }
+    }
 }
 #endif

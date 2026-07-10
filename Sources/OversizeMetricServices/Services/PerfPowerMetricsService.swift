@@ -5,14 +5,14 @@
 
 import AppStoreAPI
 import AppStoreConnect
-import OversizeCore
 import OversizeAppStoreServices
+import OversizeCore
 
 public actor PerfPowerMetricsService {
     private let client: AppStoreConnectClient
 
     public init(authenticator: some AppStoreConnect.Authenticator) {
-        self.client = AppStoreConnectClient(authenticator: authenticator)
+        client = AppStoreConnectClient(authenticator: authenticator)
     }
 
     public func fetchXcodeMetrics(appId: String) async -> Result<LocalXcodeMetrics, Error> {

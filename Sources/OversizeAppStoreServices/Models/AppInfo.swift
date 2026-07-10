@@ -65,11 +65,13 @@ public struct AppInfo: Sendable {
                 .first {
                     $0.id == schema.relationships?.ageRatingDeclaration?.data?.id
                 }
-            if let primaryCategory, let seconaryCategory {
+            // A secondary category is optional in App Store Connect — requiring it here dropped
+            // the primary category for every app that has only one category set.
+            if let primaryCategory {
                 self.included = .init(
                     primaryCategory: .init(schema: primaryCategory),
-                    secondaryCategory: .init(schema: seconaryCategory),
-                    ageRatingDeclaration: ageRatingDeclaration != nil ? .init(schema: ageRatingDeclaration!) : nil,
+                    secondaryCategory: seconaryCategory.flatMap { .init(schema: $0) },
+                    ageRatingDeclaration: ageRatingDeclaration.flatMap { .init(schema: $0) },
                 )
             } else {
                 self.included = nil

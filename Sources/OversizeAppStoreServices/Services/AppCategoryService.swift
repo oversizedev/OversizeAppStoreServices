@@ -12,14 +12,13 @@ public actor AppCategoryService {
     private let client: AppStoreConnectClient
 
     public init(authenticator: some AppStoreConnect.Authenticator) {
-        self.client = AppStoreConnectClient(authenticator: authenticator)
+        client = AppStoreConnectClient(authenticator: authenticator)
     }
 
     public func fetchAppCategoryIds(platform: Platform) async -> Result<[String], Error> {
         guard let appCategoriesPlatform: Resources.V1.AppCategories.FilterPlatforms = .init(rawValue: platform.rawValue) else {
             return .failure(NetworkError.invalidURL)
         }
-
 
         let request = Resources.v1.appCategories.get(
             filterPlatforms: [appCategoriesPlatform],
@@ -37,7 +36,6 @@ public actor AppCategoryService {
         guard let appCategoriesPlatform: Resources.V1.AppCategories.FilterPlatforms = .init(rawValue: platform.rawValue) else {
             return .failure(NetworkError.invalidURL)
         }
-
 
         let request = Resources.v1.appCategories.get(
             filterPlatforms: [appCategoriesPlatform],
@@ -66,8 +64,6 @@ public actor AppCategoryService {
         secondarySubcategoryOneId: String? = nil,
         secondarySubcategoryTwoId: String? = nil,
     ) async -> Result<AppInfo, Error> {
-
-
         let primaryCategory: AppInfoUpdateRequest.Data.Relationships.PrimaryCategory? = primaryCategoryId != nil ? .init(data: .init(id: primaryCategoryId!)) : nil
         let primarySubcategoryOne: AppInfoUpdateRequest.Data.Relationships.PrimarySubcategoryOne? = primarySubcategoryOneId != nil ? .init(data: .init(id: primarySubcategoryOneId!)) : nil
         let primarySubcategoryTwo: AppInfoUpdateRequest.Data.Relationships.PrimarySubcategoryTwo? = primarySubcategoryTwoId != nil ? .init(data: .init(id: primarySubcategoryTwoId!)) : nil

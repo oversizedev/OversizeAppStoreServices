@@ -11,7 +11,7 @@ public actor CustomerReviewService {
     private let client: AppStoreConnectClient
 
     public init(authenticator: some AppStoreConnect.Authenticator) {
-        self.client = AppStoreConnectClient(authenticator: authenticator)
+        client = AppStoreConnectClient(authenticator: authenticator)
     }
 
     public func fetchCustomerReviews(version: AppStoreVersion) async -> Result<[CustomerReview], Error> {
@@ -19,7 +19,6 @@ public actor CustomerReviewService {
     }
 
     public func fetchAppCustomerReviews(appId: String) async -> Result<[CustomerReview], Error> {
-
         let request = Resources.v1.apps.id(appId).customerReviews.get(sort: [.minusCreatedDate])
         do {
             let data = try await client.send(request).data
@@ -47,7 +46,6 @@ public actor CustomerReviewService {
     }
 
     public func fetchCustomerReviews(versionId: String) async -> Result<[CustomerReview], Error> {
-
         let request = Resources.v1.appStoreVersions.id(versionId).customerReviews.get()
         do {
             let data = try await client.send(request).data

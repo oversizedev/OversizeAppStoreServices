@@ -7,15 +7,15 @@ import AppStoreAPI
 import AppStoreConnect
 import CodableCSV
 import Foundation
-import OversizeCore
 import Gzip
 import OversizeAppStoreServices
+import OversizeCore
 
 public actor SalesAndFinanceService {
     private let client: AppStoreConnectClient
 
     public init(authenticator: some AppStoreConnect.Authenticator) {
-        self.client = AppStoreConnectClient(authenticator: authenticator)
+        client = AppStoreConnectClient(authenticator: authenticator)
     }
 
     public func fetchSalesURL(vendorNumber: String) async -> Result<URL, Error> {

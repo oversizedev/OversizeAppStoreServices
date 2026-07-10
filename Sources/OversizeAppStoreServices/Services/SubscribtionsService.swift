@@ -13,13 +13,12 @@ public actor SubscriptionsService {
     private let cacheService: CacheService
 
     public init(authenticator: some AppStoreConnect.Authenticator, cacheService: CacheService = CacheService()) {
-        self.client = AppStoreConnectClient(authenticator: authenticator)
+        client = AppStoreConnectClient(authenticator: authenticator)
         self.cacheService = cacheService
     }
 
     public func fetchAppSubscriptionGroups(appId: String, force: Bool = false) async -> Result<[SubscriptionGroup], Error> {
-
-        return await cacheService.fetchWithCache(key: "fetchAppSubscriptionGroups\(appId)", force: force) {
+        await cacheService.fetchWithCache(key: "fetchAppSubscriptionGroups\(appId)", force: force) {
             let request = Resources.v1.apps.id(appId).subscriptionGroups.get()
             return try await client.send(request)
         }.map { data in
@@ -28,8 +27,7 @@ public actor SubscriptionsService {
     }
 
     public func fetchAppSubscriptionGroupsIncludedSubscriptionsAndLocalizations(appId: String, force: Bool = false) async -> Result<[SubscriptionGroup], Error> {
-
-        return await cacheService.fetchWithCache(key: "fetchAppSubscriptionGroupsIncludedSubscriptionsAndLocalizations\(appId)", force: force) {
+        await cacheService.fetchWithCache(key: "fetchAppSubscriptionGroupsIncludedSubscriptionsAndLocalizations\(appId)", force: force) {
             let request = Resources.v1.apps.id(appId).subscriptionGroups.get(
                 include: [
                     .subscriptions,
@@ -43,8 +41,7 @@ public actor SubscriptionsService {
     }
 
     public func fetchSubscription(subscriptionId: String, force: Bool = false) async -> Result<Subscription, Error> {
-
-        return await cacheService.fetchWithCache(key: "fetchSubscription\(subscriptionId)", force: force) {
+        await cacheService.fetchWithCache(key: "fetchSubscription\(subscriptionId)", force: force) {
             let request = Resources.v1.subscriptions.id(subscriptionId).get()
             return try await client.send(request)
         }.flatMap {
@@ -56,8 +53,7 @@ public actor SubscriptionsService {
     }
 
     public func fetchSubscriptionIncludedAll(subscriptionId: String, force: Bool = false) async -> Result<Subscription, Error> {
-
-        return await cacheService.fetchWithCache(key: "fetchSubscriptionIncludedAll\(subscriptionId)", force: force) {
+        await cacheService.fetchWithCache(key: "fetchSubscriptionIncludedAll\(subscriptionId)", force: force) {
             let request = Resources.v1.subscriptions.id(subscriptionId).get(
                 include: [
                     .subscriptionLocalizations,
@@ -82,7 +78,6 @@ public actor SubscriptionsService {
     }
 
     public func postSubscriptionGroup(appId: String, referenceName: String) async -> Result<SubscriptionGroup, Error> {
-
         let requestData: SubscriptionGroupCreateRequest.Data = .init(
             type: .subscriptionGroups,
             attributes: .init(referenceName: referenceName),
@@ -113,7 +108,6 @@ public actor SubscriptionsService {
         customAppName: String? = nil,
         locale: AppStoreLanguage,
     ) async -> Result<SubscriptionGroupLocalization, Error> {
-
         let requestData: SubscriptionGroupLocalizationCreateRequest.Data = .init(
             type: .subscriptionGroupLocalizations,
             attributes: .init(
@@ -151,8 +145,6 @@ public actor SubscriptionsService {
         reviewNote: String? = nil,
         groupLevel: Int? = nil,
     ) async -> Result<Subscription, Error> {
-
-
         var subscriptionPeriodRequest: SubscriptionCreateRequest.Data.Attributes.SubscriptionPeriod? {
             if let subscriptionPeriod {
                 .init(rawValue: subscriptionPeriod.rawValue)
@@ -198,8 +190,7 @@ public actor SubscriptionsService {
         subscriptionPricePointId: String,
         force: Bool = false,
     ) async -> Result<[SubscriptionPricePoint], Error> {
-
-        return await cacheService.fetchWithCache(key: "fetchSubscriptionPricePointsEqualizations\(subscriptionPricePointId)", force: force) {
+        await cacheService.fetchWithCache(key: "fetchSubscriptionPricePointsEqualizations\(subscriptionPricePointId)", force: force) {
             let request = Resources.v1.subscriptionPricePoints.id(subscriptionPricePointId).equalizations.get(limit: 200, include: [.territory])
             return try await client.send(request)
         }.map { data in
@@ -212,8 +203,6 @@ public actor SubscriptionsService {
         filterTerritory: [Territory]? = nil,
         force: Bool = false,
     ) async -> Result<[SubscriptionPricePoint], Error> {
-
-
         let filterTerritorIds: [String]? = filterTerritory.map { $0.compactMap { $0.id } }
 
         return await cacheService.fetchWithCache(key: "fetchSubscriptionPricePoints\(subscriptionId)\(filterTerritorIds?.joined(separator: "-"))", force: force) {
@@ -229,8 +218,6 @@ public actor SubscriptionsService {
         isAvailableInNewTerritories: Bool,
         availableTerritories: [Territory],
     ) async -> Result<SubscriptionAvailability, Error> {
-
-
         let requestData = SubscriptionAvailabilityCreateRequest.Data(
             type: .subscriptionAvailabilities,
             attributes: .init(
@@ -264,8 +251,6 @@ public actor SubscriptionsService {
         filterTerritory: [Territory]? = nil,
         force: Bool = false,
     ) async -> Result<[SubscriptionIntroductoryOffer], Error> {
-
-
         let filterTerritoryIds: [String]? = filterTerritory.map { $0.compactMap { $0.id } }
 
         return await cacheService.fetchWithCache(key: "fetchSubscriptionIntroductoryOffers\(subscriptionId)\(filterTerritoryIds?.joined(separator: "-"))", force: force) {
@@ -287,8 +272,7 @@ public actor SubscriptionsService {
         subscriptionId: String,
         force: Bool = false,
     ) async -> Result<SubscriptionAvailability, Error> {
-
-        return await cacheService.fetchWithCache(key: "fetchSubscriptionAvailability\(subscriptionId)", force: force) {
+        await cacheService.fetchWithCache(key: "fetchSubscriptionAvailability\(subscriptionId)", force: force) {
             let request = Resources.v1.subscriptions.id(subscriptionId).subscriptionAvailability.get(
                 limitAvailableTerritories: 50,
             )
@@ -329,8 +313,6 @@ public actor SubscriptionsService {
         reviewNote: String? = nil,
         groupLevel: Int? = nil,
     ) async -> Result<Subscription, Error> {
-
-
         var subscriptionPeriodRequest: SubscriptionUpdateRequest.Data.Attributes.SubscriptionPeriod? {
             if let subscriptionPeriod {
                 .init(rawValue: subscriptionPeriod.rawValue)
@@ -370,8 +352,7 @@ public actor SubscriptionsService {
         subscriptionAvailabilitiyId: String,
         force: Bool = false,
     ) async -> Result<[Territory], Error> {
-
-        return await cacheService.fetchWithCache(key: "fetchSubscriptionAvailabilitiesAvailableTerritories\(subscriptionAvailabilitiyId)", force: force) {
+        await cacheService.fetchWithCache(key: "fetchSubscriptionAvailabilitiesAvailableTerritories\(subscriptionAvailabilitiyId)", force: force) {
             let request = Resources.v1.subscriptionAvailabilities.id(subscriptionAvailabilitiyId).availableTerritories.get(limit: 200)
             return try await client.send(request).data
         }.map { data in
@@ -383,8 +364,7 @@ public actor SubscriptionsService {
         subscriptionPromotionalOfferId: String,
         force: Bool = false,
     ) async -> Result<[SubscriptionPromotionalOfferPrice], Error> {
-
-        return await cacheService.fetchWithCache(key: "fetchSubscriptionPromotionalOfferPrices\(subscriptionPromotionalOfferId)", force: force) {
+        await cacheService.fetchWithCache(key: "fetchSubscriptionPromotionalOfferPrices\(subscriptionPromotionalOfferId)", force: force) {
             let request = Resources.v1.subscriptionPromotionalOffers.id(subscriptionPromotionalOfferId).prices.get()
             return try await client.send(request)
         }.map { data in
@@ -401,8 +381,6 @@ public actor SubscriptionsService {
         numberOfPeriods: Int,
         subscriptionPromotionalOfferPriceId: String,
     ) async -> Result<SubscriptionPromotionalOffer, Error> {
-
-
         guard let duration: AppStoreAPI.SubscriptionOfferDuration = .init(rawValue: duration.rawValue),
               let offerMode: AppStoreAPI.SubscriptionOfferMode = .init(rawValue: offerMode.rawValue) else { return .failure(NetworkError.invalidURL) }
 
@@ -440,8 +418,6 @@ public actor SubscriptionsService {
         description: String?,
         locale: AppStoreLanguage,
     ) async -> Result<SubscriptionLocalization, Error> {
-
-
         let requestData = SubscriptionLocalizationCreateRequest.Data(
             type: .subscriptionLocalizations,
             attributes: .init(
@@ -473,8 +449,6 @@ public actor SubscriptionsService {
         pricePountId _: String,
         prices: [SubscriptionPricePoint],
     ) async -> Result<Subscription, Error> {
-
-
         let includedItems: [SubscriptionUpdateRequest.IncludedItem] = prices.enumerated().map { index, price in
             let temporaryId = "${newprice-\(index)}"
 
@@ -539,8 +513,6 @@ public actor SubscriptionsService {
         numberOfPeriods: Int,
         territories: [Territory],
     ) async -> Result<Subscription, Error> {
-
-
         guard let duration: AppStoreAPI.SubscriptionOfferDuration = .init(rawValue: duration.rawValue),
               let offerMode: AppStoreAPI.SubscriptionOfferMode = .init(rawValue: offerMode.rawValue)
         else {
@@ -610,7 +582,6 @@ public actor SubscriptionsService {
     }
 
     public func deleteSubscription(subscriptionsId: String) async -> Result<Bool, Error> {
-
         let request = Resources.v1.subscriptions.id(subscriptionsId).delete
         do {
             let _ = try await client.send(request)

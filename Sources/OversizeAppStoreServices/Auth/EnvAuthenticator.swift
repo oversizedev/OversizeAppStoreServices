@@ -7,10 +7,9 @@
 import AppStoreConnect
 import Foundation
 import OversizeCore
-import OversizeServices
 
 public struct EnvAuthenticator: Authenticator {
-    private let storage: SecureStorageService = .init()
+    private let credentialsStorage = AppStoreConnectCredentialsStorage()
     private let configuredAPI: API
     private var jwt: JWT?
     public var api: API {
@@ -31,27 +30,24 @@ public struct EnvAuthenticator: Authenticator {
     }
 
     private func makeJWT() throws -> JWT {
-        guard let keyLabel = UserDefaults.standard.string(forKey: "AppStore.Account") else {
+        guard let accountValue = UserDefaults.standard.string(forKey: "AppStore.Account"),
+              let accountID = UUID(uuidString: accountValue)
+        else {
             Log.error("Get UserDefaults value for 'AppStore.Account'")
             throw Error.missingEnvironmentVariable("AppStore.Account")
         }
 
-        guard let appStoreIssuerID = storage.getPassword(for: "DevConnector-IssuerID-" + keyLabel) else {
-            Log.error("Get Keychain value for IssuerID")
+        guard let credentials = credentialsStorage.credentials(for: accountID) else {
+            Log.error("Get Keychain value for App Store Connect credentials")
             throw Error.missingEnvironmentVariable("AppStore.Key.Default")
         }
 
-        guard let appStoreCertificate = storage.getCredentials(with: "DevConnector-Certificate-" + keyLabel) else {
-            Log.error("Get Keychain value for Certificate")
-            throw Error.missingEnvironmentVariable("AppStore.Key.Default")
-        }
-
-        let privateKey = try JWT.PrivateKey(pemRepresentation: appStoreCertificate.password)
+        let privateKey = try JWT.PrivateKey(pemRepresentation: credentials.privateKey)
 
         return JWT(
             api: configuredAPI,
-            keyID: appStoreCertificate.login,
-            issuerID: appStoreIssuerID,
+            keyID: credentials.keyID,
+            issuerID: credentials.issuerID,
             expiryDuration: 20 * 60,
             privateKey: privateKey,
         )

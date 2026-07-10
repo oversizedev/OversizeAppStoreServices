@@ -18,7 +18,7 @@ public actor AppScreenshotsService {
     private let client: AppStoreConnectClient
 
     public init(authenticator: some AppStoreConnect.Authenticator, cacheService: CacheService = CacheService()) {
-        self.client = AppStoreConnectClient(authenticator: authenticator)
+        client = AppStoreConnectClient(authenticator: authenticator)
         self.cacheService = cacheService
     }
 
@@ -27,8 +27,6 @@ public actor AppScreenshotsService {
         screenshotDisplayType: ScreenshotDisplayType? = nil,
         force: Bool = false,
     ) async -> Result<[AppScreenshotSet], Error> {
-
-
         let cacheKey = "fetchScreenshotSets\(localizationId)\(screenshotDisplayType?.rawValue ?? "")"
 
         return await cacheService.fetchWithCache(key: cacheKey, force: force) {
@@ -48,8 +46,6 @@ public actor AppScreenshotsService {
         localizationId: String,
         screenshotDisplayType: ScreenshotDisplayType,
     ) async -> Result<AppScreenshotSet, Error> {
-
-
         do {
             let request = Resources.v1.appScreenshotSets.post(
                 .init(
@@ -78,8 +74,6 @@ public actor AppScreenshotsService {
     }
 
     public func deleteScreenshotSet(id: String) async -> Result<Void, Error> {
-
-
         do {
             let request = Resources.v1.appScreenshotSets.id(id).delete
             _ = try await client.send(request)
@@ -95,8 +89,6 @@ public actor AppScreenshotsService {
         fileName: String,
         fileSize: Int,
     ) async -> Result<AppScreenshot, Error> {
-
-
         do {
             let request = Resources.v1.appScreenshots.post(
                 .init(
@@ -131,8 +123,6 @@ public actor AppScreenshotsService {
         fileData: Data,
         uploadOperations: [UploadOperation],
     ) async -> Result<Void, Error> {
-
-
         do {
             try await withThrowingTaskGroup(of: Void.self) { group in
                 for operation in uploadOperations {
@@ -153,8 +143,6 @@ public actor AppScreenshotsService {
         screenshotId: String,
         sourceFileChecksum: String,
     ) async -> Result<AppScreenshot, Error> {
-
-
         do {
             let request = Resources.v1.appScreenshots.id(screenshotId)
                 .patch(
@@ -180,8 +168,6 @@ public actor AppScreenshotsService {
     }
 
     public func deleteAppScreenshot(id: String) async -> Result<Void, Error> {
-
-
         do {
             let request = Resources.v1.appScreenshots.id(id).delete
             _ = try await client.send(request)
@@ -196,8 +182,6 @@ public actor AppScreenshotsService {
         screenshotSetId: String,
         screenshotIds: [String],
     ) async -> Result<Void, Error> {
-
-
         do {
             let relationships: [AppStoreAPI.AppScreenshotSetAppScreenshotsLinkagesRequest.Datum] = screenshotIds.map {
                 .init(type: .appScreenshots, id: $0)

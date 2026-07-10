@@ -9,19 +9,18 @@ import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-import OversizeCore
 import Gzip
 import OversizeAppStoreServices
+import OversizeCore
 
 public actor AnalyticsService {
     private let client: AppStoreConnectClient
 
     public init(authenticator: some AppStoreConnect.Authenticator) {
-        self.client = AppStoreConnectClient(authenticator: authenticator)
+        client = AppStoreConnectClient(authenticator: authenticator)
     }
 
     public func fetchAppAnalyticsReportRequests(appId: String) async -> Result<[AnalyticsReportRequest], Error> {
-
         let request = Resources.v1.apps.id(appId).analyticsReportRequests.get()
         do {
             let data = try await client.send(request).data
@@ -32,7 +31,6 @@ public actor AnalyticsService {
     }
 
     public func fetchAppAnalyticsReportRequestsIncludeReports(appId: String) async -> Result<[AnalyticsReportRequest], Error> {
-
         let request = Resources.v1.apps.id(appId).analyticsReportRequests.get(
             include: [.reports],
         )
@@ -45,7 +43,6 @@ public actor AnalyticsService {
     }
 
     public func fetchAnalyticsReportRequestReport(analyticsReportRequestsId: String) async -> Result<[AnalyticsReport], Error> {
-
         let request = Resources.v1.analyticsReportRequests.id(analyticsReportRequestsId).reports.get()
         do {
             let data = try await client.send(request).data
@@ -56,7 +53,6 @@ public actor AnalyticsService {
     }
 
     public func fetchAnalyticsReport(analyticsReportId: String) async -> Result<AnalyticsReport, Error> {
-
         let request = Resources.v1.analyticsReports.id(analyticsReportId).get()
         do {
             let data = try await client.send(request).data
@@ -70,7 +66,6 @@ public actor AnalyticsService {
     }
 
     public func fetchAnalyticsReportInstances(reportId: String) async -> Result<[AppStoreAPI.AnalyticsReportInstance], Error> {
-
         print("Fetching report instances for reportId: \(reportId)")
         let request = Resources.v1.analyticsReports.id(reportId).instances.get(
             filterGranularity: [.daily],
@@ -96,7 +91,6 @@ public actor AnalyticsService {
     }
 
     public func fetchAnalyticsReportSegments(instanceId: String) async -> Result<[AppStoreAPI.AnalyticsReportSegment], Error> {
-
         print("Fetching segments for instanceId: \(instanceId)")
         let request = Resources.v1.analyticsReportInstances.id(instanceId).segments.get(limit: 200)
         do {
@@ -193,7 +187,7 @@ public actor AnalyticsService {
                     let allMetrics = try await withThrowingTaskGroup(of: [SearchTermMetric].self) { group in
                         for url in segmentURLs {
                             group.addTask { [self] in
-                                try await self.downloadAndParseSearchTerms(segmentURL: url, processingDate: processingDate).get()
+                                try await downloadAndParseSearchTerms(segmentURL: url, processingDate: processingDate).get()
                             }
                         }
                         var merged: [SearchTermMetric] = []

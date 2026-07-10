@@ -13,12 +13,12 @@ public actor AppsService {
     private let client: AppStoreConnectClient
 
     public init(authenticator: some AppStoreConnect.Authenticator, cacheService: CacheService = CacheService()) {
-        self.client = AppStoreConnectClient(authenticator: authenticator)
+        client = AppStoreConnectClient(authenticator: authenticator)
         self.cacheService = cacheService
     }
 
     public func fetchApp(id: String, force: Bool = false) async -> Result<App, Error> {
-        return await cacheService.fetchWithCache(key: "fetchApp\(id)", force: force) {
+        await cacheService.fetchWithCache(key: "fetchApp\(id)", force: force) {
             let request = Resources.v1.apps.id(id).get()
             return try await client.send(request)
         }.flatMap {
@@ -30,7 +30,7 @@ public actor AppsService {
     }
 
     public func fetchAppIncludeBuildsAndAppStoreVersions(id: String, force: Bool = false) async -> Result<App, Error> {
-        return await cacheService.fetchWithCache(key: "fetchAppIncludeBuildsAndAppStoreVersions\(id)", force: force) {
+        await cacheService.fetchWithCache(key: "fetchAppIncludeBuildsAndAppStoreVersions\(id)", force: force) {
             let request = Resources.v1.apps.id(id).get(
                 include: [
                     .builds,
@@ -66,7 +66,6 @@ public actor AppsService {
     }
 
     public func fetchApps() async -> Result<[App], Error> {
-
         let request = Resources.v1.apps.get()
         do {
             let response = try await client.send(request)
@@ -78,8 +77,7 @@ public actor AppsService {
     }
 
     public func fetchAppsIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions(forse: Bool = false) async -> Result<[App], Error> {
-
-        return await cacheService.fetchWithCache(key: "fetchAppsIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions", force: forse) {
+        await cacheService.fetchWithCache(key: "fetchAppsIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions", force: forse) {
             let request = Resources.v1.apps.get(
                 include: [
                     .builds,
@@ -92,8 +90,7 @@ public actor AppsService {
     }
 
     public func fetchAppsIncludeActualAppStoreVersionsAndBuilds(limitAppStoreVersions: Int? = nil, forse: Bool = false) async -> Result<[App], Error> {
-
-        return await cacheService.fetchWithCache(key: "fetchAppsIncludeActualAppStoreVersionsAndBuilds", force: forse) {
+        await cacheService.fetchWithCache(key: "fetchAppsIncludeActualAppStoreVersionsAndBuilds", force: forse) {
             let request = Resources.v1.apps.get(
                 filterAppStoreVersionsAppStoreState: [
                     .accepted,
@@ -132,7 +129,6 @@ public actor AppsService {
         identifier: String,
         seedID: String? = nil,
     ) async -> Result<Bool, Error> {
-
         guard let bundleIDPlatform: AppStoreAPI.BundleIDPlatform = .init(rawValue: platform.rawValue) else { return .failure(NetworkError.invalidURL) }
 
         let requestData: BundleIDCreateRequest.Data = .init(
@@ -158,8 +154,6 @@ public actor AppsService {
         appId: String,
         locale: AppStoreLanguage,
     ) async -> Result<App, Error> {
-
-
         let requestData: AppUpdateRequest.Data = .init(
             type: .apps,
             id: appId,

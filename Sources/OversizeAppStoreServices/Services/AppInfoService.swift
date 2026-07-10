@@ -13,13 +13,12 @@ public actor AppInfoService {
     private let client: AppStoreConnectClient
 
     public init(authenticator: some AppStoreConnect.Authenticator, cacheService: CacheService = CacheService()) {
-        self.client = AppStoreConnectClient(authenticator: authenticator)
+        client = AppStoreConnectClient(authenticator: authenticator)
         self.cacheService = cacheService
     }
 
     public func fetchAppInfos(appId: String, force: Bool = false) async -> Result<[AppInfo], Error> {
-
-        return await cacheService.fetchWithCache(key: "fetchAppInfos\(appId)", force: force) {
+        await cacheService.fetchWithCache(key: "fetchAppInfos\(appId)", force: force) {
             let request = Resources.v1.apps.id(appId).appInfos.get()
             return try await client.send(request).data
         }.map { data in
@@ -28,7 +27,6 @@ public actor AppInfoService {
     }
 
     public func fetchAppInfoIncludedCategory(appId: String) async -> Result<[AppInfo], Error> {
-
         let request = Resources.v1.apps.id(appId).appInfos.get(include: [.primaryCategory, .secondaryCategory, .ageRatingDeclaration])
         do {
             let responce = try await client.send(request)
@@ -41,8 +39,7 @@ public actor AppInfoService {
     }
 
     public func fetchAppInfoLocalizations(appInfoId: String, force: Bool = false) async -> Result<[AppInfoLocalization], Error> {
-
-        return await cacheService.fetchWithCache(key: "fetchAppInfoLocalizations\(appInfoId)", force: force) {
+        await cacheService.fetchWithCache(key: "fetchAppInfoLocalizations\(appInfoId)", force: force) {
             let request = Resources.v1.appInfos.id(appInfoId).appInfoLocalizations.get()
             return try await client.send(request).data
         }.map { data in
@@ -51,7 +48,6 @@ public actor AppInfoService {
     }
 
     public func fetchAppInfoLocalization(appInfoId: String, locale: AppStoreLanguage) async -> Result<AppInfoLocalization, Error> {
-
         let request = Resources.v1.appInfos.id(appInfoId).appInfoLocalizations.get(
             filterLocale: [locale.rawValue],
         )
@@ -86,8 +82,6 @@ public actor AppInfoService {
         violenceRealistic: AgeRatingDeclarationUpdateRequest.Data.Attributes.ViolenceRealistic?,
         koreaAgeRatingOverride: AgeRatingDeclarationUpdateRequest.Data.Attributes.KoreaAgeRatingOverride?,
     ) async -> Result<AgeRatingDeclaration, Error> {
-
-
         let requestAttributes: AgeRatingDeclarationUpdateRequest.Data.Attributes = .init(
             alcoholTobaccoOrDrugUseOrReferences: alcoholTobaccoOrDrugUseOrReferences,
             contests: contests,
@@ -137,8 +131,6 @@ public actor AppInfoService {
         privacyChoicesURL: URL? = nil,
         privacyPolicyText: String? = nil,
     ) async -> Result<AppInfoLocalization, Error> {
-
-
         let requestAttributes: AppInfoLocalizationUpdateRequest.Data.Attributes = .init(
             name: name,
             subtitle: subtitle,
@@ -177,8 +169,6 @@ public actor AppInfoService {
         privacyChoicesURL: String? = nil,
         privacyPolicyText: String? = nil,
     ) async -> Result<AppInfoLocalization, Error> {
-
-
         let requestAttributes: AppInfoLocalizationCreateRequest.Data.Attributes = .init(
             locale: language.rawValue,
             name: name,
