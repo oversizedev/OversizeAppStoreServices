@@ -205,7 +205,7 @@ public actor SubscriptionsService {
     ) async -> Result<[SubscriptionPricePoint], Error> {
         let filterTerritorIds: [String]? = filterTerritory.map { $0.compactMap { $0.id } }
 
-        return await cacheService.fetchWithCache(key: "fetchSubscriptionPricePoints\(subscriptionId)\(filterTerritorIds?.joined(separator: "-"))", force: force) {
+        return await cacheService.fetchWithCache(key: "fetchSubscriptionPricePoints\(subscriptionId)\(filterTerritorIds?.joined(separator: "-") ?? "")", force: force) {
             let request = Resources.v1.subscriptions.id(subscriptionId).pricePoints.get(filterTerritory: filterTerritorIds, limit: 2000, include: [.territory])
             return try await client.send(request)
         }.map { data in
@@ -253,7 +253,7 @@ public actor SubscriptionsService {
     ) async -> Result<[SubscriptionIntroductoryOffer], Error> {
         let filterTerritoryIds: [String]? = filterTerritory.map { $0.compactMap { $0.id } }
 
-        return await cacheService.fetchWithCache(key: "fetchSubscriptionIntroductoryOffers\(subscriptionId)\(filterTerritoryIds?.joined(separator: "-"))", force: force) {
+        return await cacheService.fetchWithCache(key: "fetchSubscriptionIntroductoryOffers\(subscriptionId)\(filterTerritoryIds?.joined(separator: "-") ?? "")", force: force) {
             let request = Resources.v1.subscriptions.id(subscriptionId).introductoryOffers.get(
                 filterTerritory: filterTerritoryIds,
                 limit: 200,
@@ -292,7 +292,7 @@ public actor SubscriptionsService {
     ) async -> Result<[SubscriptionPrice], Error> {
         let filterTerritoryIds: [String]? = filterTerritory.map { $0.compactMap { $0.id } }
 
-        return await cacheService.fetchWithCache(key: "fetchSubscriptionPrices\(subscriptionId)\(filterTerritoryIds?.joined(separator: "-"))", force: force) {
+        return await cacheService.fetchWithCache(key: "fetchSubscriptionPrices\(subscriptionId)\(filterTerritoryIds?.joined(separator: "-") ?? "")", force: force) {
             let request = Resources.v1.subscriptions.id(subscriptionId).prices.get(
                 filterTerritory: filterTerritoryIds,
                 limit: 200,

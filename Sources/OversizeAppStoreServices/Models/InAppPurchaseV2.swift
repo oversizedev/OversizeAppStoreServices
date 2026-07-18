@@ -49,12 +49,16 @@ public struct InAppPurchaseV2: Identifiable, Sendable {
         )
 
         self.included = .init(
-            inAppPurchaseLocalizations: included?.compactMap {
-                if case let .inAppPurchaseLocalization(value) = $0 { return .init(schema: value) }
+            inAppPurchaseLocalizations: included?.compactMap { (item: InAppPurchaseV2Response.IncludedItem) -> InAppPurchaseLocalization? in
+                if case let .inAppPurchaseLocalization(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             },
-            inAppPurchasePricePoints: included?.compactMap {
-                if case let .inAppPurchasePricePoint(value) = $0 { return .init(schema: value) }
+            inAppPurchasePricePoints: included?.compactMap { (item: InAppPurchaseV2Response.IncludedItem) -> InAppPurchasePricePoint? in
+                if case let .inAppPurchasePricePoint(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             },
             inAppPurchaseContent: included?.compactMap { (item: InAppPurchaseV2Response.IncludedItem) -> InAppPurchaseContent? in
@@ -81,12 +85,16 @@ public struct InAppPurchaseV2: Identifiable, Sendable {
                 }
                 return nil
             }.first,
-            inAppPurchaseAvailability: included?.compactMap {
-                if case let .inAppPurchaseAvailability(value) = $0 { return value.attributes?.isAvailableInNewTerritories }
+            inAppPurchaseAvailability: included?.compactMap { (item: InAppPurchaseV2Response.IncludedItem) -> Bool? in
+                if case let .inAppPurchaseAvailability(value) = item {
+                    return value.attributes?.isAvailableInNewTerritories
+                }
                 return nil
             }.first,
-            inAppPurchaseImages: included?.compactMap {
-                if case let .inAppPurchaseImage(value) = $0 { return .init(schema: value) }
+            inAppPurchaseImages: included?.compactMap { (item: InAppPurchaseV2Response.IncludedItem) -> InAppPurchaseImage? in
+                if case let .inAppPurchaseImage(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             },
         )

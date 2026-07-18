@@ -11,11 +11,13 @@ public struct AppStoreConnectCredentials: Codable, Sendable, Equatable {
     public let issuerID: String
     public let keyID: String
     public let privateKey: String
+    public let vendorNumber: String?
 
-    public init(issuerID: String, keyID: String, privateKey: String) {
+    public init(issuerID: String, keyID: String, privateKey: String, vendorNumber: String? = nil) {
         self.issuerID = issuerID
         self.keyID = keyID
         self.privateKey = privateKey
+        self.vendorNumber = vendorNumber
     }
 }
 
@@ -66,6 +68,13 @@ public struct AppStoreConnectCredentialsStorage: Sendable {
             return nil
         }
         return try? JSONDecoder().decode(AppStoreConnectCredentials.self, from: data)
+    }
+
+    public func currentAccountCredentials() -> AppStoreConnectCredentials? {
+        guard let accountValue = UserDefaults.standard.string(forKey: "AppStore.Account"),
+              let accountID = UUID(uuidString: accountValue)
+        else { return nil }
+        return credentials(for: accountID)
     }
 
     public func delete(for accountID: UUID) {

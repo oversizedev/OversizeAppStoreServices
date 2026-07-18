@@ -199,17 +199,23 @@ public struct Subscription: Sendable, Identifiable {
 
         public init?(included: [SubscriptionResponse.IncludedItem]?) {
             subscriptionLocalizations = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> SubscriptionLocalization? in
-                if case let .subscriptionLocalization(value) = item { return .init(schema: value) }
+                if case let .subscriptionLocalization(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             }
 
             subscriptionPrices = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> SubscriptionPrice? in
-                if case let .subscriptionPrice(value) = item { return .init(schema: value) }
+                if case let .subscriptionPrice(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             }
 
             subscriptionGroup = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> SubscriptionGroup? in
-                if case let .subscriptionGroup(value) = item { return .init(schema: value) }
+                if case let .subscriptionGroup(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             }.first
 
@@ -221,37 +227,51 @@ public struct Subscription: Sendable, Identifiable {
             }.first
 
             promotedPurchase = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> PromotedPurchase? in
-                if case let .promotedPurchase(value) = item { return .init(schema: value) }
+                if case let .promotedPurchase(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             }.first
 
             subscriptionOfferCodes = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> SubscriptionOfferCode? in
-                if case let .subscriptionOfferCode(value) = item { return .init(schema: value) }
+                if case let .subscriptionOfferCode(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             }
 
             subscriptionAvailability = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> Bool? in
-                if case let .subscriptionAvailability(value) = item { return value.attributes?.isAvailableInNewTerritories }
+                if case let .subscriptionAvailability(value) = item {
+                    return value.attributes?.isAvailableInNewTerritories
+                }
                 return nil
             }.first
 
             introductoryOffers = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> SubscriptionIntroductoryOffer? in
-                if case let .subscriptionIntroductoryOffer(value) = item { return .init(schema: value) }
+                if case let .subscriptionIntroductoryOffer(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             }
 
             promotionalOffers = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> SubscriptionPromotionalOffer? in
-                if case let .subscriptionPromotionalOffer(value) = item { return .init(schema: value) }
+                if case let .subscriptionPromotionalOffer(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             }
 
             winBackOffers = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> WinBackOffer? in
-                if case let .winBackOffer(value) = item { return .init(schema: value) }
+                if case let .winBackOffer(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             }
 
             subscriptionImages = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> SubscriptionImage? in
-                if case let .subscriptionImage(value) = item { return .init(schema: value) }
+                if case let .subscriptionImage(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             }
         }

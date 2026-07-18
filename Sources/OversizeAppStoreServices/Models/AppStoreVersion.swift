@@ -94,7 +94,9 @@ public struct AppStoreVersion: Sendable, Identifiable {
             case let .app(app):
                 includedApp = app
             case let .build(build):
-                if buildId == build.id { includedBuild = build }
+                if buildId == build.id {
+                    includedBuild = build
+                }
             case let .appStoreVersionLocalization(localization):
                 if localizationIds.contains(localization.id) {
                     includedAppStoreVersionLocalizations.append(localization)

@@ -15,10 +15,14 @@ import OversizeCore
 
 public actor AnalyticsService {
     private let client: AppStoreConnectClient
+    private let instanceDataCache = CacheService(expiration: 60 * 60 * 24 * 30)
+    private static let maxConcurrentDownloads = 4
 
     public init(authenticator: some AppStoreConnect.Authenticator) {
         client = AppStoreConnectClient(authenticator: authenticator)
     }
+
+    // MARK: - Report Requests
 
     public func fetchAppAnalyticsReportRequests(appId: String) async -> Result<[AnalyticsReportRequest], Error> {
         let request = Resources.v1.apps.id(appId).analyticsReportRequests.get()
@@ -26,7 +30,8 @@ public actor AnalyticsService {
             let data = try await client.send(request).data
             return .success(data.compactMap { .init(schema: $0) })
         } catch {
-            return .failure(NetworkError.noResponse)
+            Log.error("Fetch analytics report requests failed", error: error)
+            return .failure(error.asNetworkError)
         }
     }
 
@@ -38,18 +43,79 @@ public actor AnalyticsService {
             let result = try await client.send(request)
             return .success(result.data.compactMap { .init(schema: $0, included: result.included) })
         } catch {
-            return .failure(NetworkError.noResponse)
+            Log.error("Fetch analytics report requests with reports failed", error: error)
+            return .failure(error.asNetworkError)
+        }
+    }
+
+    public func postAppAnalyticsReportRequests(appId: String) async -> Result<AnalyticsReportRequest, Error> {
+        let requestData: AnalyticsReportRequestCreateRequest.Data = .init(
+            type: .analyticsReportRequests,
+            attributes: .init(accessType: .ongoing),
+            relationships: .init(app: .init(data: .init(type: .apps, id: appId))),
+        )
+        let request = Resources.v1.analyticsReportRequests.post(.init(data: requestData))
+        do {
+            let data = try await client.send(request).data
+            guard let analyticsReportRequest: AnalyticsReportRequest = .init(schema: data) else {
+                return .failure(NetworkError.decode)
+            }
+            Log.info("Created ONGOING analytics report request: \(analyticsReportRequest.id)")
+            return .success(analyticsReportRequest)
+        } catch {
+            Log.error("Create analytics report request failed", error: error)
+            return .failure(error.asNetworkError)
+        }
+    }
+
+    public func ensureOngoingReportRequest(appId: String) async -> Result<AnalyticsReportRequest, Error> {
+        let requestsResult = await fetchAppAnalyticsReportRequests(appId: appId)
+        switch requestsResult {
+        case let .failure(error):
+            return .failure(error)
+        case let .success(requests):
+            if let ongoing = requests.first(where: { $0.accessType == .ongoing && $0.isStoppedDueToInactivity != true }) {
+                return .success(ongoing)
+            }
+            Log.debug("No active ONGOING report request, creating new one")
+            return await postAppAnalyticsReportRequests(appId: appId)
+        }
+    }
+
+    // MARK: - Reports
+
+    public func fetchReports(
+        requestId: String,
+        category: AnalyticsReport.Category? = nil,
+        name: String? = nil,
+    ) async -> Result<[AnalyticsReport], Error> {
+        let filterCategory = category.flatMap {
+            Resources.V1.AnalyticsReportRequests.WithID.Reports.FilterCategory(rawValue: $0.rawValue)
+        }
+        let request = Resources.v1.analyticsReportRequests.id(requestId).reports.get(
+            filterName: name.map { [$0] },
+            filterCategory: filterCategory.map { [$0] },
+            limit: 200,
+        )
+        do {
+            let response = try await client.send(request)
+            var allReports = response.data
+            var nextURL: URL? = response.links.next
+            while let next = nextURL {
+                let pageRequest = Request<AppStoreAPI.AnalyticsReportsResponse>.get(next)
+                let pageResponse = try await client.send(pageRequest)
+                allReports.append(contentsOf: pageResponse.data)
+                nextURL = pageResponse.links.next
+            }
+            return .success(allReports.compactMap { AnalyticsReport(schema: $0) })
+        } catch {
+            Log.error("Fetch analytics reports failed", error: error)
+            return .failure(error.asNetworkError)
         }
     }
 
     public func fetchAnalyticsReportRequestReport(analyticsReportRequestsId: String) async -> Result<[AnalyticsReport], Error> {
-        let request = Resources.v1.analyticsReportRequests.id(analyticsReportRequestsId).reports.get()
-        do {
-            let data = try await client.send(request).data
-            return .success(data.compactMap { .init(schema: $0) })
-        } catch {
-            return .failure(NetworkError.noResponse)
-        }
+        await fetchReports(requestId: analyticsReportRequestsId)
     }
 
     public func fetchAnalyticsReport(analyticsReportId: String) async -> Result<AnalyticsReport, Error> {
@@ -61,14 +127,24 @@ public actor AnalyticsService {
             }
             return .success(analyticsReport)
         } catch {
-            return .failure(NetworkError.noResponse)
+            Log.error("Fetch analytics report failed", error: error)
+            return .failure(error.asNetworkError)
         }
     }
 
-    public func fetchAnalyticsReportInstances(reportId: String) async -> Result<[AppStoreAPI.AnalyticsReportInstance], Error> {
-        print("Fetching report instances for reportId: \(reportId)")
+    // MARK: - Instances
+
+    public func fetchReportInstances(
+        reportId: String,
+        granularity: AnalyticsReportInstance.Granularity? = .daily,
+        processingDates: [String]? = nil,
+    ) async -> Result<[AnalyticsReportInstance], Error> {
+        let filterGranularity = granularity.flatMap {
+            Resources.V1.AnalyticsReports.WithID.Instances.FilterGranularity(rawValue: $0.rawValue)
+        }
         let request = Resources.v1.analyticsReports.id(reportId).instances.get(
-            filterGranularity: [.daily],
+            filterGranularity: filterGranularity.map { [$0] },
+            filterProcessingDate: processingDates,
             limit: 200,
         )
         do {
@@ -76,200 +152,240 @@ public actor AnalyticsService {
             var allInstances = response.data
             var nextURL: URL? = response.links.next
             while let next = nextURL {
-                print("Fetching next page of report instances")
                 let pageRequest = Request<AppStoreAPI.AnalyticsReportInstancesResponse>.get(next)
                 let pageResponse = try await client.send(pageRequest)
                 allInstances.append(contentsOf: pageResponse.data)
                 nextURL = pageResponse.links.next
             }
-            print("Fetched \(allInstances.count) report instances")
-            return .success(allInstances)
+            return .success(allInstances.compactMap { AnalyticsReportInstance(schema: $0) })
         } catch {
-            print("Failed to fetch report instances: \(error)")
-            return .failure(NetworkError.noResponse)
+            Log.error("Fetch report instances failed", error: error)
+            return .failure(error.asNetworkError)
         }
     }
 
-    public func fetchAnalyticsReportSegments(instanceId: String) async -> Result<[AppStoreAPI.AnalyticsReportSegment], Error> {
-        print("Fetching segments for instanceId: \(instanceId)")
-        let request = Resources.v1.analyticsReportInstances.id(instanceId).segments.get(limit: 200)
-        do {
-            let response = try await client.send(request)
-            var allSegments = response.data
-            var nextURL: URL? = response.links.next
-            while let next = nextURL {
-                print("Fetching next page of segments")
-                let pageRequest = Request<AppStoreAPI.AnalyticsReportSegmentsResponse>.get(next)
-                let pageResponse = try await client.send(pageRequest)
-                allSegments.append(contentsOf: pageResponse.data)
-                nextURL = pageResponse.links.next
-            }
-            print("Fetched \(allSegments.count) segments")
-            return .success(allSegments)
-        } catch {
-            print("Failed to fetch segments: \(error)")
-            return .failure(NetworkError.noResponse)
+    // MARK: - Report Data
+
+    public func fetchReportData(
+        instance: AnalyticsReportInstance,
+        force: Bool = false,
+    ) async -> Result<AnalyticsReportData, Error> {
+        await instanceDataCache.fetchWithCache(
+            key: "analytics-report-data-\(instance.id)",
+            force: force,
+        ) { [self] in
+            try await downloadReportData(instance: instance)
         }
     }
+
+    private func downloadReportData(instance: AnalyticsReportInstance) async throws -> AnalyticsReportData {
+        let segmentURLs = try await fetchSegmentURLs(instanceId: instance.id)
+        let emptyData = AnalyticsReportData(headers: [], rows: [], processingDate: instance.processingDate)
+        guard !segmentURLs.isEmpty else { return emptyData }
+
+        let processingDate = instance.processingDate
+        let tables = try await withThrowingTaskGroup(of: AnalyticsReportData?.self) { group in
+            var results: [AnalyticsReportData] = []
+            var nextIndex = 0
+            while nextIndex < segmentURLs.count, nextIndex < Self.maxConcurrentDownloads {
+                let url = segmentURLs[nextIndex]
+                group.addTask { try await Self.downloadTable(segmentURL: url, processingDate: processingDate) }
+                nextIndex += 1
+            }
+            while let table = try await group.next() {
+                if let table {
+                    results.append(table)
+                }
+                if nextIndex < segmentURLs.count {
+                    let url = segmentURLs[nextIndex]
+                    group.addTask { try await Self.downloadTable(segmentURL: url, processingDate: processingDate) }
+                    nextIndex += 1
+                }
+            }
+            return results
+        }
+
+        guard var merged = tables.first else { return emptyData }
+        for table in tables.dropFirst() {
+            merged = merged.merged(with: table)
+        }
+        Log.info("Loaded report data for instance \(instance.id): \(merged.rows.count) rows")
+        return merged
+    }
+
+    private func fetchSegmentURLs(instanceId: String) async throws -> [URL] {
+        let request = Resources.v1.analyticsReportInstances.id(instanceId).segments.get(limit: 200)
+        let response = try await client.send(request)
+        var allSegments = response.data
+        var nextURL: URL? = response.links.next
+        while let next = nextURL {
+            let pageRequest = Request<AppStoreAPI.AnalyticsReportSegmentsResponse>.get(next)
+            let pageResponse = try await client.send(pageRequest)
+            allSegments.append(contentsOf: pageResponse.data)
+            nextURL = pageResponse.links.next
+        }
+        return allSegments.compactMap { $0.attributes?.url }
+    }
+
+    private static func downloadTable(segmentURL: URL, processingDate: String) async throws -> AnalyticsReportData? {
+        let (data, response) = try await URLSession.shared.data(from: segmentURL)
+        if let http = response as? HTTPURLResponse, !(200 ..< 300).contains(http.statusCode) {
+            throw NetworkError.unexpectedStatusCode
+        }
+        let decompressed: Data = data.isGzipped ? try data.gunzipped() : data
+        return AnalyticsTabularParser.parse(data: decompressed, processingDate: processingDate)
+    }
+
+    // MARK: - Dashboard Metrics
+
+    public func fetchDailyMetricSeries(
+        appId: String,
+        metric: DashboardMetric,
+        days: Int = 30,
+        force: Bool = false,
+    ) async -> Result<[AnalyticsMetricPoint], Error> {
+        let requestResult = await ensureOngoingReportRequest(appId: appId)
+        guard case let .success(reportRequest) = requestResult else {
+            return .failure(requestResult.failureError ?? NetworkError.noResponse)
+        }
+
+        let reportsResult = await fetchReports(requestId: reportRequest.id, category: metric.category)
+        guard case let .success(reports) = reportsResult else {
+            return .failure(reportsResult.failureError ?? NetworkError.noResponse)
+        }
+        guard let report = reports.pickReport(matching: metric.reportNameCandidates) else {
+            Log.warning("No report matched \(metric.reportNameCandidates) in category \(metric.category)")
+            return .success([])
+        }
+
+        let instancesResult = await fetchReportInstances(reportId: report.id, granularity: .daily)
+        guard case let .success(allInstances) = instancesResult else {
+            return .failure(instancesResult.failureError ?? NetworkError.noResponse)
+        }
+
+        let cutoffDate = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
+        let cutoff = AnalyticsReportInstance.dateFormatter.string(from: cutoffDate)
+        let instances = allInstances
+            .filter { $0.processingDate >= cutoff }
+            .sorted { $0.processingDate < $1.processingDate }
+        guard !instances.isEmpty else { return .success([]) }
+
+        do {
+            let tables = try await withThrowingTaskGroup(of: AnalyticsReportData.self) { group in
+                var results: [AnalyticsReportData] = []
+                var nextIndex = 0
+                while nextIndex < instances.count, nextIndex < Self.maxConcurrentDownloads {
+                    let instance = instances[nextIndex]
+                    group.addTask { [self] in
+                        try await fetchReportData(instance: instance, force: force).get()
+                    }
+                    nextIndex += 1
+                }
+                while let table = try await group.next() {
+                    results.append(table)
+                    if nextIndex < instances.count {
+                        let instance = instances[nextIndex]
+                        group.addTask { [self] in
+                            try await fetchReportData(instance: instance, force: force).get()
+                        }
+                        nextIndex += 1
+                    }
+                }
+                return results
+            }
+            let points = Self.aggregate(tables: tables, metric: metric, cutoff: cutoff)
+            return .success(points)
+        } catch {
+            Log.error("Fetch metric series failed for \(metric.rawValue)", error: error)
+            return .failure(error.asNetworkError)
+        }
+    }
+
+    private static func aggregate(
+        tables: [AnalyticsReportData],
+        metric: DashboardMetric,
+        cutoff: String,
+    ) -> [AnalyticsMetricPoint] {
+        var totals: [String: Double] = [:]
+        for table in tables {
+            guard let valueIndex = table.columnIndex(matching: metric.valueColumnCandidates) else { continue }
+            let dateIndex = table.dateColumnIndex
+            let filterIndex = metric.rowFilter.flatMap { table.columnIndex(matching: $0.columnCandidates) }
+            if let rowFilter = metric.rowFilter, filterIndex == nil {
+                Log.warning("Filter column \(rowFilter.columnCandidates) not found for \(metric.rawValue), skipping table")
+                continue
+            }
+            for row in table.rows {
+                if let rowFilter = metric.rowFilter, let filterIndex {
+                    let filterValue = table.value(row: row, columnIndex: filterIndex) ?? ""
+                    guard rowFilter.allowedValues.contains(where: { $0.caseInsensitiveCompare(filterValue) == .orderedSame }) else {
+                        continue
+                    }
+                }
+                guard let value = table.numericValue(row: row, columnIndex: valueIndex) else { continue }
+                let dateString = dateIndex.flatMap { table.value(row: row, columnIndex: $0) } ?? table.processingDate
+                guard dateString >= cutoff else { continue }
+                totals[dateString, default: 0] += value
+            }
+        }
+        return totals
+            .compactMap { dateString, value -> AnalyticsMetricPoint? in
+                guard let date = AnalyticsReportInstance.dateFormatter.date(from: dateString) else { return nil }
+                return AnalyticsMetricPoint(date: date, value: value)
+            }
+            .sorted { $0.date < $1.date }
+    }
+
+    // MARK: - Search Terms
 
     public func fetchSearchTermMetrics(appId: String) async -> Result<[SearchTermMetric], Error> {
-        print("Fetching search term metrics for appId: \(appId)")
-
-        let requestsResult = await fetchAppAnalyticsReportRequestsIncludeReports(appId: appId)
-        guard case let .success(reportRequests) = requestsResult else {
-            print("Failed to fetch analytics report requests")
-            return .failure(NetworkError.noResponse)
+        let requestResult = await ensureOngoingReportRequest(appId: appId)
+        guard case let .success(reportRequest) = requestResult else {
+            return .failure(requestResult.failureError ?? NetworkError.noResponse)
         }
 
-        let ongoingRequest = reportRequests.first { $0.accessType == .ongoing && $0.isStoppedDueToInactivity != true }
-
-        let analyticsReportRequest: AnalyticsReportRequest
-        if let existing = ongoingRequest {
-            print("Using existing ONGOING report request: \(existing.id)")
-            analyticsReportRequest = existing
-        } else {
-            print("No ONGOING report request found, creating new one")
-            let createResult = await postAppAnalyticsReportRequests(appId: appId)
-            guard case let .success(created) = createResult else {
-                print("Failed to create analytics report request")
-                return .failure(NetworkError.noResponse)
-            }
-            print("Created new report request: \(created.id). Data will be available next day.")
-            analyticsReportRequest = created
-        }
-
-        let reportsResult = await fetchAnalyticsReportRequestReport(analyticsReportRequestsId: analyticsReportRequest.id)
+        let reportsResult = await fetchReports(requestId: reportRequest.id, category: .appStoreEngagement)
         guard case let .success(reports) = reportsResult else {
-            print("Failed to fetch reports for request: \(analyticsReportRequest.id)")
-            return .failure(NetworkError.noResponse)
+            return .failure(reportsResult.failureError ?? NetworkError.noResponse)
         }
-        print("Found \(reports.count) reports, filtering for APP_STORE_ENGAGEMENT")
-
-        let engagementReports = reports.filter { $0.category == .appStoreEngagement }
-        print("Available engagement reports: \(engagementReports.map(\.name).joined(separator: ", "))")
-        guard let searchReport = engagementReports.pickSearchTermReport() else {
-            print("No APP_STORE_ENGAGEMENT report found")
+        guard let searchReport = reports.pickSearchTermReport() else {
+            Log.warning("No APP_STORE_ENGAGEMENT report found")
             return .success([])
         }
-        print("Using report: \"\(searchReport.name)\" (id: \(searchReport.id))")
 
-        let instancesResult = await fetchAnalyticsReportInstances(reportId: searchReport.id)
+        let instancesResult = await fetchReportInstances(reportId: searchReport.id, granularity: .daily)
         switch instancesResult {
         case let .failure(error):
-            print("Failed to fetch instances: \(error)")
             return .failure(error)
         case let .success(instances) where instances.isEmpty:
-            print("No report instances available yet — report data not ready")
+            Log.debug("No report instances available yet — report data not ready")
             return .success([])
         case let .success(instances):
-            let latestInstance = instances
-                .compactMap { inst -> (AppStoreAPI.AnalyticsReportInstance, String)? in
-                    guard let date = inst.attributes?.processingDate else { return nil }
-                    return (inst, date)
-                }
-                .max(by: { $0.1 < $1.1 })
-                .map(\.0) ?? instances[0]
-            print("Selected latest instance: \(latestInstance.id), date: \(latestInstance.attributes?.processingDate ?? "unknown")")
-
-            let segmentsResult = await fetchAnalyticsReportSegments(instanceId: latestInstance.id)
-            switch segmentsResult {
-            case let .failure(error):
-                print("Failed to fetch segments: \(error)")
-                return .failure(error)
-            case let .success(segments) where segments.isEmpty:
-                print("No segments available for instance \(latestInstance.id)")
+            guard let latestInstance = instances.max(by: { $0.processingDate < $1.processingDate }) else {
                 return .success([])
-            case let .success(segments):
-                let processingDate = latestInstance.attributes?.processingDate ?? ""
-                let segmentURLs = segments.compactMap { $0.attributes?.url }
-                print("Downloading \(segmentURLs.count) segment(s) concurrently for date: \(processingDate)")
-                do {
-                    let allMetrics = try await withThrowingTaskGroup(of: [SearchTermMetric].self) { group in
-                        for url in segmentURLs {
-                            group.addTask { [self] in
-                                try await downloadAndParseSearchTerms(segmentURL: url, processingDate: processingDate).get()
-                            }
-                        }
-                        var merged: [SearchTermMetric] = []
-                        for try await metrics in group {
-                            merged.append(contentsOf: metrics)
-                        }
-                        return merged
+            }
+            let dataResult = await fetchReportData(instance: latestInstance)
+            switch dataResult {
+            case let .failure(error):
+                return .failure(error)
+            case let .success(table):
+                let metrics = SearchTermParser.metrics(from: table)
+                var accumulated: [String: SearchTermMetric] = [:]
+                for metric in metrics {
+                    if let existing = accumulated[metric.searchTerm] {
+                        accumulated[metric.searchTerm] = SearchTermMetric(
+                            searchTerm: metric.searchTerm,
+                            impressions: existing.impressions + metric.impressions,
+                            downloads: existing.downloads + metric.downloads,
+                            processingDate: latestInstance.processingDate,
+                        )
+                    } else {
+                        accumulated[metric.searchTerm] = metric
                     }
-                    var accumulated: [String: SearchTermMetric] = [:]
-                    for metric in allMetrics {
-                        if let existing = accumulated[metric.searchTerm] {
-                            accumulated[metric.searchTerm] = SearchTermMetric(
-                                searchTerm: metric.searchTerm,
-                                impressions: existing.impressions + metric.impressions,
-                                downloads: existing.downloads + metric.downloads,
-                                processingDate: processingDate,
-                            )
-                        } else {
-                            accumulated[metric.searchTerm] = metric
-                        }
-                    }
-                    print("Search term metrics loaded: \(accumulated.count) unique terms")
-                    return .success(Array(accumulated.values))
-                } catch {
-                    return .failure(error)
                 }
+                Log.info("Search term metrics loaded: \(accumulated.count) unique terms")
+                return .success(Array(accumulated.values))
             }
-        }
-    }
-
-    public func downloadAndParseSearchTerms(segmentURL: URL, processingDate: String) async -> Result<[SearchTermMetric], Error> {
-        print("Downloading segment: \(segmentURL)")
-        do {
-            let (data, response) = try await URLSession.shared.data(from: segmentURL)
-            if let http = response as? HTTPURLResponse, !(200 ..< 300).contains(http.statusCode) {
-                print("Segment download failed with HTTP \(http.statusCode)")
-                return .failure(NetworkError.noResponse)
-            }
-            let decompressed: Data
-            if data.isGzipped {
-                print("Decompressing gzip segment (\(data.count) bytes)")
-                decompressed = try data.gunzipped()
-            } else {
-                decompressed = data
-            }
-            let metrics = SearchTermParser.parse(tsv: decompressed, processingDate: processingDate)
-            print("Parsed \(metrics.count) search term rows from segment")
-            return .success(metrics)
-        } catch {
-            print("Segment download/parse failed: \(error)")
-            return .failure(NetworkError.decode)
-        }
-    }
-
-    public func postAppAnalyticsReportRequests(appId: String) async -> Result<AnalyticsReportRequest, Error> {
-        let requestAttributes: AnalyticsReportRequestCreateRequest.Data.Attributes = .init(
-            accessType: .ongoing,
-        )
-
-        let requestRelationships: AnalyticsReportRequestCreateRequest.Data.Relationships = .init(
-            app: .init(data: .init(
-                type: .apps,
-                id: appId,
-            )),
-        )
-
-        let requestData: AnalyticsReportRequestCreateRequest.Data = .init(
-            type: .analyticsReportRequests,
-            attributes: requestAttributes,
-            relationships: requestRelationships,
-        )
-
-        let request = Resources.v1.analyticsReportRequests.post(.init(data: requestData))
-
-        do {
-            let data = try await client.send(request).data
-            guard let analyticsReportRequest: AnalyticsReportRequest = .init(schema: data) else {
-                return .failure(NetworkError.decode)
-            }
-            return .success(analyticsReportRequest)
-        } catch {
-            return .failure(NetworkError.noResponse)
         }
     }
 }

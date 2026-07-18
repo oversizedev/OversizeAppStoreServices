@@ -10,6 +10,12 @@ public struct AnalyticsReport: Identifiable, Hashable, Sendable {
     public var name: String
     public var category: Category
 
+    public init(id: String, name: String, category: Category) {
+        self.id = id
+        self.name = name
+        self.category = category
+    }
+
     init?(schema: AppStoreAPI.AnalyticsReport) {
         guard let categoryRawValue = schema.attributes?.category?.rawValue,
               let category: Category = .init(rawValue: categoryRawValue),

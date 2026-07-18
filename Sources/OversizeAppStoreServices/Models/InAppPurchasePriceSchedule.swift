@@ -29,7 +29,9 @@ public struct InAppPurchasePriceSchedule: Identifiable, Sendable {
                 return nil
             }.first,
             inAppPurchasePrices: included?.compactMap {
-                if case let .inAppPurchasePrice(value) = $0 { return .init(schema: value) }
+                if case let .inAppPurchasePrice(value) = $0 {
+                    return .init(schema: value)
+                }
                 return nil
             },
         )

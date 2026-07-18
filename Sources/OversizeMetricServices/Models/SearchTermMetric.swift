@@ -34,96 +34,27 @@ public enum SearchTermParser {
     private static let installCountKeys = ["installCount", "Downloads", "Install Count", "installs"]
 
     public static func parse(tsv: Data, processingDate: String) -> [SearchTermMetric] {
-        guard let text = String(data: tsv, encoding: .utf8) else { return [] }
-        let lines = text.components(separatedBy: .newlines).filter { !$0.isEmpty }
-        guard lines.count > 1 else { return [] }
+        guard let table = AnalyticsTabularParser.parse(data: tsv, processingDate: processingDate) else { return [] }
+        return metrics(from: table)
+    }
 
-        let delimiter = detectDelimiter(firstLine: lines[0])
-        let headers = split(line: lines[0], delimiter: delimiter)
-        let termIdx = firstIndex(in: headers, matching: searchTermKeys)
-        let impressionsIdx = firstIndex(in: headers, matching: impressionsKeys)
-        let installCountIdx = firstIndex(in: headers, matching: installCountKeys)
+    public static func metrics(from table: AnalyticsReportData) -> [SearchTermMetric] {
+        guard let termIndex = table.columnIndex(matching: searchTermKeys) else { return [] }
 
-        guard let termIdx else { return [] }
+        let processingDate = table.processingDate
+        let impressionsIndex = table.columnIndex(matching: impressionsKeys)
+        let installCountIndex = table.columnIndex(matching: installCountKeys)
 
-        return lines.dropFirst().compactMap { line in
-            let cols = split(line: line, delimiter: delimiter)
-            guard cols.count > termIdx else { return nil }
-            let term = cols[termIdx].trimmingCharacters(in: .init(charactersIn: " \""))
-            guard !term.isEmpty else { return nil }
-            let impressions = impressionsIdx.flatMap { idx -> Int? in
-                guard cols.count > idx else { return nil }
-                return Int(cols[idx].trimmingCharacters(in: .whitespaces))
-            } ?? 0
-            let installs = installCountIdx.flatMap { idx -> Int? in
-                guard cols.count > idx else { return nil }
-                return Int(cols[idx].trimmingCharacters(in: .whitespaces))
-            } ?? 0
+        return table.rows.compactMap { row in
+            guard let term = table.value(row: row, columnIndex: termIndex), !term.isEmpty else { return nil }
+            let impressions = impressionsIndex.flatMap { table.numericValue(row: row, columnIndex: $0) } ?? 0
+            let installs = installCountIndex.flatMap { table.numericValue(row: row, columnIndex: $0) } ?? 0
             return SearchTermMetric(
                 searchTerm: term,
-                impressions: impressions,
-                downloads: installs,
+                impressions: Int(impressions),
+                downloads: Int(installs),
                 processingDate: processingDate,
             )
         }
-    }
-
-    private static func detectDelimiter(firstLine: String) -> Character {
-        let tabCount = firstLine.count(where: { $0 == "\t" })
-        let commaCount = firstLine.count(where: { $0 == "," })
-        return tabCount >= commaCount ? "\t" : ","
-    }
-
-    private static func split(line: String, delimiter: Character) -> [String] {
-        if delimiter == "," {
-            return splitCSV(line: line)
-        }
-        return line.components(separatedBy: "\t")
-    }
-
-    private static func splitCSV(line: String) -> [String] {
-        var fields: [String] = []
-        var current = ""
-        var inQuotes = false
-        var index = line.startIndex
-        while index < line.endIndex {
-            let char = line[index]
-            if inQuotes {
-                if char == "\"" {
-                    let next = line.index(after: index)
-                    if next < line.endIndex, line[next] == "\"" {
-                        current.append("\"")
-                        index = next
-                    } else {
-                        inQuotes = false
-                    }
-                } else {
-                    current.append(char)
-                }
-            } else {
-                switch char {
-                case "\"": inQuotes = true
-                case ",":
-                    fields.append(current)
-                    current = ""
-                default:
-                    current.append(char)
-                }
-            }
-            index = line.index(after: index)
-        }
-        fields.append(current)
-        return fields
-    }
-
-    private static func firstIndex(in headers: [String], matching candidates: [String]) -> Int? {
-        for candidate in candidates {
-            if let idx = headers.firstIndex(where: {
-                $0.trimmingCharacters(in: .init(charactersIn: " \"")).lowercased() == candidate.lowercased()
-            }) {
-                return idx
-            }
-        }
-        return nil
     }
 }

@@ -26,11 +26,6 @@ public struct SalesReports: Sendable {
         guard let csvString = String(data: data, encoding: .utf8) else { return nil }
         print("Row CSV data:")
         print(csvString)
-
-        do {
-            return nil
-        } catch {
-            return nil
-        }
+        return nil
     }
 }
