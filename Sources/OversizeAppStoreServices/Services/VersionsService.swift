@@ -8,7 +8,7 @@ import AppStoreConnect
 import Foundation
 import OversizeCore
 
-public actor VersionsService {
+public actor VersionsService: VersionsServicesProtocol {
     private let cacheService: CacheService
     private let client: AppStoreConnectClient
 
@@ -383,15 +383,5 @@ public actor VersionsService {
         } catch {
             return .failure(NetworkError.noResponse)
         }
-    }
-}
-
-public extension VersionsService {
-    func fetchAppVersions(_ app: App) async -> Result<[AppStoreVersion], Error> {
-        await fetchAppVersions(appId: app.id)
-    }
-
-    func fetchAppVersions(_ app: App, platform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform) async -> Result<[AppStoreVersion], Error> {
-        await fetchAppVersions(appId: app.id, platform: platform)
     }
 }

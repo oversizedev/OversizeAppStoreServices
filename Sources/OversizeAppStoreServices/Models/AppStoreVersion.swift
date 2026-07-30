@@ -119,8 +119,6 @@ public struct AppStoreVersion: Sendable, Identifiable {
                 includedGameCenterAppVersion = gameCenterVersion
             case let .routingAppCoverage(coverage):
                 includedRoutingAppCoverage = coverage
-            default:
-                continue
             }
         }
 

@@ -7,7 +7,7 @@
 import FactoryKit
 
 public extension Container {
-    var appsService: Factory<AppsService> {
+    var appsService: Factory<AppsServicesProtocol> {
         self { AppsService(authenticator: EnvAuthenticator()) }
     }
 
@@ -35,7 +35,7 @@ public extension Container {
         self { BuildsService(authenticator: EnvAuthenticator()) }
     }
 
-    var versionsService: Factory<VersionsService> {
+    var versionsService: Factory<any VersionsServicesProtocol> {
         self { VersionsService(authenticator: EnvAuthenticator()) }
     }
 

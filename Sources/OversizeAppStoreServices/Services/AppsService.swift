@@ -8,7 +8,7 @@ import AppStoreConnect
 import Foundation
 import OversizeCore
 
-public actor AppsService {
+public actor AppsService: AppsServicesProtocol {
     private let cacheService: CacheService
     private let client: AppStoreConnectClient
 
