@@ -58,12 +58,12 @@ public actor SubscriptionsService { ... }
 
 ### Dependency Injection
 Uses **Factory Kit** for service registration and injection:
-- Service registration: `Sources/OversizeAppStoreServices/ServiceRegistering.swift`
+- Service registration: `Sources/OversizeAppStoreServices/DI/ServiceRegistering.swift`
 - Usage pattern:
 ```swift
 @Injected(\.appsService) private var appsService: AppsService
-@Injected(\.cacheService) private var cacheService: CacheService
 ```
+There is no DI entry for caching: the cache stack is created by the services themselves (see below).
 
 ### Core Services (OversizeAppStoreServices)
 
@@ -103,12 +103,23 @@ Uses **Factory Kit** for service registration and injection:
 
 ### Caching Layer
 
-**CacheService** (`Sources/OversizeAppStoreServices/Cache/СacheService.swift`):
-- File-based persistence using FileManager
-- Default TTL: 5 minutes (configurable)
-- Generic `fetchWithCache()` method pattern
-- Automatic invalidation by file modification date
-- Force refresh support
+Everything is built on Foundation's `URLCache` (`Sources/OversizeAppStoreServices/Cache/`). The whole stack is Darwin-only — on Linux it degrades to no caching, without `#if` at call sites.
+
+**HTTP responses** — `ASCCachingTransport` (an asc-swift `Transport`) stamps GET requests with TTL/force/scope via `URLProtocol.setProperty`, `ASCCachingURLProtocol` serves hits from `ASCResponseCache` and stores misses. Wrap reads in a policy to enable it:
+```swift
+await ASCCache.cached(ttl: ASCCache.TTL.short, force: force) {
+    try await client.send(Resources.v1.apps.id(id).get())
+}
+```
+Unstamped requests are never cached. TTL constants: `short` (1 min), `default` (5 min), `long` (1 h), `veryLong` (24 h), `month` (30 d). Clients are built by `ASCClientFactory.makeClient(authenticator:cacheAccountID:)`, which pins the account at construction time.
+
+**Derived values** — `ASCValueCache` (`load`/`save`/`remove`) for small computed values that are not the body of a single HTTP response, currently only the daily proceeds aggregates in `SalesAndFinanceService`. One `URLCache` pool (2 MB / 64 MB), keys are synthetic `https://asc-value.invalid/<namespace>/<sha256(key)>` URLs. Analytics report data is deliberately NOT cached: segment URLs are single-use, and the merged tables were large enough to make caching them cost more than it saved. Keep this cache for kilobyte-sized values.
+
+**Manual TTL** — App Store Connect sends no `Cache-Control`/`ETag`/`Last-Modified`, so entries are written with a synthesized `Cache-Control: max-age=N` plus an `X-ASC-Cached-At` timestamp that freshness is checked against.
+
+**Scoping and invalidation** (`ASCCacheScope`) — the account ID and a generation counter are part of every key (`__ascScope`), so accounts are isolated structurally and switching accounts needs no flush. Two independent counters: mutating requests (POST/PATCH/PUT/DELETE) bump the response generation only, so 30-day derived values survive writes; `invalidateCurrentAccount()` drops HTTP responses, `invalidateAllCurrentAccount()` drops derived values too.
+
+**Important**: `URLCache.removeCachedResponse`/`removeAllCachedResponses` do NOT evict manually stored entries — invalidation is done by overwriting the entry with an expired timestamp.
 
 ### Error Handling
 
@@ -120,13 +131,24 @@ All service methods return `Result<T, Error>`:
 
 ### Data Flow
 
+HTTP responses:
 ```
 Service Method Call
-→ Check Cache (unless force: true)
-→ Return cached Result if valid
-→ Fetch from AppStoreConnectClient if needed
+→ ASCCache.cached sets the TaskLocal policy (ttl, force)
+→ ASCCachingTransport stamps the URLRequest with ttl/force/account scope
+→ ASCCachingURLProtocol builds the scoped key, checks freshness
+→ Hit: replay stored response  |  Miss: network → store on 2xx
+→ asc-swift decodes the response (errors and rate limits stay intact)
 → Transform API response to domain models
-→ Save to cache
+→ Return Result<T, Error>
+```
+
+Derived values:
+```
+Service Method Call
+→ ASCValueCache builds the scoped synthetic key
+→ Return decoded value if fresh
+→ Otherwise run the fetcher, encode, store with the injected TTL
 → Return Result<T, Error>
 ```
 
@@ -136,18 +158,21 @@ Service Method Call
 Sources/
 ├── OversizeAppStoreServices/
 │   ├── Auth/                    # EnvAuthenticator, NetworkEnvironment
-│   ├── Cache/                   # CacheService (file-based)
+│   ├── Cache/                   # URLCache stack: ASCCachePolicy, ASCCacheScope,
+│   │                            # ASCResponseCache, ASCCachingURLProtocol,
+│   │                            # ASCCachingTransport, ASCClientFactory,
+│   │                            # ASCValueCache, ASCCacheInvalidationBox
+│   ├── DI/                      # ServiceRegistering.swift (Factory DI registration)
 │   ├── Models/                  # 30+ data models
 │   │   └── Types/              # Type-safe enums (SubscriptionPeriod, Platform, etc.)
-│   ├── Services/               # 12 actor-based services
-│   └── ServiceRegistering.swift # Factory DI registration
+│   └── Services/               # 12 actor-based services
 │
 ├── OversizeMetricServices/
 │   ├── Models/                  # FinanceReport, SalesReport, InstallReport
 │   └── Services/               # AnalyticsService, SalesAndFinanceService, PerfPowerMetricsService
 │
 Tests/
-└── OversizeAppStoreServicesTests/  # 18 test files using Swift Testing framework
+└── OversizeAppStoreServicesTests/  # 22 test files using Swift Testing framework
 ```
 
 ## Testing Infrastructure
@@ -165,25 +190,32 @@ Test coverage focuses on:
 - Type enum parsing and mappings
 - Territory handling with currencies
 - Display name validation
+- The cache stack: `ASCResponseCacheTests`, `ASCCachingTransportTests`, `ASCValueCacheTests`
+
+Cache-suite conventions:
+- `@Suite(.serialized)` for suites that mutate process-global cache state
+- Injection seams: `ASCCachingURLProtocol.cache` / `.innerSession` and `ASCValueCacheStorage.shared`
+- Caches point at a fresh temp directory, and every test uses its own UUID account ID so generation counters never collide with other suites
+- `StubURLProtocol` (in `ASCCachingTransportTests`) counts network hits
 
 ## Key Dependencies
 
-- **asc-swift** (1.0.1+): App Store Connect API client
-- **Factory** (2.1.3+): Dependency injection container
-- **GzipSwift** (6.1.0+): Gzip decompression for report downloads
+- **asc-swift** (1.7.0+): App Store Connect API client
+- **Factory** (3.0.2+): Dependency injection container
+- **GzipSwift** (7.0.0+): Gzip decompression for report downloads
 - **CodableCSV** (0.6.7+): CSV parsing for finance/sales reports
+- **swift-crypto** (4.0.0+): SHA-256 on non-Darwin platforms
 - **OversizeCore**: Logging utilities (logError, logData, logNetwork)
 - **OversizeServices**: SecureStorageService, AppError
-- **OversizeModels**: Domain models (App, InAppPurchase, etc.)
 
 ## Common Patterns
 
 ### Creating a New Service
 1. Define as `public actor ServiceName`
-2. Initialize `AppStoreConnectClient` with `EnvAuthenticator()`
+2. Build the client with `ASCClientFactory.makeClient(authenticator:cacheAccountID:)`
 3. Use `Result<T, Error>` return types
-4. Implement caching with `@Injected(\.cacheService)`
-5. Register in `ServiceRegistering.swift`
+4. Wrap cacheable reads in `ASCCache.cached(ttl:force:)`; use `ASCValueCache` only for derived values that cannot be keyed by URL
+5. Register in `DI/ServiceRegistering.swift`
 
 ### Adding New Models
 1. Create model in `Sources/OversizeAppStoreServices/Models/`

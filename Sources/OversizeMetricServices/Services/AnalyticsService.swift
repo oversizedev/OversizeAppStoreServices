@@ -15,11 +15,10 @@ import OversizeCore
 
 public actor AnalyticsService {
     private let client: AppStoreConnectClient
-    private let instanceDataCache = CacheService(expiration: 60 * 60 * 24 * 30)
     private static let maxConcurrentDownloads = 4
 
-    public init(authenticator: some AppStoreConnect.Authenticator) {
-        client = AppStoreConnectClient(authenticator: authenticator)
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
+        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: cacheAccountID)
     }
 
     // MARK: - Report Requests
@@ -166,15 +165,12 @@ public actor AnalyticsService {
 
     // MARK: - Report Data
 
-    public func fetchReportData(
-        instance: AnalyticsReportInstance,
-        force: Bool = false,
-    ) async -> Result<AnalyticsReportData, Error> {
-        await instanceDataCache.fetchWithCache(
-            key: "analytics-report-data-\(instance.id)",
-            force: force,
-        ) { [self] in
-            try await downloadReportData(instance: instance)
+    public func fetchReportData(instance: AnalyticsReportInstance) async -> Result<AnalyticsReportData, Error> {
+        do {
+            return try await .success(downloadReportData(instance: instance))
+        } catch {
+            Log.error("Fetch report data failed for instance \(instance.id)", error: error)
+            return .failure(error.asNetworkError)
         }
     }
 
@@ -242,7 +238,6 @@ public actor AnalyticsService {
         appId: String,
         metric: DashboardMetric,
         days: Int = 30,
-        force: Bool = false,
     ) async -> Result<[AnalyticsMetricPoint], Error> {
         let requestResult = await ensureOngoingReportRequest(appId: appId)
         guard case let .success(reportRequest) = requestResult else {
@@ -277,7 +272,7 @@ public actor AnalyticsService {
                 while nextIndex < instances.count, nextIndex < Self.maxConcurrentDownloads {
                     let instance = instances[nextIndex]
                     group.addTask { [self] in
-                        try await fetchReportData(instance: instance, force: force).get()
+                        try await fetchReportData(instance: instance).get()
                     }
                     nextIndex += 1
                 }
@@ -286,7 +281,7 @@ public actor AnalyticsService {
                     if nextIndex < instances.count {
                         let instance = instances[nextIndex]
                         group.addTask { [self] in
-                            try await fetchReportData(instance: instance, force: force).get()
+                            try await fetchReportData(instance: instance).get()
                         }
                         nextIndex += 1
                     }

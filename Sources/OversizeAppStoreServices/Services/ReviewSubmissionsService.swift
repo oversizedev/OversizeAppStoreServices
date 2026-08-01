@@ -10,11 +10,9 @@ import OversizeCore
 
 public actor ReviewSubmissionsService {
     private let client: AppStoreConnectClient
-    private let cacheService: CacheService
 
-    public init(authenticator: some AppStoreConnect.Authenticator, cacheService: CacheService = CacheService()) {
-        client = AppStoreConnectClient(authenticator: authenticator)
-        self.cacheService = cacheService
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
+        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: cacheAccountID)
     }
 
     public func postReviewSubmission(
@@ -156,7 +154,7 @@ public actor ReviewSubmissionsService {
         appId: String,
         force: Bool = false,
     ) async -> Result<[ReviewSubmission], Error> {
-        await cacheService.fetchWithCache(key: "fetchReviewSubmissionsIncludedAll\(appId)", force: force) {
+        await ASCCache.cached(ttl: ASCCache.TTL.short, force: force) {
             let request = Resources.v1.reviewSubmissions.get(
                 filterApp: [appId],
                 include: [
@@ -177,7 +175,7 @@ public actor ReviewSubmissionsService {
         reviewSubmissionId: String,
         force: Bool = false,
     ) async -> Result<[ReviewSubmissionItem], Error> {
-        await cacheService.fetchWithCache(key: "fetchReviewSubmissionItemsIncludedAll\(reviewSubmissionId)", force: force) {
+        await ASCCache.cached(ttl: ASCCache.TTL.short, force: force) {
             let request = Resources.v1.reviewSubmissions.id(reviewSubmissionId).items.get(
                 limit: 200,
                 include: [

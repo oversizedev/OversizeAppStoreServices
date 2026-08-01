@@ -12,14 +12,19 @@ public struct EnvAuthenticator: Authenticator {
     private let credentialsStorage = AppStoreConnectCredentialsStorage()
     private let configuredAPI: API
     private var jwt: JWT?
+    public let accountID: UUID?
     public var api: API {
         configuredAPI
     }
 
     public init(
         api: API = .appStoreConnect,
+        accountID: UUID? = nil,
     ) {
         configuredAPI = api
+        self.accountID = accountID ?? UserDefaults.standard
+            .string(forKey: "AppStore.Account")
+            .flatMap(UUID.init(uuidString:))
     }
 
     public mutating func token() throws -> String {
@@ -30,9 +35,10 @@ public struct EnvAuthenticator: Authenticator {
     }
 
     private func makeJWT() throws -> JWT {
-        guard let accountValue = UserDefaults.standard.string(forKey: "AppStore.Account"),
-              let accountID = UUID(uuidString: accountValue)
-        else {
+        let resolvedAccountID = accountID ?? UserDefaults.standard
+            .string(forKey: "AppStore.Account")
+            .flatMap(UUID.init(uuidString:))
+        guard let accountID = resolvedAccountID else {
             Log.error("Get UserDefaults value for 'AppStore.Account'")
             throw Error.missingEnvironmentVariable("AppStore.Account")
         }

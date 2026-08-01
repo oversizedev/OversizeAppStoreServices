@@ -11,8 +11,8 @@ import OversizeCore
 public actor AppCategoryService {
     private let client: AppStoreConnectClient
 
-    public init(authenticator: some AppStoreConnect.Authenticator) {
-        client = AppStoreConnectClient(authenticator: authenticator)
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
+        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: cacheAccountID)
     }
 
     public func fetchAppCategoryIds(platform: Platform) async -> Result<[String], Error> {

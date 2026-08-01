@@ -13,11 +13,17 @@ import OversizeCore
 
 public actor SalesAndFinanceService {
     private let client: AppStoreConnectClient
-    private let dailySalesCache = CacheService(expiration: 60 * 60 * 24 * 30)
+    private let dailySalesCache: ASCValueCache
     private static let maxConcurrentDownloads = 4
 
-    public init(authenticator: some AppStoreConnect.Authenticator) {
-        client = AppStoreConnectClient(authenticator: authenticator)
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
+        let resolvedAccountID = ASCClientFactory.resolveCacheAccountID(for: authenticator, explicit: cacheAccountID)
+        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: resolvedAccountID)
+        dailySalesCache = ASCValueCache(
+            namespace: "daily-sales",
+            ttl: ASCCache.TTL.month,
+            accountID: resolvedAccountID,
+        )
     }
 
     public func fetchSalesURL(vendorNumber: String) async -> Result<URL, Error> {
@@ -207,7 +213,7 @@ public actor SalesAndFinanceService {
         guard let date = AnalyticsReportInstance.dateFormatter.date(from: reportDate) else { return .missing }
         let cacheKey = "daily-proceeds-by-currency-\(vendorNumber)-\(appAppleId ?? "all")-\(reportDate)"
 
-        if !force, let cached: [String: Double] = await dailySalesCache.load(key: cacheKey, as: [String: Double].self) {
+        if !force, let cached = dailySalesCache.load([String: Double].self, key: cacheKey) {
             return .day(date, cached)
         }
 
@@ -221,7 +227,7 @@ public actor SalesAndFinanceService {
                 }
                 totals[report.currencyOfProceeds, default: 0] += report.developerProceeds * Double(report.units)
             }
-            await dailySalesCache.save(totals, key: cacheKey)
+            dailySalesCache.save(totals, key: cacheKey)
             return .day(date, totals)
         case let .failure(error):
             if Self.isMissingReportError(error.asNetworkError) {

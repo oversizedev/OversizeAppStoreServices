@@ -10,15 +10,13 @@ import OversizeCore
 
 public actor SubscriptionsService {
     private let client: AppStoreConnectClient
-    private let cacheService: CacheService
 
-    public init(authenticator: some AppStoreConnect.Authenticator, cacheService: CacheService = CacheService()) {
-        client = AppStoreConnectClient(authenticator: authenticator)
-        self.cacheService = cacheService
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
+        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: cacheAccountID)
     }
 
     public func fetchAppSubscriptionGroups(appId: String, force: Bool = false) async -> Result<[SubscriptionGroup], Error> {
-        await cacheService.fetchWithCache(key: "fetchAppSubscriptionGroups\(appId)", force: force) {
+        await ASCCache.cached(force: force) {
             let request = Resources.v1.apps.id(appId).subscriptionGroups.get()
             return try await client.send(request)
         }.map { data in
@@ -27,7 +25,7 @@ public actor SubscriptionsService {
     }
 
     public func fetchAppSubscriptionGroupsIncludedSubscriptionsAndLocalizations(appId: String, force: Bool = false) async -> Result<[SubscriptionGroup], Error> {
-        await cacheService.fetchWithCache(key: "fetchAppSubscriptionGroupsIncludedSubscriptionsAndLocalizations\(appId)", force: force) {
+        await ASCCache.cached(force: force) {
             let request = Resources.v1.apps.id(appId).subscriptionGroups.get(
                 include: [
                     .subscriptions,
@@ -41,7 +39,7 @@ public actor SubscriptionsService {
     }
 
     public func fetchSubscription(subscriptionId: String, force: Bool = false) async -> Result<Subscription, Error> {
-        await cacheService.fetchWithCache(key: "fetchSubscription\(subscriptionId)", force: force) {
+        await ASCCache.cached(force: force) {
             let request = Resources.v1.subscriptions.id(subscriptionId).get()
             return try await client.send(request)
         }.flatMap {
@@ -53,7 +51,7 @@ public actor SubscriptionsService {
     }
 
     public func fetchSubscriptionIncludedAll(subscriptionId: String, force: Bool = false) async -> Result<Subscription, Error> {
-        await cacheService.fetchWithCache(key: "fetchSubscriptionIncludedAll\(subscriptionId)", force: force) {
+        await ASCCache.cached(force: force) {
             let request = Resources.v1.subscriptions.id(subscriptionId).get(
                 include: [
                     .subscriptionLocalizations,
@@ -190,7 +188,7 @@ public actor SubscriptionsService {
         subscriptionPricePointId: String,
         force: Bool = false,
     ) async -> Result<[SubscriptionPricePoint], Error> {
-        await cacheService.fetchWithCache(key: "fetchSubscriptionPricePointsEqualizations\(subscriptionPricePointId)", force: force) {
+        await ASCCache.cached(ttl: ASCCache.TTL.long, force: force) {
             let request = Resources.v1.subscriptionPricePoints.id(subscriptionPricePointId).equalizations.get(limit: 200, include: [.territory])
             return try await client.send(request)
         }.map { data in
@@ -205,7 +203,7 @@ public actor SubscriptionsService {
     ) async -> Result<[SubscriptionPricePoint], Error> {
         let filterTerritorIds: [String]? = filterTerritory.map { $0.compactMap { $0.id } }
 
-        return await cacheService.fetchWithCache(key: "fetchSubscriptionPricePoints\(subscriptionId)\(filterTerritorIds?.joined(separator: "-") ?? "")", force: force) {
+        return await ASCCache.cached(ttl: ASCCache.TTL.long, force: force) {
             let request = Resources.v1.subscriptions.id(subscriptionId).pricePoints.get(filterTerritory: filterTerritorIds, limit: 2000, include: [.territory])
             return try await client.send(request)
         }.map { data in
@@ -253,7 +251,7 @@ public actor SubscriptionsService {
     ) async -> Result<[SubscriptionIntroductoryOffer], Error> {
         let filterTerritoryIds: [String]? = filterTerritory.map { $0.compactMap { $0.id } }
 
-        return await cacheService.fetchWithCache(key: "fetchSubscriptionIntroductoryOffers\(subscriptionId)\(filterTerritoryIds?.joined(separator: "-") ?? "")", force: force) {
+        return await ASCCache.cached(force: force) {
             let request = Resources.v1.subscriptions.id(subscriptionId).introductoryOffers.get(
                 filterTerritory: filterTerritoryIds,
                 limit: 200,
@@ -272,7 +270,7 @@ public actor SubscriptionsService {
         subscriptionId: String,
         force: Bool = false,
     ) async -> Result<SubscriptionAvailability, Error> {
-        await cacheService.fetchWithCache(key: "fetchSubscriptionAvailability\(subscriptionId)", force: force) {
+        await ASCCache.cached(force: force) {
             let request = Resources.v1.subscriptions.id(subscriptionId).subscriptionAvailability.get(
                 limitAvailableTerritories: 50,
             )
@@ -292,7 +290,7 @@ public actor SubscriptionsService {
     ) async -> Result<[SubscriptionPrice], Error> {
         let filterTerritoryIds: [String]? = filterTerritory.map { $0.compactMap { $0.id } }
 
-        return await cacheService.fetchWithCache(key: "fetchSubscriptionPrices\(subscriptionId)\(filterTerritoryIds?.joined(separator: "-") ?? "")", force: force) {
+        return await ASCCache.cached(force: force) {
             let request = Resources.v1.subscriptions.id(subscriptionId).prices.get(
                 filterTerritory: filterTerritoryIds,
                 limit: 200,
@@ -352,7 +350,7 @@ public actor SubscriptionsService {
         subscriptionAvailabilitiyId: String,
         force: Bool = false,
     ) async -> Result<[Territory], Error> {
-        await cacheService.fetchWithCache(key: "fetchSubscriptionAvailabilitiesAvailableTerritories\(subscriptionAvailabilitiyId)", force: force) {
+        await ASCCache.cached(force: force) {
             let request = Resources.v1.subscriptionAvailabilities.id(subscriptionAvailabilitiyId).availableTerritories.get(limit: 200)
             return try await client.send(request).data
         }.map { data in
@@ -364,7 +362,7 @@ public actor SubscriptionsService {
         subscriptionPromotionalOfferId: String,
         force: Bool = false,
     ) async -> Result<[SubscriptionPromotionalOfferPrice], Error> {
-        await cacheService.fetchWithCache(key: "fetchSubscriptionPromotionalOfferPrices\(subscriptionPromotionalOfferId)", force: force) {
+        await ASCCache.cached(force: force) {
             let request = Resources.v1.subscriptionPromotionalOffers.id(subscriptionPromotionalOfferId).prices.get()
             return try await client.send(request)
         }.map { data in

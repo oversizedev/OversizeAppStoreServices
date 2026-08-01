@@ -9,16 +9,14 @@ import Foundation
 import OversizeCore
 
 public actor AppInfoService {
-    private let cacheService: CacheService
     private let client: AppStoreConnectClient
 
-    public init(authenticator: some AppStoreConnect.Authenticator, cacheService: CacheService = CacheService()) {
-        client = AppStoreConnectClient(authenticator: authenticator)
-        self.cacheService = cacheService
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
+        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: cacheAccountID)
     }
 
     public func fetchAppInfos(appId: String, force: Bool = false) async -> Result<[AppInfo], Error> {
-        await cacheService.fetchWithCache(key: "fetchAppInfos\(appId)", force: force) {
+        await ASCCache.cached(force: force) {
             let request = Resources.v1.apps.id(appId).appInfos.get()
             return try await client.send(request).data
         }.map { data in
@@ -39,7 +37,7 @@ public actor AppInfoService {
     }
 
     public func fetchAppInfoLocalizations(appInfoId: String, force: Bool = false) async -> Result<[AppInfoLocalization], Error> {
-        await cacheService.fetchWithCache(key: "fetchAppInfoLocalizations\(appInfoId)", force: force) {
+        await ASCCache.cached(force: force) {
             let request = Resources.v1.appInfos.id(appInfoId).appInfoLocalizations.get()
             return try await client.send(request).data
         }.map { data in

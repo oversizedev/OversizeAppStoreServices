@@ -9,12 +9,10 @@ import Foundation
 import OversizeCore
 
 public actor VersionsService: VersionsServicesProtocol {
-    private let cacheService: CacheService
     private let client: AppStoreConnectClient
 
-    public init(authenticator: some AppStoreConnect.Authenticator, cacheService: CacheService = CacheService()) {
-        client = AppStoreConnectClient(authenticator: authenticator)
-        self.cacheService = cacheService
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
+        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: cacheAccountID)
     }
 
     public func fetchAppStoreVersion(appStoreVersionId: String) async -> Result<AppStoreVersion, Error> {
@@ -36,7 +34,7 @@ public actor VersionsService: VersionsServicesProtocol {
         } else {
             nil
         }
-        return await cacheService.fetchWithCache(key: "fetchAppVersions\(appId)\(platform?.rawValue ?? "")", force: force) {
+        return await ASCCache.cached(force: force) {
             let request = Resources.v1.apps.id(appId).appStoreVersions.get(filterPlatform: filterPlatforms)
             let response = try await client.send(request)
             return response.data
@@ -51,7 +49,7 @@ public actor VersionsService: VersionsServicesProtocol {
         } else {
             nil
         }
-        return await cacheService.fetchWithCache(key: "fetchEditableAppStoreVersion\(appId)\(platform?.rawValue ?? "")", force: force) {
+        return await ASCCache.cached(force: force) {
             let request = Resources.v1.apps.id(appId).appStoreVersions.get(
                 filterPlatform: filterPlatforms,
                 filterAppVersionState: [
@@ -90,7 +88,7 @@ public actor VersionsService: VersionsServicesProtocol {
         } else {
             nil
         }
-        return await cacheService.fetchWithCache(key: "fetchActualAppStoreVersions\(appId)\(platform?.rawValue ?? "")", force: force) {
+        return await ASCCache.cached(force: force) {
             let request = Resources.v1.apps.id(appId).appStoreVersions.get(
                 filterPlatform: filterPlatforms,
                 filterAppVersionState: [
@@ -123,7 +121,7 @@ public actor VersionsService: VersionsServicesProtocol {
         } else {
             nil
         }
-        return await cacheService.fetchWithCache(key: "fetchActualAppStoreVersionsIncludeBuilds\(appId)\(platform?.rawValue ?? "")", force: force) {
+        return await ASCCache.cached(force: force) {
             let request = Resources.v1.apps.id(appId).appStoreVersions.get(
                 filterPlatform: filterPlatforms,
                 filterAppVersionState: [
@@ -181,7 +179,7 @@ public actor VersionsService: VersionsServicesProtocol {
     }
 
     public func fetchAppVersionLocalizations(versionId: String, force: Bool = false) async -> Result<[AppStoreVersionLocalization], Error> {
-        await cacheService.fetchWithCache(key: "fetchAppVersionLocalizations\(versionId)", force: force) {
+        await ASCCache.cached(force: force) {
             let request = Resources.v1.appStoreVersions.id(versionId).appStoreVersionLocalizations.get()
             return try await client.send(request).data
         }.map { data in

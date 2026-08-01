@@ -9,16 +9,14 @@ import Foundation
 import OversizeCore
 
 public actor BuildsService {
-    private let cacheService: CacheService
     private let client: AppStoreConnectClient
 
-    public init(authenticator: some AppStoreConnect.Authenticator, cacheService: CacheService = CacheService()) {
-        client = AppStoreConnectClient(authenticator: authenticator)
-        self.cacheService = cacheService
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
+        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: cacheAccountID)
     }
 
     public func fetchBuild(buildId: String, forse: Bool = false) async -> Result<Build, Error> {
-        await cacheService.fetchWithCache(key: "fetchBuild\(buildId)", force: forse) {
+        await ASCCache.cached(ttl: ASCCache.TTL.short, force: forse) {
             let request = Resources.v1.builds.id(buildId).get()
             return try await client.send(request)
         }.flatMap {
@@ -30,7 +28,7 @@ public actor BuildsService {
     }
 
     public func fetchBuildBundlesId(buildBundlesId: String, forse: Bool = false) async -> Result<[BuildBundleFileSize], Error> {
-        await cacheService.fetchWithCache(key: "buildBundlesId\(buildBundlesId)", force: forse) {
+        await ASCCache.cached(ttl: ASCCache.TTL.short, force: forse) {
             let request = Resources.v1.buildBundles.id(buildBundlesId).buildBundleFileSizes.get()
             return try await client.send(request).data
         }.map { data in

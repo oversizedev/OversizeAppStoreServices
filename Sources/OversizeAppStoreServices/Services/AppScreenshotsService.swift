@@ -14,12 +14,10 @@ import Foundation
 import OversizeCore
 
 public actor AppScreenshotsService {
-    private let cacheService: CacheService
     private let client: AppStoreConnectClient
 
-    public init(authenticator: some AppStoreConnect.Authenticator, cacheService: CacheService = CacheService()) {
-        client = AppStoreConnectClient(authenticator: authenticator)
-        self.cacheService = cacheService
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
+        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: cacheAccountID)
     }
 
     public func fetchAppScreenshotSets(
@@ -27,9 +25,7 @@ public actor AppScreenshotsService {
         screenshotDisplayType: ScreenshotDisplayType? = nil,
         force: Bool = false,
     ) async -> Result<[AppScreenshotSet], Error> {
-        let cacheKey = "fetchScreenshotSets\(localizationId)\(screenshotDisplayType?.rawValue ?? "")"
-
-        return await cacheService.fetchWithCache(key: cacheKey, force: force) {
+        await ASCCache.cached(force: force) {
             let request = Resources.v1.appStoreVersionLocalizations.id(localizationId).appScreenshotSets.get(include: [.appScreenshots])
             return try await client.send(request)
         }.flatMap {

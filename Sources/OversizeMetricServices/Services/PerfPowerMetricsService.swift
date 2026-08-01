@@ -11,8 +11,8 @@ import OversizeCore
 public actor PerfPowerMetricsService {
     private let client: AppStoreConnectClient
 
-    public init(authenticator: some AppStoreConnect.Authenticator) {
-        client = AppStoreConnectClient(authenticator: authenticator)
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
+        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: cacheAccountID)
     }
 
     public func fetchXcodeMetrics(appId: String) async -> Result<LocalXcodeMetrics, Error> {

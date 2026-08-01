@@ -59,10 +59,6 @@ public extension Container {
         self { AppScreenshotsService(authenticator: EnvAuthenticator()) }
     }
 
-    var cacheService: Factory<CacheService> {
-        self { CacheService() }
-    }
-
     var appStoreConnectCredentialsStorage: Factory<AppStoreConnectCredentialsStorage> {
         self { AppStoreConnectCredentialsStorage() }
     }

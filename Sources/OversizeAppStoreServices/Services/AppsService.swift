@@ -9,16 +9,14 @@ import Foundation
 import OversizeCore
 
 public actor AppsService: AppsServicesProtocol {
-    private let cacheService: CacheService
     private let client: AppStoreConnectClient
 
-    public init(authenticator: some AppStoreConnect.Authenticator, cacheService: CacheService = CacheService()) {
-        client = AppStoreConnectClient(authenticator: authenticator)
-        self.cacheService = cacheService
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
+        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: cacheAccountID)
     }
 
     public func fetchApp(id: String, force: Bool = false) async -> Result<App, Error> {
-        await cacheService.fetchWithCache(key: "fetchApp\(id)", force: force) {
+        await ASCCache.cached(force: force) {
             let request = Resources.v1.apps.id(id).get()
             return try await client.send(request)
         }.flatMap {
@@ -30,7 +28,7 @@ public actor AppsService: AppsServicesProtocol {
     }
 
     public func fetchAppIncludeBuildsAndAppStoreVersions(id: String, force: Bool = false) async -> Result<App, Error> {
-        await cacheService.fetchWithCache(key: "fetchAppIncludeBuildsAndAppStoreVersions\(id)", force: force) {
+        await ASCCache.cached(force: force) {
             let request = Resources.v1.apps.id(id).get(
                 include: [
                     .builds,
@@ -77,7 +75,7 @@ public actor AppsService: AppsServicesProtocol {
     }
 
     public func fetchAppsIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions(forse: Bool = false) async -> Result<[App], Error> {
-        await cacheService.fetchWithCache(key: "fetchAppsIncludeAppStoreVersionsAndBuildsAndPreReleaseVersions", force: forse) {
+        await ASCCache.cached(force: forse) {
             let request = Resources.v1.apps.get(
                 include: [
                     .builds,
@@ -90,7 +88,7 @@ public actor AppsService: AppsServicesProtocol {
     }
 
     public func fetchAppsIncludeActualAppStoreVersionsAndBuilds(limitAppStoreVersions: Int? = nil, forse: Bool = false) async -> Result<[App], Error> {
-        await cacheService.fetchWithCache(key: "fetchAppsIncludeActualAppStoreVersionsAndBuilds", force: forse) {
+        await ASCCache.cached(force: forse) {
             let request = Resources.v1.apps.get(
                 filterAppStoreVersionsAppStoreState: [
                     .accepted,
