@@ -14,7 +14,9 @@ import Testing
 struct ASCCachingTransportTests {
     private struct StubAuthenticator: Authenticator {
         let api: API = .appStoreConnect
-        func token() throws -> String { "stub-token" }
+        func token() throws -> String {
+            "stub-token"
+        }
     }
 
     private static let appsBody = Data(#"{"data":[],"links":{"self":"https://api.appstoreconnect.apple.com/v1/apps"}}"#.utf8)
@@ -58,7 +60,7 @@ struct ASCCachingTransportTests {
     }
 
     @Test("Should serve the second request from cache")
-    func cachesRepeatedRequest() async throws {
+    func cachesRepeatedRequest() async {
         let client = makeClient()
 
         for _ in 0 ..< 2 {
@@ -71,7 +73,7 @@ struct ASCCachingTransportTests {
     }
 
     @Test("Should hit the network when force is requested")
-    func forceBypassesCache() async throws {
+    func forceBypassesCache() async {
         let client = makeClient()
 
         _ = await ASCCache.cached(ttl: 300) {
@@ -85,7 +87,7 @@ struct ASCCachingTransportTests {
     }
 
     @Test("Should not cache requests without policy")
-    func withoutPolicyGoesToNetwork() async throws {
+    func withoutPolicyGoesToNetwork() async {
         let client = makeClient()
 
         for _ in 0 ..< 2 {
@@ -96,7 +98,7 @@ struct ASCCachingTransportTests {
     }
 
     @Test("Should refetch after the entry expires")
-    func expiredEntryIsRefetched() async throws {
+    func expiredEntryIsRefetched() async {
         let client = makeClient()
 
         _ = await ASCCache.cached(ttl: 300) {
@@ -110,7 +112,7 @@ struct ASCCachingTransportTests {
     }
 
     @Test("Should not cache failed responses and should map the error")
-    func failedResponseIsNotCached() async throws {
+    func failedResponseIsNotCached() async {
         let client = makeClient(status: 404, body: Data(#"{"errors":[{"id":"1","status":"404","code":"NOT_FOUND","title":"Not found","detail":"No app"}]}"#.utf8))
 
         let first: Result<AppsResponse, Error> = await ASCCache.cached(ttl: 300) {
@@ -134,7 +136,7 @@ struct ASCCachingTransportTests {
     }
 
     @Test("Should map rate limit responses")
-    func rateLimitIsMapped() async throws {
+    func rateLimitIsMapped() async {
         let client = makeClient(
             status: 429,
             body: Data("{}".utf8),
@@ -157,7 +159,7 @@ struct ASCCachingTransportTests {
     }
 
     @Test("Should not share cached responses between accounts")
-    func accountsDoNotShareCache() async throws {
+    func accountsDoNotShareCache() async {
         let firstAccountClient = makeClient(accountID: "account-a")
         let secondAccountClient = makeClient(accountID: "account-b", resetStub: false)
 
@@ -172,7 +174,7 @@ struct ASCCachingTransportTests {
     }
 
     @Test("Should not reuse a response that failed to decode")
-    func undecodableResponseIsNotReused() async throws {
+    func undecodableResponseIsNotReused() async {
         let client = makeClient(body: Data(#"{"data":"not-an-array"}"#.utf8))
 
         for _ in 0 ..< 2 {
@@ -189,7 +191,7 @@ struct ASCCachingTransportTests {
     }
 
     @Test("Should invalidate cache after a mutating request")
-    func mutationInvalidatesCache() async throws {
+    func mutationInvalidatesCache() async {
         let client = makeClient()
 
         _ = await ASCCache.cached(ttl: 300) {
@@ -226,9 +228,13 @@ final class StubURLProtocol: URLProtocol, @unchecked Sendable {
         }
     }
 
-    override class func canInit(with _: URLRequest) -> Bool { true }
+    override class func canInit(with _: URLRequest) -> Bool {
+        true
+    }
 
-    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        request
+    }
 
     override func startLoading() {
         let (status, body, headers) = Self.lock.withLock {

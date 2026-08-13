@@ -108,8 +108,8 @@ struct ASCResponseCacheTests {
     @Test("Should keep query parameters distinct in keys")
     func distinctQueriesProduceDistinctKeys() throws {
         let cache = makeCache()
-        let firstURL = URL(string: "https://api.appstoreconnect.apple.com/v1/apps?limit=1")!
-        let secondURL = URL(string: "https://api.appstoreconnect.apple.com/v1/apps?limit=10")!
+        let firstURL = try #require(URL(string: "https://api.appstoreconnect.apple.com/v1/apps?limit=1"))
+        let secondURL = try #require(URL(string: "https://api.appstoreconnect.apple.com/v1/apps?limit=10"))
         let firstKey = try #require(cache.keyRequest(for: .init(url: firstURL), scope: "account-a.0"))
         let secondKey = try #require(cache.keyRequest(for: .init(url: secondURL), scope: "account-a.0"))
 

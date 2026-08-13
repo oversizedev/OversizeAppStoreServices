@@ -35,11 +35,13 @@ public actor VersionsService: VersionsServicesProtocol {
             nil
         }
         return await ASCCache.cached(force: force) {
-            let request = Resources.v1.apps.id(appId).appStoreVersions.get(filterPlatform: filterPlatforms)
-            let response = try await client.send(request)
-            return response.data
+            let request = Resources.v1.apps.id(appId).appStoreVersions.get(
+                filterPlatform: filterPlatforms,
+                include: [.build],
+            )
+            return try await client.send(request)
         }.map { data in
-            data.compactMap { .init(schema: $0) }
+            data.data.compactMap { .init(schema: $0, included: data.included) }
         }
     }
 
@@ -79,6 +81,32 @@ public actor VersionsService: VersionsServicesProtocol {
             return .success(data.compactMap { .init(schema: $0) })
         } catch {
             return .failure(NetworkError.noResponse)
+        }
+    }
+
+    public func fetchRelisedAppVersionsIncludeLocalizations(appId: String, platform: Platform? = nil, limit: Int? = nil, force: Bool = false) async -> Result<[AppStoreVersion], Error> {
+        let filterPlatforms: [Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform]? = if let platform, let filteredPlatform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform = .init(rawValue: platform.rawValue) {
+            [filteredPlatform]
+        } else {
+            nil
+        }
+        return await ASCCache.cached(force: force) {
+            let request = Resources.v1.apps.id(appId).appStoreVersions.get(
+                filterPlatform: filterPlatforms,
+                filterAppVersionState: [
+                    .replacedWithNewVersion,
+                    .readyForDistribution,
+                ],
+                limit: limit,
+                include: [
+                    .appStoreVersionLocalizations,
+                ],
+                limitAppStoreVersionLocalizations: 50,
+            )
+
+            return try await client.send(request)
+        }.map { data in
+            data.data.compactMap { .init(schema: $0, included: data.included) }
         }
     }
 

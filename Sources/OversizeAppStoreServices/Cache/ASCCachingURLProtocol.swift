@@ -74,7 +74,8 @@ final class ASCCachingURLProtocol: URLProtocol {
         let keyRequest = cache.keyRequest(for: request, scope: scope)
 
         if !force, let url = request.url, let keyRequest,
-           let cached = cache.cachedResponse(for: keyRequest, originalURL: url, ttl: ttl) {
+           let cached = cache.cachedResponse(for: keyRequest, originalURL: url, ttl: ttl)
+        {
             finish(response: cached.response, data: cached.data)
             return
         }

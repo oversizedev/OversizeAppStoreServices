@@ -32,7 +32,9 @@ struct ASCValueCacheTests {
         )
     }
 
-    private func account() -> String { "asc-value-tests-\(UUID().uuidString)" }
+    private func account() -> String {
+        "asc-value-tests-\(UUID().uuidString)"
+    }
 
     @Test("Should return the stored value for the same key")
     func storeAndLoadRoundTrip() {

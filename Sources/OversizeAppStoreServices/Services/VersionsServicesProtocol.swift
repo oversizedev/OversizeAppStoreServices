@@ -11,6 +11,7 @@ public protocol VersionsServicesProtocol: Sendable {
     func fetchAppVersions(appId: String, platform: Platform?, force: Bool) async -> Result<[AppStoreVersion], Error>
     func fetchEditableAppStoreVersion(appId: String, platform: Platform?, force: Bool) async -> Result<[AppStoreVersion], Error>
     func fetchRelisedAppVersions(appId: String) async -> Result<[AppStoreVersion], Error>
+    func fetchRelisedAppVersionsIncludeLocalizations(appId: String, platform: Platform?, limit: Int?, force: Bool) async -> Result<[AppStoreVersion], Error>
     func fetchActualAppStoreVersions(appId: String, platform: Platform?, force: Bool) async -> Result<[AppStoreVersion], Error>
     func fetchActualAppStoreVersionsIncludeBuilds(appId: String, platform: Platform?, limit: Int?, force: Bool) async -> Result<[AppStoreVersion], Error>
     func fetchAppVersions(appId: String, platform: Resources.V1.Apps.WithID.AppStoreVersions.FilterPlatform) async -> Result<[AppStoreVersion], Error>
@@ -81,6 +82,14 @@ public extension VersionsServicesProtocol {
 
     func fetchAppVersionLocalizations(versionId: String) async -> Result<[AppStoreVersionLocalization], Error> {
         await fetchAppVersionLocalizations(versionId: versionId, force: false)
+    }
+
+    func fetchRelisedAppVersionsIncludeLocalizations(appId: String) async -> Result<[AppStoreVersion], Error> {
+        await fetchRelisedAppVersionsIncludeLocalizations(appId: appId, platform: nil, limit: nil, force: false)
+    }
+
+    func fetchRelisedAppVersionsIncludeLocalizations(appId: String, platform: Platform?, force: Bool) async -> Result<[AppStoreVersion], Error> {
+        await fetchRelisedAppVersionsIncludeLocalizations(appId: appId, platform: platform, limit: nil, force: force)
     }
 
     func postVersion(appId: String, platform: Platform, versionString: String) async -> Result<AppStoreVersion, Error> {

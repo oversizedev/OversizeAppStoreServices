@@ -50,7 +50,7 @@ public struct MockVersionsService: VersionsServicesProtocol {
     }
 
     public func fetchAppVersions(appId _: String, platform _: Platform?, force _: Bool) async -> Result<[AppStoreVersion], Error> {
-        .success([MockAppStoreData.appStoreVersion])
+        .success(MockAppStoreData.appStoreVersions)
     }
 
     public func fetchEditableAppStoreVersion(appId _: String, platform _: Platform?, force _: Bool) async -> Result<[AppStoreVersion], Error> {
@@ -59,6 +59,10 @@ public struct MockVersionsService: VersionsServicesProtocol {
 
     public func fetchRelisedAppVersions(appId _: String) async -> Result<[AppStoreVersion], Error> {
         .success([MockAppStoreData.appStoreVersion])
+    }
+
+    public func fetchRelisedAppVersionsIncludeLocalizations(appId _: String, platform _: Platform?, limit _: Int?, force _: Bool) async -> Result<[AppStoreVersion], Error> {
+        .success(MockAppStoreData.releasedAppStoreVersions)
     }
 
     public func fetchActualAppStoreVersions(appId _: String, platform _: Platform?, force _: Bool) async -> Result<[AppStoreVersion], Error> {
@@ -141,8 +145,8 @@ public struct MockVersionsService: VersionsServicesProtocol {
 
 // MARK: - Mock data
 
-enum MockAppStoreData {
-    static var appStoreVersion: AppStoreVersion {
+public enum MockAppStoreData {
+    public static var appStoreVersion: AppStoreVersion {
         AppStoreVersion(
             id: "1",
             versionString: "1.2.0",
@@ -156,6 +160,169 @@ enum MockAppStoreData {
             isDownloadable: true,
             createdDate: Date(),
             included: nil,
+            relationships: nil,
+        )
+    }
+
+    public static var latestAppStoreVersion: AppStoreVersion {
+        AppStoreVersion(
+            id: "4",
+            versionString: "1.3.0",
+            platform: .ios,
+            storeState: .waitingForReview,
+            state: .waitingForReview,
+            copyright: "© 2026 Oversize",
+            reviewType: nil,
+            releaseType: .manual,
+            earliestReleaseDate: nil,
+            isDownloadable: false,
+            createdDate: Calendar.current.date(byAdding: .day, value: -2, to: Date()),
+            included: AppStoreVersion.Included(
+                app: nil,
+                build: build,
+                appStoreVersionLocalizations: [],
+                appStoreReviewDetails: [],
+                appStoreVersionExperiments: [],
+                appStoreVersionPhasedRelease: nil,
+                appStoreVersionSubmission: nil,
+                appClipDefaultExperience: nil,
+                alternativeDistributionPackage: nil,
+                gameCenterAppVersion: nil,
+                routingAppCoverage: nil,
+            ),
+            relationships: nil,
+        )
+    }
+
+    public static var appStoreVersions: [AppStoreVersion] {
+        [latestAppStoreVersion] + releasedAppStoreVersions + [macOsAppStoreVersion]
+    }
+
+    public static var macOsAppStoreVersion: AppStoreVersion {
+        AppStoreVersion(
+            id: "5",
+            versionString: "1.2.0",
+            platform: .macOs,
+            storeState: .readyForSale,
+            state: .readyForDistribution,
+            copyright: "© 2026 Oversize",
+            reviewType: nil,
+            releaseType: nil,
+            earliestReleaseDate: nil,
+            isDownloadable: true,
+            createdDate: Calendar.current.date(byAdding: .day, value: -20, to: Date()),
+            included: AppStoreVersion.Included(
+                app: nil,
+                build: build,
+                appStoreVersionLocalizations: [],
+                appStoreReviewDetails: [],
+                appStoreVersionExperiments: [],
+                appStoreVersionPhasedRelease: nil,
+                appStoreVersionSubmission: nil,
+                appClipDefaultExperience: nil,
+                alternativeDistributionPackage: nil,
+                gameCenterAppVersion: nil,
+                routingAppCoverage: nil,
+            ),
+            relationships: nil,
+        )
+    }
+
+    public static var build: Build {
+        Build(
+            id: "build-1",
+            version: "482",
+            uploadedDate: Calendar.current.date(byAdding: .day, value: -2, to: Date()) ?? Date(),
+            expirationDate: Calendar.current.date(byAdding: .day, value: 88, to: Date()) ?? Date(),
+            iconAssetToken: nil,
+            isExpired: false,
+            minOsVersion: "17.0",
+            lsMinimumSystemVersion: nil,
+            computedMinMacOsVersion: nil,
+            processingState: .valid,
+            buildAudienceType: nil,
+            relationships: .init(buildBundlesIds: nil),
+        )
+    }
+
+    public static var releasedAppStoreVersions: [AppStoreVersion] {
+        [
+            makeReleasedVersion(
+                id: "3",
+                versionString: "1.2.0",
+                state: .readyForDistribution,
+                daysAgo: 14,
+                whatsNew: [
+                    .englishUS: "Dark mode support and a redesigned dashboard.",
+                    .german: "Unterstützung für den Dunkelmodus und ein neu gestaltetes Dashboard.",
+                    .russian: "Поддержка тёмной темы и обновлённая панель.",
+                ],
+            ),
+            makeReleasedVersion(
+                id: "2",
+                versionString: "1.1.0",
+                state: .replacedWithNewVersion,
+                daysAgo: 96,
+                whatsNew: [
+                    .englishUS: "Faster sync and bug fixes.",
+                    .russian: "Ускоренная синхронизация и исправление ошибок.",
+                ],
+            ),
+            makeReleasedVersion(
+                id: "1",
+                versionString: "1.0.0",
+                state: .replacedWithNewVersion,
+                daysAgo: 210,
+                whatsNew: [
+                    .englishUS: "First release.",
+                ],
+            ),
+        ]
+    }
+
+    static func makeReleasedVersion(
+        id: String,
+        versionString: String,
+        state: AppVersionState,
+        daysAgo: Int,
+        whatsNew: [AppStoreLanguage: String],
+    ) -> AppStoreVersion {
+        AppStoreVersion(
+            id: id,
+            versionString: versionString,
+            platform: .ios,
+            storeState: .readyForSale,
+            state: state,
+            copyright: "© 2026 Oversize",
+            reviewType: nil,
+            releaseType: nil,
+            earliestReleaseDate: nil,
+            isDownloadable: true,
+            createdDate: Calendar.current.date(byAdding: .day, value: -daysAgo, to: Date()),
+            included: AppStoreVersion.Included(
+                app: nil,
+                build: nil,
+                appStoreVersionLocalizations: whatsNew.map { locale, text in
+                    AppStoreVersionLocalization(
+                        id: "\(id)-\(locale.rawValue)",
+                        locale: locale,
+                        description: "Mock description for \(locale.displayName).",
+                        keywords: "mock,preview,appstore",
+                        marketingURL: nil,
+                        promotionalText: "Mock promotional text.",
+                        supportURL: nil,
+                        whatsNew: text,
+                    )
+                },
+                appStoreReviewDetails: [],
+                appStoreVersionExperiments: [],
+                appStoreVersionPhasedRelease: nil,
+                appStoreVersionSubmission: nil,
+                appClipDefaultExperience: nil,
+                alternativeDistributionPackage: nil,
+                gameCenterAppVersion: nil,
+                routingAppCoverage: nil,
+            ),
             relationships: nil,
         )
     }
