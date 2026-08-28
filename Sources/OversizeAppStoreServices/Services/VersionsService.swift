@@ -325,7 +325,7 @@ public actor VersionsService: VersionsServicesProtocol {
         copyright: String? = nil,
         reviewType: ReviewType? = nil,
         releaseType: ReleaseType? = nil,
-        earliestReleaseDate _: Date? = nil,
+        earliestReleaseDate: Date? = nil,
         isDownloadable: Bool? = nil,
     ) async -> Result<AppStoreVersion, Error> {
         let requestAttributes: AppStoreVersionUpdateRequest.Data.Attributes = .init(
@@ -333,7 +333,7 @@ public actor VersionsService: VersionsServicesProtocol {
             copyright: copyright,
             reviewType: .init(rawValue: reviewType?.rawValue ?? ""),
             releaseType: .init(rawValue: releaseType?.rawValue ?? ""),
-            // earliestReleaseDate: earliestReleaseDate,
+            earliestReleaseDate: earliestReleaseDate,
             isDownloadable: isDownloadable,
         )
 

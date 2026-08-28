@@ -52,6 +52,7 @@ public struct Subscription: Sendable, Identifiable {
             promotionalOffersIds: schema.relationships?.promotionalOffers?.data?.map { $0.id },
             winBackOffersIds: schema.relationships?.winBackOffers?.data?.map { $0.id },
             imagesIds: schema.relationships?.images?.data?.map { $0.id },
+            versionsIds: schema.relationships?.versions?.data?.map { $0.id },
         )
 
         self.included = .init(included: included)
@@ -130,6 +131,7 @@ public struct Subscription: Sendable, Identifiable {
         public var promotionalOffersIds: [String]?
         public var winBackOffersIds: [String]?
         public var imagesIds: [String]?
+        public var versionsIds: [String]?
 
         public init(
             subscriptionLocalizationsIds: [String]? = nil,
@@ -143,6 +145,7 @@ public struct Subscription: Sendable, Identifiable {
             promotionalOffersIds: [String]? = nil,
             winBackOffersIds: [String]? = nil,
             imagesIds: [String]? = nil,
+            versionsIds: [String]? = nil,
         ) {
             self.subscriptionLocalizationsIds = subscriptionLocalizationsIds
             self.subscriptionPricesIds = subscriptionPricesIds
@@ -155,6 +158,7 @@ public struct Subscription: Sendable, Identifiable {
             self.promotionalOffersIds = promotionalOffersIds
             self.winBackOffersIds = winBackOffersIds
             self.imagesIds = imagesIds
+            self.versionsIds = versionsIds
         }
     }
 
@@ -170,6 +174,7 @@ public struct Subscription: Sendable, Identifiable {
         public let promotionalOffers: [SubscriptionPromotionalOffer]?
         public let winBackOffers: [WinBackOffer]?
         public let subscriptionImages: [SubscriptionImage]?
+        public let versions: [SubscriptionVersion]?
 
         public init(
             subscriptionLocalizations: [SubscriptionLocalization]? = nil,
@@ -183,6 +188,7 @@ public struct Subscription: Sendable, Identifiable {
             promotionalOffers: [SubscriptionPromotionalOffer]? = nil,
             winBackOffers: [WinBackOffer]? = nil,
             subscriptionImages: [SubscriptionImage]? = nil,
+            versions: [SubscriptionVersion]? = nil,
         ) {
             self.subscriptionLocalizations = subscriptionLocalizations
             self.subscriptionPrices = subscriptionPrices
@@ -195,6 +201,7 @@ public struct Subscription: Sendable, Identifiable {
             self.promotionalOffers = promotionalOffers
             self.winBackOffers = winBackOffers
             self.subscriptionImages = subscriptionImages
+            self.versions = versions
         }
 
         public init?(included: [SubscriptionResponse.IncludedItem]?) {
@@ -270,6 +277,13 @@ public struct Subscription: Sendable, Identifiable {
 
             subscriptionImages = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> SubscriptionImage? in
                 if case let .subscriptionImage(value) = item {
+                    return .init(schema: value)
+                }
+                return nil
+            }
+
+            versions = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> SubscriptionVersion? in
+                if case let .subscriptionVersion(value) = item {
                     return .init(schema: value)
                 }
                 return nil

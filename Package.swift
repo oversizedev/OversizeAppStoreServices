@@ -4,7 +4,7 @@ import Foundation
 import PackageDescription
 
 let commonDependencies: [PackageDescription.Package.Dependency] = [
-    .package(url: "https://github.com/aaronsky/asc-swift.git", .upToNextMajor(from: "1.7.0")),
+    .package(url: "https://github.com/aaronsky/asc-swift.git", .upToNextMajor(from: "1.7.1")),
     .package(url: "https://github.com/1024jp/GzipSwift", .upToNextMajor(from: "7.0.0")),
     .package(url: "https://github.com/dehesa/CodableCSV.git", .upToNextMajor(from: "0.6.7")),
     .package(url: "https://github.com/apple/swift-crypto.git", .upToNextMajor(from: "4.0.0")),

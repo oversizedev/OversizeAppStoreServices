@@ -30,6 +30,7 @@ public actor SubscriptionsService {
                 include: [
                     .subscriptions,
                     .subscriptionGroupLocalizations,
+                    .versions,
                 ],
             )
             return try await client.send(request)
@@ -64,6 +65,7 @@ public actor SubscriptionsService {
                     .promotedPurchase,
                     .winBackOffers,
                     .images,
+                    .versions,
                 ],
             )
             return try await client.send(request)

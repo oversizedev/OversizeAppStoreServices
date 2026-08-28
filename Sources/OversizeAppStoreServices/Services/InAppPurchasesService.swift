@@ -48,6 +48,7 @@ public actor InAppPurchasesService {
                 .inAppPurchaseLocalizations,
                 .pricePoints,
                 .promotedPurchase,
+                .versions,
             ])
             return try await client.send(request)
         }.flatMap {
@@ -68,6 +69,7 @@ public actor InAppPurchasesService {
                 .inAppPurchaseLocalizations,
                 .pricePoints,
                 .promotedPurchase,
+                .versions,
             ])
             return try await client.send(request)
         }.flatMap {

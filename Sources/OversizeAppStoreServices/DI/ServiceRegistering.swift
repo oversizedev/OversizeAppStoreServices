@@ -43,7 +43,7 @@ public extension Container {
         self { AppInfoService(authenticator: EnvAuthenticator()) }
     }
 
-    var appStoreReviewService: Factory<AppStoreReviewService> {
+    var appStoreReviewService: Factory<any AppStoreReviewServicesProtocol> {
         self { AppStoreReviewService(authenticator: EnvAuthenticator()) }
     }
 
@@ -51,7 +51,7 @@ public extension Container {
         self { AppCategoryService(authenticator: EnvAuthenticator()) }
     }
 
-    var reviewSubmissionsService: Factory<ReviewSubmissionsService> {
+    var reviewSubmissionsService: Factory<any ReviewSubmissionsServicesProtocol> {
         self { ReviewSubmissionsService(authenticator: EnvAuthenticator()) }
     }
 

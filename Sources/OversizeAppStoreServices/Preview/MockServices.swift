@@ -143,6 +143,86 @@ public struct MockVersionsService: VersionsServicesProtocol {
     }
 }
 
+public struct MockReviewSubmissionsService: ReviewSubmissionsServicesProtocol {
+    public init() {}
+
+    public func postReviewSubmission(appId _: String, platform _: Platform) async -> Result<ReviewSubmission, Error> {
+        .success(MockAppStoreData.reviewSubmission)
+    }
+
+    public func postReviewSubmissionItems(reviewSubmissionId _: String, appStoreVersionsId _: String) async -> Result<ReviewSubmissionItem, Error> {
+        .success(MockAppStoreData.reviewSubmissionItem)
+    }
+
+    public func patchReviewSubmissions(reviewSubmissionId _: String, isSubmitted _: Bool, isCanceled _: Bool?) async -> Result<ReviewSubmission, Error> {
+        .success(MockAppStoreData.reviewSubmission)
+    }
+
+    public func postAppStoreVersionSubmissionWithItems(appId _: String, appStoreVersionsId _: String, platform _: Platform) async -> Result<ReviewSubmission, Error> {
+        .success(MockAppStoreData.reviewSubmission)
+    }
+
+    public func fetchReviewSubmissions(appId _: String) async -> Result<[ReviewSubmission], Error> {
+        .success(MockAppStoreData.reviewSubmissions)
+    }
+
+    public func fetchReviewSubmissionsIncludedAll(appId _: String, force _: Bool) async -> Result<[ReviewSubmission], Error> {
+        .success(MockAppStoreData.reviewSubmissions)
+    }
+
+    public func fetchReviewSubmissionItemsIncludedAll(reviewSubmissionId _: String, force _: Bool) async -> Result<[ReviewSubmissionItem], Error> {
+        .success(MockAppStoreData.reviewSubmissionItems)
+    }
+
+    public func cancelReviewSubmission(id _: String) async -> Result<Void, Error> {
+        .success(())
+    }
+
+    public func cancelIrisReviewSubmission(id _: String) async -> Result<Void, Error> {
+        .success(())
+    }
+}
+
+public struct MockAppStoreReviewService: AppStoreReviewServicesProtocol {
+    public init() {}
+
+    public func fetchAppStoreReviewDetail(versionId _: String) async -> Result<AppStoreReviewDetail, Error> {
+        .success(MockAppStoreData.appStoreReviewDetail)
+    }
+
+    public func fetchAppStoreReviewDetailAttachments(versionId _: String) async -> Result<[AppStoreReviewAttachment], Error> {
+        .success([])
+    }
+
+    public func patchAppStoreReviewDetail(
+        appStoreReviewDetailId _: String,
+        contactFirstName _: String?,
+        contactLastName _: String?,
+        contactPhone _: String?,
+        contactEmail _: String?,
+        demoAccountName _: String?,
+        demoAccountPassword _: String?,
+        isDemoAccountRequired _: Bool?,
+        notes _: String?,
+    ) async -> Result<AppStoreReviewDetail, Error> {
+        .success(MockAppStoreData.appStoreReviewDetail)
+    }
+
+    public func postAppStoreReviewDetail(
+        versionId _: String,
+        contactFirstName _: String?,
+        contactLastName _: String?,
+        contactPhone _: String?,
+        contactEmail _: String?,
+        demoAccountName _: String?,
+        demoAccountPassword _: String?,
+        isDemoAccountRequired _: Bool?,
+        notes _: String?,
+    ) async -> Result<AppStoreReviewDetail, Error> {
+        .success(MockAppStoreData.appStoreReviewDetail)
+    }
+}
+
 // MARK: - Mock data
 
 public enum MockAppStoreData {
@@ -327,6 +407,163 @@ public enum MockAppStoreData {
         )
     }
 
+    // MARK: - Review submissions
+
+    public static var reviewSubmission: ReviewSubmission {
+        makeReviewSubmission(
+            id: "submission-1",
+            state: .inReview,
+            daysAgo: 1,
+            version: latestAppStoreVersion,
+            items: reviewSubmissionItems,
+        )
+    }
+
+    public static var reviewSubmissions: [ReviewSubmission] {
+        [
+            reviewSubmission,
+            makeReviewSubmission(
+                id: "submission-2",
+                state: .unresolvedIssues,
+                daysAgo: 6,
+                version: latestAppStoreVersion,
+                items: [makeReviewSubmissionItem(id: "item-rejected", state: .rejected, version: latestAppStoreVersion)],
+            ),
+            makeReviewSubmission(
+                id: "submission-3",
+                state: .complete,
+                daysAgo: 14,
+                version: appStoreVersion,
+                items: [makeReviewSubmissionItem(id: "item-approved", state: .approved, version: appStoreVersion)],
+            ),
+            makeReviewSubmission(
+                id: "submission-4",
+                state: .complete,
+                daysAgo: 20,
+                version: macOsAppStoreVersion,
+                items: [makeReviewSubmissionItem(id: "item-macos", state: .approved, version: macOsAppStoreVersion)],
+            ),
+        ]
+    }
+
+    public static var reviewSubmissionItem: ReviewSubmissionItem {
+        makeReviewSubmissionItem(id: "item-1", state: .readyForReview, version: latestAppStoreVersion)
+    }
+
+    public static var reviewSubmissionItems: [ReviewSubmissionItem] {
+        [
+            makeReviewSubmissionItem(id: "item-1", state: .readyForReview, version: latestAppStoreVersion),
+            makeReviewSubmissionItem(id: "item-2", state: .accepted, version: nil),
+        ]
+    }
+
+    public static var appStoreReviewDetail: AppStoreReviewDetail {
+        AppStoreReviewDetail(
+            id: "review-detail-1",
+            contactFirstName: "Alexander",
+            contactLastName: "Romanov",
+            contactPhone: "+1 555 0100",
+            contactEmail: "review@oversize.dev",
+            demoAccountName: "demo@oversize.dev",
+            demoAccountPassword: "demo-password",
+            isDemoAccountRequired: true,
+            notes: "The app requires an App Store Connect API key to sign in. Use the demo account above.",
+        )
+    }
+
+    static var submittedByActor: Actor {
+        Actor(
+            id: "actor-1",
+            actorType: .user,
+            userFirstName: "Alexander",
+            userLastName: "Romanov",
+            userEmail: "aromanov@oversize.dev",
+            apiKeyId: nil,
+        )
+    }
+
+    static var lastUpdatedByActor: Actor {
+        Actor(
+            id: "actor-2",
+            actorType: .apple,
+            userFirstName: nil,
+            userLastName: nil,
+            userEmail: nil,
+            apiKeyId: nil,
+        )
+    }
+
+    static func makeReviewSubmission(
+        id: String,
+        state: ReviewSubmissionState,
+        daysAgo: Int,
+        version: AppStoreVersion?,
+        items: [ReviewSubmissionItem],
+    ) -> ReviewSubmission {
+        ReviewSubmission(
+            id: id,
+            platform: version?.platform ?? .ios,
+            submittedDate: Calendar.current.date(byAdding: .day, value: -daysAgo, to: Date()),
+            state: state,
+            relationships: .init(
+                appId: app.id,
+                itemIds: items.map(\.id),
+                appStoreVersionForReviewId: version?.id,
+                submittedByActorId: submittedByActor.id,
+                lastUpdatedByActorId: lastUpdatedByActor.id,
+            ),
+            included: .init(
+                app: app,
+                appStoreVersionForReview: version,
+                reviewSubmissionItems: items,
+                submittedByActor: submittedByActor,
+                lastUpdatedByActor: lastUpdatedByActor,
+            ),
+        )
+    }
+
+    static func makeReviewSubmissionItem(
+        id: String,
+        state: ReviewSubmissionItem.State,
+        version: AppStoreVersion?,
+    ) -> ReviewSubmissionItem {
+        ReviewSubmissionItem(
+            id: id,
+            state: state,
+            relationships: .init(
+                appStoreVersionId: version?.id,
+                appCustomProductPageVersionId: nil,
+                appStoreVersionExperimentId: nil,
+                appStoreVersionExperimentV2Id: nil,
+                appEventId: nil,
+                backgroundAssetVersionId: nil,
+                gameCenterAchievementVersionId: nil,
+                gameCenterActivityVersionId: nil,
+                gameCenterChallengeVersionId: nil,
+                gameCenterLeaderboardSetVersionId: nil,
+                gameCenterLeaderboardVersionId: nil,
+                inAppPurchaseVersionId: nil,
+                subscriptionVersionId: nil,
+                subscriptionGroupVersionId: nil,
+            ),
+            included: .init(
+                appStoreVersion: version,
+                appCustomProductPageVersion: nil,
+                appStoreVersionExperiment: nil,
+                appEvent: nil,
+                backgroundAssetVersion: nil,
+                gameCenterAchievementVersionV2: nil,
+                gameCenterActivityVersion: nil,
+                gameCenterChallengeVersion: nil,
+                gameCenterLeaderboardSetVersionV2: nil,
+                gameCenterLeaderboardVersionV2: nil,
+                inAppPurchaseVersion: nil,
+                subscriptionVersion: nil,
+                subscriptionGroupVersion: nil,
+            ),
+        )
+    }
+
     static var app: App {
         App(
             id: "1",
@@ -344,6 +581,80 @@ public enum MockAppStoreData {
 }
 
 // MARK: - Preview memberwise init
+
+extension ReviewSubmission {
+    init(
+        id: String,
+        platform: Platform?,
+        submittedDate: Date?,
+        state: ReviewSubmissionState?,
+        relationships: Relationships?,
+        included: Included?,
+    ) {
+        self.id = id
+        self.platform = platform
+        self.submittedDate = submittedDate
+        self.state = state
+        self.relationships = relationships
+        self.included = included
+    }
+}
+
+extension ReviewSubmissionItem {
+    init(
+        id: String,
+        state: State?,
+        relationships: Relationships?,
+        included: Included?,
+    ) {
+        self.id = id
+        self.state = state
+        self.relationships = relationships
+        self.included = included
+    }
+}
+
+extension Actor {
+    init(
+        id: String,
+        actorType: ActorType?,
+        userFirstName: String?,
+        userLastName: String?,
+        userEmail: String?,
+        apiKeyId: String?,
+    ) {
+        self.id = id
+        self.actorType = actorType
+        self.userFirstName = userFirstName
+        self.userLastName = userLastName
+        self.userEmail = userEmail
+        self.apiKeyId = apiKeyId
+    }
+}
+
+extension AppStoreReviewDetail {
+    init(
+        id: String,
+        contactFirstName: String,
+        contactLastName: String,
+        contactPhone: String,
+        contactEmail: String,
+        demoAccountName: String,
+        demoAccountPassword: String,
+        isDemoAccountRequired: Bool,
+        notes: String,
+    ) {
+        self.id = id
+        self.contactFirstName = contactFirstName
+        self.contactLastName = contactLastName
+        self.contactPhone = contactPhone
+        self.contactEmail = contactEmail
+        self.demoAccountName = demoAccountName
+        self.demoAccountPassword = demoAccountPassword
+        self.isDemoAccountRequired = isDemoAccountRequired
+        self.notes = notes
+    }
+}
 
 extension App {
     init(

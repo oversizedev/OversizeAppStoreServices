@@ -50,6 +50,12 @@ public struct AppCategory: Identifiable, Sendable {
     }
 }
 
+extension AppCategory: Equatable {
+    public static func == (lhs: AppCategory, rhs: AppCategory) -> Bool {
+        lhs.id == rhs.id
+    }
+}
+
 public extension AppCategory {
     var displayName: String {
         switch id {

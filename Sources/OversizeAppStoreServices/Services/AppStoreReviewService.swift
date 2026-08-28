@@ -8,7 +8,7 @@ import AppStoreConnect
 import Foundation
 import OversizeCore
 
-public actor AppStoreReviewService {
+public actor AppStoreReviewService: AppStoreReviewServicesProtocol {
     private let client: AppStoreConnectClient
 
     public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {

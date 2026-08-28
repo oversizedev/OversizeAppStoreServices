@@ -8,7 +8,7 @@ import AppStoreConnect
 import Foundation
 import OversizeCore
 
-public actor ReviewSubmissionsService {
+public actor ReviewSubmissionsService: ReviewSubmissionsServicesProtocol {
     private let client: AppStoreConnectClient
 
     public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
@@ -190,6 +190,9 @@ public actor ReviewSubmissionsService {
                     .gameCenterChallengeVersion,
                     .gameCenterLeaderboardSetVersion,
                     .gameCenterLeaderboardVersion,
+                    .inAppPurchaseVersion,
+                    .subscriptionVersion,
+                    .subscriptionGroupVersion,
                 ],
             )
             return try await client.send(request)
