@@ -724,3 +724,13 @@ public extension TerritoryCode {
         }
     }
 }
+
+public extension TerritoryCode {
+    var alpha2Code: String? {
+        if self == .xks {
+            return "XK"
+        }
+        let identifier = Locale(identifier: "und_\(rawValue)").region?.identifier ?? ""
+        return identifier.count == 2 ? identifier.uppercased() : nil
+    }
+}

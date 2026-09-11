@@ -56,6 +56,7 @@ public enum ASCCache {
         public static let `default`: TimeInterval = 300
         public static let long: TimeInterval = 60 * 60
         public static let veryLong: TimeInterval = 60 * 60 * 24
+        public static let week: TimeInterval = 60 * 60 * 24 * 7
         public static let month: TimeInterval = 60 * 60 * 24 * 30
     }
 }

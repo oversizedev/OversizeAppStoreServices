@@ -15,10 +15,17 @@ import OversizeCore
 
 public actor AnalyticsService {
     private let client: AppStoreConnectClient
+    private let territoryDownloadsCache: ASCValueCache
     private static let maxConcurrentDownloads = 4
 
     public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
-        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: cacheAccountID)
+        let resolvedAccountID = ASCClientFactory.resolveCacheAccountID(for: authenticator, explicit: cacheAccountID)
+        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: resolvedAccountID)
+        territoryDownloadsCache = ASCValueCache(
+            namespace: "territory-downloads",
+            ttl: ASCCache.TTL.week,
+            accountID: resolvedAccountID,
+        )
     }
 
     // MARK: - Report Requests
@@ -266,33 +273,87 @@ public actor AnalyticsService {
         guard !instances.isEmpty else { return .success([]) }
 
         do {
-            let tables = try await withThrowingTaskGroup(of: AnalyticsReportData.self) { group in
-                var results: [AnalyticsReportData] = []
-                var nextIndex = 0
-                while nextIndex < instances.count, nextIndex < Self.maxConcurrentDownloads {
+            let tables = try await fetchTables(instances: instances)
+            let points = Self.aggregate(tables: tables, metric: metric, cutoff: cutoff)
+            return .success(points)
+        } catch {
+            Log.error("Fetch metric series failed for \(metric.rawValue)", error: error)
+            return .failure(error.asNetworkError)
+        }
+    }
+
+    // MARK: - Territory Downloads
+
+    public func fetchTerritoryDownloads(
+        appId: String,
+        days: Int = 30,
+        force: Bool = false,
+    ) async -> Result<[TerritoryDownloads], Error> {
+        let cutoffDate = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
+        let cutoff = AnalyticsReportInstance.dateFormatter.string(from: cutoffDate)
+        let cacheKey = "\(appId):\(days):\(cutoff)"
+        if !force, let cached = territoryDownloadsCache.load([TerritoryDownloads].self, key: cacheKey) {
+            return .success(cached)
+        }
+        let metric = DashboardMetric.downloads
+        let requestResult = await ensureOngoingReportRequest(appId: appId)
+        guard case let .success(reportRequest) = requestResult else {
+            return .failure(requestResult.failureError ?? NetworkError.noResponse)
+        }
+        let reportsResult = await fetchReports(requestId: reportRequest.id, category: metric.category)
+        guard case let .success(reports) = reportsResult else {
+            return .failure(reportsResult.failureError ?? NetworkError.noResponse)
+        }
+        guard let report = reports.pickReport(matching: metric.reportNameCandidates) else {
+            Log.warning("No downloads report available for territory aggregation")
+            return .success([])
+        }
+        let instancesResult = await fetchReportInstances(reportId: report.id, granularity: .daily)
+        guard case let .success(allInstances) = instancesResult else {
+            return .failure(instancesResult.failureError ?? NetworkError.noResponse)
+        }
+        let instances = allInstances
+            .filter { $0.processingDate >= cutoff }
+            .sorted { $0.processingDate < $1.processingDate }
+        guard !instances.isEmpty else { return .success([]) }
+        do {
+            let tables = try await fetchTables(instances: instances)
+            let territories = TerritoryAggregation.aggregate(
+                tables: tables,
+                valueColumnCandidates: metric.valueColumnCandidates,
+                cutoff: cutoff,
+            )
+            territoryDownloadsCache.save(territories, key: cacheKey)
+            Log.info("Territory downloads aggregated for \(appId): \(territories.count) territories")
+            return .success(territories)
+        } catch {
+            Log.error("Fetch territory downloads failed", error: error)
+            return .failure(error.asNetworkError)
+        }
+    }
+
+    private func fetchTables(instances: [AnalyticsReportInstance]) async throws -> [AnalyticsReportData] {
+        try await withThrowingTaskGroup(of: AnalyticsReportData.self) { group in
+            var results: [AnalyticsReportData] = []
+            var nextIndex = 0
+            while nextIndex < instances.count, nextIndex < Self.maxConcurrentDownloads {
+                let instance = instances[nextIndex]
+                group.addTask { [self] in
+                    try await fetchReportData(instance: instance).get()
+                }
+                nextIndex += 1
+            }
+            while let table = try await group.next() {
+                results.append(table)
+                if nextIndex < instances.count {
                     let instance = instances[nextIndex]
                     group.addTask { [self] in
                         try await fetchReportData(instance: instance).get()
                     }
                     nextIndex += 1
                 }
-                while let table = try await group.next() {
-                    results.append(table)
-                    if nextIndex < instances.count {
-                        let instance = instances[nextIndex]
-                        group.addTask { [self] in
-                            try await fetchReportData(instance: instance).get()
-                        }
-                        nextIndex += 1
-                    }
-                }
-                return results
             }
-            let points = Self.aggregate(tables: tables, metric: metric, cutoff: cutoff)
-            return .success(points)
-        } catch {
-            Log.error("Fetch metric series failed for \(metric.rawValue)", error: error)
-            return .failure(error.asNetworkError)
+            return results
         }
     }
 
