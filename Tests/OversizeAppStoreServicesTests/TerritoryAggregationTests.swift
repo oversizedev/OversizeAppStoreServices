@@ -26,7 +26,7 @@ struct TerritoryAggregationTests {
 
     @Test("Downloads are summed per territory and mapped to storefront codes")
     func aggregatesByTerritory() throws {
-        let result = TerritoryAggregation.aggregate(tables: [try table()], cutoff: "2026-08-15")
+        let result = try TerritoryAggregation.aggregate(tables: [table()], cutoff: "2026-08-15")
         #expect(result.map(\.territoryLabel) == ["United States", "United Kingdom", "Brazil", "Narnia"])
         #expect(result.first?.downloads == 170)
         #expect(Set(result.map(\.id)).count == result.count)
@@ -40,9 +40,9 @@ struct TerritoryAggregationTests {
 
     @Test("Rows before the cutoff are ignored")
     func cutoffFiltersOldRows() throws {
-        let result = TerritoryAggregation.aggregate(tables: [try table()], cutoff: "2026-08-15")
+        let result = try TerritoryAggregation.aggregate(tables: [table()], cutoff: "2026-08-15")
         #expect(!result.contains { $0.territoryLabel == "Germany" })
-        let unfiltered = TerritoryAggregation.aggregate(tables: [try table()])
+        let unfiltered = try TerritoryAggregation.aggregate(tables: [table()])
         #expect(unfiltered.first?.territoryLabel == "Germany")
     }
 
