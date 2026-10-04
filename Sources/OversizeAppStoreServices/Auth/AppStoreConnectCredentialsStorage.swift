@@ -12,12 +12,16 @@ public extension AppStoreConnectCredentials {
 }
 
 public extension Keychain {
-    static let appStoreConnectCredentials = Keychain(service: AppStoreConnectCredentials.keychainService)
+    static let appStoreConnectCredentials = Keychain(
+        service: AppStoreConnectCredentials.keychainService,
+        synchronizable: true,
+        useDataProtectionKeychain: true,
+    )
 }
 
 public extension AppStoreConnectCredentials {
     static func stored(for accountID: UUID) throws -> Self? {
-        try Keychain.appStoreConnectCredentials.object(forKey: accountID.uuidString)
+        try stored(for: accountID, in: .appStoreConnectCredentials)
     }
 
     static func currentAccount() -> Self? {
@@ -28,15 +32,33 @@ public extension AppStoreConnectCredentials {
     }
 
     func save(for accountID: UUID) throws {
-        try Keychain.appStoreConnectCredentials.setObject(self, forKey: accountID.uuidString)
+        try save(for: accountID, in: .appStoreConnectCredentials)
     }
 
     static func remove(for accountID: UUID) throws {
-        try Keychain.appStoreConnectCredentials.remove(forKey: accountID.uuidString)
+        try remove(for: accountID, in: .appStoreConnectCredentials)
     }
 
     static func removeAll() throws {
-        try Keychain.appStoreConnectCredentials.removeAll()
+        try removeAll(in: .appStoreConnectCredentials)
+    }
+}
+
+extension AppStoreConnectCredentials {
+    static func stored(for accountID: UUID, in keychain: Keychain) throws -> Self? {
+        try keychain.object(forKey: accountID.uuidString)
+    }
+
+    func save(for accountID: UUID, in keychain: Keychain) throws {
+        try keychain.setObject(self, forKey: accountID.uuidString)
+    }
+
+    static func remove(for accountID: UUID, in keychain: Keychain) throws {
+        try keychain.remove(forKey: accountID.uuidString)
+    }
+
+    static func removeAll(in keychain: Keychain) throws {
+        try keychain.removeAll()
     }
 }
 #endif

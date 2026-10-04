@@ -10,6 +10,7 @@ import OversizeServices
 import Testing
 
 struct AppStoreConnectCredentialsStorageTests {
+    private let keychain = Keychain(service: "Tests.OversizeAppStoreServices.Credentials." + UUID().uuidString)
     private let credentials = AppStoreConnectCredentials(
         issuerID: "issuer",
         keyID: "KEY123",
@@ -22,21 +23,21 @@ struct AppStoreConnectCredentialsStorageTests {
         let accountID = UUID()
         let otherAccountID = UUID()
         defer {
-            try? AppStoreConnectCredentials.remove(for: accountID)
-            try? AppStoreConnectCredentials.remove(for: otherAccountID)
+            try? AppStoreConnectCredentials.remove(for: accountID, in: keychain)
+            try? AppStoreConnectCredentials.remove(for: otherAccountID, in: keychain)
         }
         let withoutVendor = AppStoreConnectCredentials(issuerID: "issuer", keyID: "KEY", privateKey: "pem")
 
-        try credentials.save(for: accountID)
-        try withoutVendor.save(for: otherAccountID)
+        try credentials.save(for: accountID, in: keychain)
+        try withoutVendor.save(for: otherAccountID, in: keychain)
 
-        #expect(try AppStoreConnectCredentials.stored(for: accountID) == credentials)
-        #expect(try AppStoreConnectCredentials.stored(for: otherAccountID)?.vendorNumber == nil)
+        #expect(try AppStoreConnectCredentials.stored(for: accountID, in: keychain) == credentials)
+        #expect(try AppStoreConnectCredentials.stored(for: otherAccountID, in: keychain)?.vendorNumber == nil)
     }
 
     @Test
     func unknownAccountIsNil() throws {
-        #expect(try AppStoreConnectCredentials.stored(for: UUID()) == nil)
+        #expect(try AppStoreConnectCredentials.stored(for: UUID(), in: keychain) == nil)
     }
 
     @Test
@@ -44,26 +45,26 @@ struct AppStoreConnectCredentialsStorageTests {
         let removed = UUID()
         let kept = UUID()
         defer {
-            try? AppStoreConnectCredentials.remove(for: removed)
-            try? AppStoreConnectCredentials.remove(for: kept)
+            try? AppStoreConnectCredentials.remove(for: removed, in: keychain)
+            try? AppStoreConnectCredentials.remove(for: kept, in: keychain)
         }
-        try credentials.save(for: removed)
-        try credentials.save(for: kept)
+        try credentials.save(for: removed, in: keychain)
+        try credentials.save(for: kept, in: keychain)
 
-        try AppStoreConnectCredentials.remove(for: removed)
+        try AppStoreConnectCredentials.remove(for: removed, in: keychain)
 
-        #expect(try AppStoreConnectCredentials.stored(for: removed) == nil)
-        #expect(try AppStoreConnectCredentials.stored(for: kept) == credentials)
+        #expect(try AppStoreConnectCredentials.stored(for: removed, in: keychain) == nil)
+        #expect(try AppStoreConnectCredentials.stored(for: kept, in: keychain) == credentials)
     }
 
     @Test
     func readsItemsWrittenInTheExistingFormat() throws {
         let accountID = UUID()
-        defer { try? AppStoreConnectCredentials.remove(for: accountID) }
+        defer { try? AppStoreConnectCredentials.remove(for: accountID, in: keychain) }
         let stored = Data(#"{"issuerID":"issuer","keyID":"KEY123","privateKey":"pem","vendorNumber":"8000000"}"#.utf8)
-        try Keychain.appStoreConnectCredentials.set(stored, forKey: accountID.uuidString)
+        try keychain.set(stored, forKey: accountID.uuidString)
 
-        #expect(try AppStoreConnectCredentials.stored(for: accountID) == AppStoreConnectCredentials(
+        #expect(try AppStoreConnectCredentials.stored(for: accountID, in: keychain) == AppStoreConnectCredentials(
             issuerID: "issuer",
             keyID: "KEY123",
             privateKey: "pem",
