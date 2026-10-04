@@ -5,11 +5,12 @@
 
 #if canImport(Darwin)
 import AppStoreConnect
+import FactoryKit
 import Foundation
 import OversizeCore
+import OversizeServices
 
 public struct EnvAuthenticator: Authenticator {
-    private let credentialsStorage = AppStoreConnectCredentialsStorage()
     private let configuredAPI: API
     private var jwt: JWT?
     public let accountID: UUID?
@@ -43,7 +44,7 @@ public struct EnvAuthenticator: Authenticator {
             throw Error.missingEnvironmentVariable("AppStore.Account")
         }
 
-        guard let credentials = credentialsStorage.credentials(for: accountID) else {
+        guard let credentials = try AppStoreConnectCredentials.stored(for: accountID) else {
             Log.error("Get Keychain value for App Store Connect credentials")
             throw Error.missingEnvironmentVariable("AppStore.Key.Default")
         }

@@ -1,103 +1,42 @@
 //
 // Copyright © 2026 Alexander Romanov
-// AppStoreConnectCredentialsStorage.swift, created on 08.07.2026
+// AppStoreConnectCredentialsStorage.swift, created on 03.10.2026
 //
 
 #if canImport(Darwin)
 import Foundation
-import Security
+import OversizeServices
 
-public struct AppStoreConnectCredentials: Codable, Sendable, Equatable {
-    public let issuerID: String
-    public let keyID: String
-    public let privateKey: String
-    public let vendorNumber: String?
-
-    public init(issuerID: String, keyID: String, privateKey: String, vendorNumber: String? = nil) {
-        self.issuerID = issuerID
-        self.keyID = keyID
-        self.privateKey = privateKey
-        self.vendorNumber = vendorNumber
-    }
+public extension AppStoreConnectCredentials {
+    static let keychainService = "AppConnector.AppStoreConnectCredentials"
 }
 
-public struct AppStoreConnectCredentialsStorage: Sendable {
-    public enum StorageError: Error {
-        case encodingFailed
-        case keychain(OSStatus)
+public extension Keychain {
+    static let appStoreConnectCredentials = Keychain(service: AppStoreConnectCredentials.keychainService)
+}
+
+public extension AppStoreConnectCredentials {
+    static func stored(for accountID: UUID) throws -> Self? {
+        try Keychain.appStoreConnectCredentials.object(forKey: accountID.uuidString)
     }
 
-    public static let service = "AppConnector.AppStoreConnectCredentials"
-
-    public init() {}
-
-    public func save(_ credentials: AppStoreConnectCredentials, for accountID: UUID) throws {
-        guard let data = try? JSONEncoder().encode(credentials) else {
-            throw StorageError.encodingFailed
-        }
-
-        var addQuery = baseQuery(for: accountID)
-        addQuery[kSecAttrAccessible] = kSecAttrAccessibleAfterFirstUnlock
-        addQuery[kSecValueData] = data
-
-        let addStatus = SecItemAdd(addQuery as CFDictionary, nil)
-        switch addStatus {
-        case errSecSuccess:
-            return
-        case errSecDuplicateItem:
-            let updateStatus = SecItemUpdate(
-                baseQuery(for: accountID) as CFDictionary,
-                [kSecValueData: data] as CFDictionary,
-            )
-            guard updateStatus == errSecSuccess else {
-                throw StorageError.keychain(updateStatus)
-            }
-        default:
-            throw StorageError.keychain(addStatus)
-        }
-    }
-
-    public func credentials(for accountID: UUID) -> AppStoreConnectCredentials? {
-        var query = baseQuery(for: accountID)
-        query[kSecReturnData] = kCFBooleanTrue
-        query[kSecMatchLimit] = kSecMatchLimitOne
-
-        var result: AnyObject?
-        let status = SecItemCopyMatching(query as CFDictionary, &result)
-        guard status == errSecSuccess, let data = result as? Data else {
-            return nil
-        }
-        return try? JSONDecoder().decode(AppStoreConnectCredentials.self, from: data)
-    }
-
-    public func currentAccountCredentials() -> AppStoreConnectCredentials? {
+    static func currentAccount() -> Self? {
         guard let accountValue = UserDefaults.standard.string(forKey: "AppStore.Account"),
               let accountID = UUID(uuidString: accountValue)
         else { return nil }
-        return credentials(for: accountID)
+        return try? stored(for: accountID)
     }
 
-    public func delete(for accountID: UUID) {
-        SecItemDelete(baseQuery(for: accountID) as CFDictionary)
+    func save(for accountID: UUID) throws {
+        try Keychain.appStoreConnectCredentials.setObject(self, forKey: accountID.uuidString)
     }
 
-    public func deleteAll() throws {
-        let query: [CFString: Any] = [
-            kSecClass: kSecClassGenericPassword,
-            kSecAttrService: Self.service,
-        ]
-        let status = SecItemDelete(query as CFDictionary)
-        guard status == errSecSuccess || status == errSecItemNotFound else {
-            throw StorageError.keychain(status)
-        }
+    static func remove(for accountID: UUID) throws {
+        try Keychain.appStoreConnectCredentials.remove(forKey: accountID.uuidString)
     }
 
-    private func baseQuery(for accountID: UUID) -> [CFString: Any] {
-        [
-            kSecClass: kSecClassGenericPassword,
-            kSecAttrService: Self.service,
-            kSecAttrAccount: accountID.uuidString,
-        ]
+    static func removeAll() throws {
+        try Keychain.appStoreConnectCredentials.removeAll()
     }
 }
 #endif

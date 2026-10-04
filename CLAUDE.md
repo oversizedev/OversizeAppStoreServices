@@ -94,7 +94,7 @@ There is no DI entry for caching: the cache stack is created by the services the
 ### Authentication System
 
 **EnvAuthenticator** (`Sources/OversizeAppStoreServices/Auth/EnvAuthenticator.swift`):
-- Loads credentials from Keychain via SecureStorageService
+- Loads credentials from Keychain via `AppStoreConnectCredentials.stored(for:)` (`Keychain.appStoreConnectCredentials`)
 - Account selection via UserDefaults
 - Generates JWT tokens (20-minute expiration)
 - Implements `Authenticator` protocol from asc-swift
@@ -206,7 +206,7 @@ Cache-suite conventions:
 - **CodableCSV** (0.6.7+): CSV parsing for finance/sales reports
 - **swift-crypto** (4.0.0+): SHA-256 on non-Darwin platforms
 - **OversizeCore**: Logging utilities (logError, logData, logNetwork)
-- **OversizeServices**: SecureStorageService, AppError
+- **OversizeServices**: Keychain, AppError
 
 ## Common Patterns
 
@@ -245,4 +245,4 @@ Services require App Store Connect API credentials stored in Keychain:
 - Issuer ID
 - Private Key (P8 file content)
 
-Account selection managed via UserDefaults with key from SecureStorageService.
+Account selection managed via UserDefaults with the `AppStore.Account` key; credentials come from `AppStoreConnectCredentials.currentAccount()`.
