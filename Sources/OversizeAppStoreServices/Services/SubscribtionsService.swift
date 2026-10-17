@@ -9,7 +9,7 @@ import Foundation
 import OversizeCore
 
 public actor SubscriptionsService {
-    private let client: AppStoreConnectClient
+    let client: AppStoreConnectClient
 
     public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
         client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: cacheAccountID)
