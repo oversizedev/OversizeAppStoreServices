@@ -72,12 +72,20 @@ public extension VersionsServicesProtocol {
         await fetchAppVersions(appId: appId, platform: nil, force: force)
     }
 
+    func fetchAppVersions(appId: String, platform: Platform?) async -> Result<[AppStoreVersion], Error> {
+        await fetchAppVersions(appId: appId, platform: platform, force: false)
+    }
+
     func fetchEditableAppStoreVersion(appId: String) async -> Result<[AppStoreVersion], Error> {
         await fetchEditableAppStoreVersion(appId: appId, platform: nil, force: false)
     }
 
     func fetchEditableAppStoreVersion(appId: String, force: Bool) async -> Result<[AppStoreVersion], Error> {
         await fetchEditableAppStoreVersion(appId: appId, platform: nil, force: force)
+    }
+
+    func fetchEditableAppStoreVersion(appId: String, platform: Platform?) async -> Result<[AppStoreVersion], Error> {
+        await fetchEditableAppStoreVersion(appId: appId, platform: platform, force: false)
     }
 
     func fetchAppVersionLocalizations(versionId: String) async -> Result<[AppStoreVersionLocalization], Error> {
@@ -88,8 +96,91 @@ public extension VersionsServicesProtocol {
         await fetchRelisedAppVersionsIncludeLocalizations(appId: appId, platform: nil, limit: nil, force: false)
     }
 
+    func fetchRelisedAppVersionsIncludeLocalizations(appId: String, platform: Platform?) async -> Result<[AppStoreVersion], Error> {
+        await fetchRelisedAppVersionsIncludeLocalizations(appId: appId, platform: platform, limit: nil, force: false)
+    }
+
+    func fetchRelisedAppVersionsIncludeLocalizations(appId: String, limit: Int?) async -> Result<[AppStoreVersion], Error> {
+        await fetchRelisedAppVersionsIncludeLocalizations(appId: appId, platform: nil, limit: limit, force: false)
+    }
+
+    func fetchRelisedAppVersionsIncludeLocalizations(appId: String, force: Bool) async -> Result<[AppStoreVersion], Error> {
+        await fetchRelisedAppVersionsIncludeLocalizations(appId: appId, platform: nil, limit: nil, force: force)
+    }
+
+    func fetchRelisedAppVersionsIncludeLocalizations(
+        appId: String,
+        platform: Platform?,
+        limit: Int?,
+    ) async -> Result<[AppStoreVersion], Error> {
+        await fetchRelisedAppVersionsIncludeLocalizations(appId: appId, platform: platform, limit: limit, force: false)
+    }
+
+    func fetchRelisedAppVersionsIncludeLocalizations(
+        appId: String,
+        limit: Int?,
+        force: Bool,
+    ) async -> Result<[AppStoreVersion], Error> {
+        await fetchRelisedAppVersionsIncludeLocalizations(appId: appId, platform: nil, limit: limit, force: force)
+    }
+
     func fetchRelisedAppVersionsIncludeLocalizations(appId: String, platform: Platform?, force: Bool) async -> Result<[AppStoreVersion], Error> {
         await fetchRelisedAppVersionsIncludeLocalizations(appId: appId, platform: platform, limit: nil, force: force)
+    }
+
+    func fetchActualAppStoreVersions(appId: String) async -> Result<[AppStoreVersion], Error> {
+        await fetchActualAppStoreVersions(appId: appId, platform: nil, force: false)
+    }
+
+    func fetchActualAppStoreVersions(appId: String, platform: Platform?) async -> Result<[AppStoreVersion], Error> {
+        await fetchActualAppStoreVersions(appId: appId, platform: platform, force: false)
+    }
+
+    func fetchActualAppStoreVersions(appId: String, force: Bool) async -> Result<[AppStoreVersion], Error> {
+        await fetchActualAppStoreVersions(appId: appId, platform: nil, force: force)
+    }
+
+    func fetchActualAppStoreVersionsIncludeBuilds(appId: String) async -> Result<[AppStoreVersion], Error> {
+        await fetchActualAppStoreVersionsIncludeBuilds(appId: appId, platform: nil, limit: nil, force: false)
+    }
+
+    func fetchActualAppStoreVersionsIncludeBuilds(appId: String, platform: Platform?) async -> Result<[AppStoreVersion], Error> {
+        await fetchActualAppStoreVersionsIncludeBuilds(appId: appId, platform: platform, limit: nil, force: false)
+    }
+
+    func fetchActualAppStoreVersionsIncludeBuilds(appId: String, limit: Int?) async -> Result<[AppStoreVersion], Error> {
+        await fetchActualAppStoreVersionsIncludeBuilds(appId: appId, platform: nil, limit: limit, force: false)
+    }
+
+    func fetchActualAppStoreVersionsIncludeBuilds(
+        appId: String,
+        platform: Platform?,
+        limit: Int?,
+    ) async -> Result<[AppStoreVersion], Error> {
+        await fetchActualAppStoreVersionsIncludeBuilds(appId: appId, platform: platform, limit: limit, force: false)
+    }
+
+    func fetchActualAppStoreVersionsIncludeBuilds(
+        appId: String,
+        force: Bool,
+    ) async -> Result<[AppStoreVersion], Error> {
+        await fetchActualAppStoreVersionsIncludeBuilds(appId: appId, platform: nil, limit: nil, force: force)
+    }
+
+    func fetchActualAppStoreVersionsIncludeBuilds(
+        appId: String,
+        platform: Platform?,
+        force: Bool,
+    ) async -> Result<[AppStoreVersion], Error> {
+        await fetchActualAppStoreVersionsIncludeBuilds(appId: appId, platform: platform, limit: nil, force: force)
+    }
+
+    func fetchActualAppStoreVersionsIncludeBuilds(
+        appId: String,
+        limit: Int?,
+        force: Bool,
+    ) async -> Result<[AppStoreVersion], Error> {
+        await fetchActualAppStoreVersionsIncludeBuilds(appId: appId, platform: nil, limit: limit, force: force)
     }
 
     func postVersion(appId: String, platform: Platform, versionString: String) async -> Result<AppStoreVersion, Error> {

@@ -53,14 +53,6 @@ public enum ASCCacheScope {
 
     // MARK: - Invalidation
 
-    public static func invalidateCurrentAccount() {
-        invalidate(accountID: accountID)
-    }
-
-    public static func invalidateAllCurrentAccount() {
-        purge(accountID: accountID)
-    }
-
     public static func invalidate(accountID: String) {
         bumpGeneration(for: accountID)
     }

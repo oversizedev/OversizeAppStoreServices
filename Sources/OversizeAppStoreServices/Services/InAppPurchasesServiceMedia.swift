@@ -24,21 +24,26 @@ public extension InAppPurchasesService {
                 ),
             )
             let reserved = try await client.send(reserveRequest).data
-            guard let operations = reserved.attributes?.uploadOperations, !operations.isEmpty else {
-                return .failure(NetworkError.noResponse)
-            }
+            do {
+                guard let operations = reserved.attributes?.uploadOperations, !operations.isEmpty else {
+                    throw NetworkError.noResponse
+                }
 
-            try await ASCAssetUpload.upload(data: data, operations: operations, client: client)
+                try await ASCAssetUpload.upload(data: data, operations: operations, client: client)
 
-            let commitRequest = Resources.v1.inAppPurchaseImages.id(reserved.id).patch(
-                .init(
-                    data: .init(
-                        id: reserved.id,
-                        attributes: .init(sourceFileChecksum: ASCAssetUpload.checksum(for: data), isUploaded: true),
+                let commitRequest = Resources.v1.inAppPurchaseImages.id(reserved.id).patch(
+                    .init(
+                        data: .init(
+                            id: reserved.id,
+                            attributes: .init(sourceFileChecksum: ASCAssetUpload.checksum(for: data), isUploaded: true),
+                        ),
                     ),
-                ),
-            )
-            _ = try await client.send(commitRequest)
+                )
+                _ = try await client.send(commitRequest)
+            } catch {
+                _ = try? await client.send(Resources.v1.inAppPurchaseImages.id(reserved.id).delete)
+                throw error
+            }
             return .success(())
         } catch {
             return handleRequestFailure(error: error, replaces: [:])
