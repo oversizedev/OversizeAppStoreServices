@@ -13,13 +13,11 @@ let commonDependencies: [PackageDescription.Package.Dependency] = [
 let remoteKitDependencies: [PackageDescription.Package.Dependency] = [
     .package(url: "https://github.com/hmlongco/Factory.git", .upToNextMajor(from: "3.0.2")),
     .package(url: "https://github.com/oversizedev/OversizeCore.git", .upToNextMajor(from: "1.3.0")),
-    .package(url: "https://github.com/oversizedev/OversizeServices.git", .upToNextMajor(from: "1.4.0")),
 ]
 
 let localKitDependencies: [PackageDescription.Package.Dependency] = [
     .package(url: "https://github.com/hmlongco/Factory.git", .upToNextMajor(from: "3.0.2")),
     .package(name: "OversizeCore", path: "../OversizeCore"),
-    .package(name: "OversizeServices", path: "../OversizeServices"),
 ]
 
 let isLocalDev = FileManager.default.fileExists(atPath: "\(NSHomeDirectory())/Developer/Packages/OversizeCore")
@@ -54,7 +52,6 @@ let package = Package(
                 .product(name: "AppStoreConnect", package: "asc-swift"),
                 .product(name: "FactoryKit", package: "Factory", condition: .when(platforms: applePlatforms)),
                 .product(name: "OversizeCore", package: "OversizeCore"),
-                .product(name: "OversizeServices", package: "OversizeServices", condition: .when(platforms: applePlatforms)),
                 .product(name: "Crypto", package: "swift-crypto", condition: .when(platforms: [.linux])),
             ],
         ),

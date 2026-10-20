@@ -30,11 +30,10 @@ public struct ASCCachingTransport: Transport {
 
     public func send(request: URLRequest, decoder: JSONDecoder) async throws -> Response<Data> {
         if Self.mutatingMethods.contains(request.httpMethod?.uppercased() ?? "") {
-            let response = try await session.send(request: request, decoder: decoder)
             if let scopeAccount {
                 ASCCacheScope.bumpGeneration(for: scopeAccount)
             }
-            return response
+            return try await session.send(request: request, decoder: decoder)
         }
 
         guard let policy = ASCCache.policy, let scopeAccount else {
@@ -52,11 +51,10 @@ public struct ASCCachingTransport: Transport {
     }
 
     public func upload(request: URLRequest, data: Data, decoder: JSONDecoder) async throws -> Response<Data> {
-        let response = try await session.upload(request: request, data: data, decoder: decoder)
         if let scopeAccount {
             ASCCacheScope.bumpGeneration(for: scopeAccount)
         }
-        return response
+        return try await session.upload(request: request, data: data, decoder: decoder)
     }
 
     // MARK: - Request stamping

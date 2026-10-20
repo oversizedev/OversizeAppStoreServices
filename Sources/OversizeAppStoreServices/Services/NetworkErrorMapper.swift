@@ -40,11 +40,9 @@ public extension Error {
         if let networkError = self as? NetworkError {
             return networkError
         }
-        #if canImport(Darwin)
-        if (self as? EnvAuthenticator.Error) != nil {
+        if self is ASCAuthenticationError {
             return .unauthorized
         }
-        #endif
         return .noResponse
     }
 

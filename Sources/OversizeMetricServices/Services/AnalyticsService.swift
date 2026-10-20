@@ -187,7 +187,7 @@ public actor AnalyticsService {
         guard !segmentURLs.isEmpty else { return emptyData }
 
         let processingDate = instance.processingDate
-        let tables = try await withThrowingTaskGroup(of: AnalyticsReportData?.self) { group in
+        let tables = try await withThrowingTaskGroup(of: AnalyticsReportData.self) { group in
             var results: [AnalyticsReportData] = []
             var nextIndex = 0
             while nextIndex < segmentURLs.count, nextIndex < Self.maxConcurrentDownloads {
@@ -196,9 +196,7 @@ public actor AnalyticsService {
                 nextIndex += 1
             }
             while let table = try await group.next() {
-                if let table {
-                    results.append(table)
-                }
+                results.append(table)
                 if nextIndex < segmentURLs.count {
                     let url = segmentURLs[nextIndex]
                     group.addTask { try await Self.downloadTable(segmentURL: url, processingDate: processingDate) }
@@ -230,13 +228,16 @@ public actor AnalyticsService {
         return allSegments.compactMap { $0.attributes?.url }
     }
 
-    private static func downloadTable(segmentURL: URL, processingDate: String) async throws -> AnalyticsReportData? {
+    private static func downloadTable(segmentURL: URL, processingDate: String) async throws -> AnalyticsReportData {
         let (data, response) = try await URLSession.shared.data(from: segmentURL)
         if let http = response as? HTTPURLResponse, !(200 ..< 300).contains(http.statusCode) {
             throw NetworkError.unexpectedStatusCode
         }
         let decompressed: Data = data.isGzipped ? try data.gunzipped() : data
-        return AnalyticsTabularParser.parse(data: decompressed, processingDate: processingDate)
+        guard let table = AnalyticsTabularParser.parse(data: decompressed, processingDate: processingDate) else {
+            throw NetworkError.decode
+        }
+        return table
     }
 
     // MARK: - Dashboard Metrics

@@ -223,6 +223,32 @@ struct ASCCachingTransportTests {
         #expect(StubURLProtocol.requestCount == 3)
     }
 
+    @Test("Should invalidate cached responses when a mutation fails")
+    func failedMutationInvalidatesCache() async throws {
+        let accountID = "failed-mutation-tests-" + UUID().uuidString
+        let client = makeClient(accountID: accountID)
+        let patchURL = try #require(URL(string: "https://api.appstoreconnect.apple.com/v1/apps/123"))
+
+        _ = await ASCCache.cached(ttl: 300) {
+            try await client.send(Resources.v1.apps.get())
+        }
+        StubURLProtocol.failRequests()
+
+        do {
+            try await client.send(Request<Void>.patch(patchURL))
+            Issue.record("Expected mutation to fail")
+        } catch {
+            #expect(ASCCacheScope.generation(for: accountID) == 1)
+        }
+
+        StubURLProtocol.reset(status: 200, body: Self.appsBody, headers: ["Content-Type": "application/json"])
+        _ = await ASCCache.cached(ttl: 300) {
+            try await client.send(Resources.v1.apps.get())
+        }
+
+        #expect(StubURLProtocol.requestCount == 1)
+    }
+
     @Test("Should not cache non-200 successful responses")
     func partialContentIsNotCached() async {
         let client = makeClient(status: 206)
@@ -254,6 +280,7 @@ final class StubURLProtocol: URLProtocol, @unchecked Sendable {
     private nonisolated(unsafe) static var status: Int = 200
     private nonisolated(unsafe) static var body: Data = .init()
     private nonisolated(unsafe) static var headers: [String: String] = [:]
+    private nonisolated(unsafe) static var failsRequests = false
     private nonisolated(unsafe) static var count: Int = 0
     private static let lock = NSLock()
 
@@ -266,8 +293,13 @@ final class StubURLProtocol: URLProtocol, @unchecked Sendable {
             Self.status = status
             Self.body = body
             Self.headers = headers
+            failsRequests = false
             count = 0
         }
+    }
+
+    static func failRequests() {
+        lock.withLock { failsRequests = true }
     }
 
     override class func canInit(with _: URLRequest) -> Bool {
@@ -279,9 +311,14 @@ final class StubURLProtocol: URLProtocol, @unchecked Sendable {
     }
 
     override func startLoading() {
-        let (status, body, headers) = Self.lock.withLock {
+        let (status, body, headers, failsRequests) = Self.lock.withLock {
             Self.count += 1
-            return (Self.status, Self.body, Self.headers)
+            return (Self.status, Self.body, Self.headers, Self.failsRequests)
+        }
+
+        if failsRequests {
+            client?.urlProtocol(self, didFailWithError: URLError(.timedOut))
+            return
         }
 
         guard let url = request.url,

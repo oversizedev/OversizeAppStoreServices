@@ -32,4 +32,4 @@
 
 ## Configuration & Dependencies
 - Dependencies can be toggled between local and remote in `Package.swift` (`localDependencies` vs `remoteDependencies`).
-- Auth uses `EnvAuthenticator` and reads credentials from Keychain or `.env` via `NetworkEnvironment`.
+- Auth uses `CredentialsAuthenticator(credentials:api:)`. The caller owns credential storage and passes `cacheAccountID` explicitly. Factory consumers register `appStoreConfiguration`; an unconfigured service fails before sending a request.

@@ -93,13 +93,11 @@ There is no DI entry for caching: the cache stack is created by the services the
 
 ### Authentication System
 
-**EnvAuthenticator** (`Sources/OversizeAppStoreServices/Auth/EnvAuthenticator.swift`):
-- Loads credentials from Keychain via `AppStoreConnectCredentials.stored(for:)` (`Keychain.appStoreConnectCredentials`)
-- Account selection via UserDefaults
-- Generates JWT tokens (20-minute expiration)
-- Implements `Authenticator` protocol from asc-swift
+**CredentialsAuthenticator** accepts `AppStoreConnectCredentials` through its initializer and generates JWT tokens with a 20-minute lifetime. It delegates token caching and renewal to asc-swift's JWT. It never reads Keychain or the selected account.
 
-**NetworkEnvironment**: Loads `.env` file variables with fallback to ProcessInfo
+All services accept an authenticator and an explicit `cacheAccountID`. Factory registrations resolve a single `Result<ASCAccountConfiguration, Error>` snapshot through `Container.appStoreConfiguration`. With no configuration, authentication fails before a network request. Recreate services and consumers when credentials change; restore configuration registration after a Factory reset.
+
+AppConnector owns storage in `OversizeAppStoreKit.AccountCredentialsStore`, backed by `OversizeServices.Keychain`.
 
 ### Caching Layer
 
@@ -157,7 +155,7 @@ Service Method Call
 ```
 Sources/
 ├── OversizeAppStoreServices/
-│   ├── Auth/                    # EnvAuthenticator, NetworkEnvironment
+│   ├── Auth/                    # CredentialsAuthenticator, ASCAccountConfiguration, NetworkEnvironment
 │   ├── Cache/                   # URLCache stack: ASCCachePolicy, ASCCacheScope,
 │   │                            # ASCResponseCache, ASCCachingURLProtocol,
 │   │                            # ASCCachingTransport, ASCClientFactory,
@@ -206,7 +204,6 @@ Cache-suite conventions:
 - **CodableCSV** (0.6.7+): CSV parsing for finance/sales reports
 - **swift-crypto** (4.0.0+): SHA-256 on non-Darwin platforms
 - **OversizeCore**: Logging utilities (logError, logData, logNetwork)
-- **OversizeServices**: Keychain, AppError
 
 ## Common Patterns
 
@@ -240,9 +237,4 @@ This codebase uses Swift 6 strict concurrency:
 
 ## Authentication Setup
 
-Services require App Store Connect API credentials stored in Keychain:
-- Key ID
-- Issuer ID
-- Private Key (P8 file content)
-
-Account selection managed via UserDefaults with the `AppStore.Account` key; credentials come from `AppStoreConnectCredentials.currentAccount()`.
+Services require `AppStoreConnectCredentials` containing the key ID, issuer ID and P8 private key. Storage and account selection belong to the caller. Pass the account UUID as `cacheAccountID` when constructing services.

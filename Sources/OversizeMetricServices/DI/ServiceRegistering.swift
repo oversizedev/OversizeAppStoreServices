@@ -9,15 +9,24 @@ import OversizeAppStoreServices
 
 public extension Container {
     var analyticsService: Factory<AnalyticsService> {
-        self { AnalyticsService(authenticator: EnvAuthenticator()) }
+        self {
+            let context = ASCServiceContext(configuration: self.appStoreConfiguration())
+            return AnalyticsService(authenticator: context.authenticator, cacheAccountID: context.cacheAccountID)
+        }
     }
 
     var salesAndFinanceService: Factory<SalesAndFinanceService> {
-        self { SalesAndFinanceService(authenticator: EnvAuthenticator()) }
+        self {
+            let context = ASCServiceContext(configuration: self.appStoreConfiguration())
+            return SalesAndFinanceService(authenticator: context.authenticator, cacheAccountID: context.cacheAccountID)
+        }
     }
 
     var perfPowerMetricsService: Factory<PerfPowerMetricsService> {
-        self { PerfPowerMetricsService(authenticator: EnvAuthenticator()) }
+        self {
+            let context = ASCServiceContext(configuration: self.appStoreConfiguration())
+            return PerfPowerMetricsService(authenticator: context.authenticator, cacheAccountID: context.cacheAccountID)
+        }
     }
 }
 #endif

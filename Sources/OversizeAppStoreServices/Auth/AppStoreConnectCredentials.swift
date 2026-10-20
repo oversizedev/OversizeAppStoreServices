@@ -3,9 +3,7 @@
 // AppStoreConnectCredentials.swift, created on 08.07.2026
 //
 
-#if canImport(Darwin)
 import Foundation
-import OversizeServices
 
 public struct AppStoreConnectCredentials: Codable, Sendable, Equatable {
     public let issuerID: String
@@ -20,4 +18,3 @@ public struct AppStoreConnectCredentials: Codable, Sendable, Equatable {
         self.vendorNumber = vendorNumber
     }
 }
-#endif
