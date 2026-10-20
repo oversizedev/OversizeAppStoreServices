@@ -55,6 +55,9 @@ public extension Error {
         if let urlError = self as? URLError, urlError.code == .cancelled {
             return true
         }
+        if let networkError = self as? NetworkError, case let .unknown(inner?) = networkError {
+            return inner.isCancellation
+        }
         return false
     }
 }

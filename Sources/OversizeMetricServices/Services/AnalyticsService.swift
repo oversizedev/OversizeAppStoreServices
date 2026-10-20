@@ -292,6 +292,7 @@ public actor AnalyticsService {
         let cutoffDate = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
         let cutoff = AnalyticsReportInstance.dateFormatter.string(from: cutoffDate)
         let cacheKey = "\(appId):\(days):\(cutoff)"
+        let generation = territoryDownloadsCache.generation()
         if !force, let cached = territoryDownloadsCache.load([TerritoryDownloads].self, key: cacheKey) {
             return .success(cached)
         }
@@ -323,7 +324,7 @@ public actor AnalyticsService {
                 valueColumnCandidates: metric.valueColumnCandidates,
                 cutoff: cutoff,
             )
-            territoryDownloadsCache.save(territories, key: cacheKey)
+            territoryDownloadsCache.save(territories, key: cacheKey, generation: generation)
             Log.info("Territory downloads aggregated for \(appId): \(territories.count) territories")
             return .success(territories)
         } catch {

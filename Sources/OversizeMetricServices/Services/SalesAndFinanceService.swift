@@ -212,6 +212,7 @@ public actor SalesAndFinanceService {
     ) async -> DailyProceedsOutcome {
         guard let date = AnalyticsReportInstance.dateFormatter.date(from: reportDate) else { return .missing }
         let cacheKey = "daily-proceeds-by-currency-\(vendorNumber)-\(appAppleId ?? "all")-\(reportDate)"
+        let generation = dailySalesCache.generation()
 
         if !force, let cached = dailySalesCache.load([String: Double].self, key: cacheKey) {
             return .day(date, cached)
@@ -227,7 +228,7 @@ public actor SalesAndFinanceService {
                 }
                 totals[report.currencyOfProceeds, default: 0] += report.developerProceeds * Double(report.units)
             }
-            dailySalesCache.save(totals, key: cacheKey)
+            dailySalesCache.save(totals, key: cacheKey, generation: generation)
             return .day(date, totals)
         case let .failure(error):
             if Self.isMissingReportError(error.asNetworkError) {

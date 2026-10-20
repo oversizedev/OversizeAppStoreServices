@@ -9,6 +9,10 @@ import OversizeCore
 import CryptoKit
 #endif
 
+public struct ASCValueCacheGeneration: Sendable {
+    let scope: String
+}
+
 public struct ASCValueCache: Sendable {
     private let namespace: String
     private let ttl: TimeInterval
@@ -24,6 +28,15 @@ public struct ASCValueCache: Sendable {
         self.accountID = accountID
     }
 
+    public func generation() -> ASCValueCacheGeneration? {
+        #if canImport(Darwin)
+        guard let accountID else { return nil }
+        return ASCValueCacheGeneration(scope: ASCCacheScope.valueScope(for: accountID))
+        #else
+        nil
+        #endif
+    }
+
     public func load<T: Decodable & Sendable>(_ type: T.Type, key: String) -> T? {
         #if canImport(Darwin)
         guard let accountID else { return nil }
@@ -34,9 +47,20 @@ public struct ASCValueCache: Sendable {
     }
 
     public func save(_ value: some Encodable & Sendable, key: String) {
+        save(value, key: key, generation: nil)
+    }
+
+    public func save(_ value: some Encodable & Sendable, key: String, generation: ASCValueCacheGeneration?) {
         #if canImport(Darwin)
         guard let accountID else { return }
-        ASCValueCacheStorage.shared.store(value, namespace: namespace, key: key, ttl: ttl, accountID: accountID)
+        ASCValueCacheStorage.shared.store(
+            value,
+            namespace: namespace,
+            key: key,
+            ttl: ttl,
+            accountID: accountID,
+            generation: generation,
+        )
         #endif
     }
 
@@ -106,8 +130,14 @@ final class ASCValueCacheStorage: @unchecked Sendable {
         key: String,
         ttl: TimeInterval,
         accountID: String,
+        generation: ASCValueCacheGeneration? = nil,
     ) {
-        guard let keyRequest = keyRequest(namespace: namespace, key: key, accountID: accountID),
+        let scope = ASCCacheScope.valueScope(for: accountID)
+        if let generation, generation.scope != scope {
+            Log.info("ASCValueCache: Skipping stale value for \(namespace)/\(key) after invalidation")
+            return
+        }
+        guard let keyRequest = keyRequest(namespace: namespace, key: key, scope: scope),
               let keyURL = keyRequest.url
         else {
             return
@@ -135,6 +165,10 @@ final class ASCValueCacheStorage: @unchecked Sendable {
     }
 
     private func keyRequest(namespace: String, key: String, accountID: String) -> URLRequest? {
+        keyRequest(namespace: namespace, key: key, scope: ASCCacheScope.valueScope(for: accountID))
+    }
+
+    private func keyRequest(namespace: String, key: String, scope: String) -> URLRequest? {
         var components = URLComponents()
         components.scheme = "https"
         components.host = Self.host
@@ -143,7 +177,7 @@ final class ASCValueCacheStorage: @unchecked Sendable {
         guard let url = components.url else { return nil }
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        return responseCache.keyRequest(for: request, scope: ASCCacheScope.valueScope(for: accountID))
+        return responseCache.keyRequest(for: request, scope: scope)
     }
 
     private static func digest(_ key: String) -> String {

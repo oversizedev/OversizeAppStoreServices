@@ -113,13 +113,13 @@ await ASCCache.cached(ttl: ASCCache.TTL.short, force: force) {
 ```
 Unstamped requests are never cached. TTL constants: `short` (1 min), `default` (5 min), `long` (1 h), `veryLong` (24 h), `month` (30 d). Clients are built by `ASCClientFactory.makeClient(authenticator:cacheAccountID:)`, which pins the account at construction time.
 
-**Derived values** — `ASCValueCache` (`load`/`save`/`remove`) for small computed values that are not the body of a single HTTP response, currently only the daily proceeds aggregates in `SalesAndFinanceService`. One `URLCache` pool (2 MB / 64 MB), keys are synthetic `https://asc-value.invalid/<namespace>/<sha256(key)>` URLs. Analytics report data is deliberately NOT cached: segment URLs are single-use, and the merged tables were large enough to make caching them cost more than it saved. Keep this cache for kilobyte-sized values.
+**Derived values** — `ASCValueCache` (`load`/`save`/`remove`) for small computed values that are not the body of a single HTTP response, currently the daily proceeds aggregates in `SalesAndFinanceService` and the territory downloads in `AnalyticsService`. One `URLCache` pool (2 MB / 64 MB), keys are synthetic `https://asc-value.invalid/<namespace>/<sha256(key)>` URLs. Take `generation()` before the `load` and pass it to `save(_:key:generation:)`: a value computed from a fetch that started before `invalidateAllCurrentAccount()` is then dropped instead of landing in the new generation. Analytics report data is deliberately NOT cached: segment URLs are single-use, and the merged tables were large enough to make caching them cost more than it saved. Keep this cache for kilobyte-sized values.
 
 **Manual TTL** — App Store Connect sends no `Cache-Control`/`ETag`/`Last-Modified`, so entries are written with a synthesized `Cache-Control: max-age=N` plus an `X-ASC-Cached-At` timestamp that freshness is checked against.
 
 **Scoping and invalidation** (`ASCCacheScope`) — the account ID and a generation counter are part of every key (`__ascScope`), so accounts are isolated structurally and switching accounts needs no flush. Two independent counters: mutating requests (POST/PATCH/PUT/DELETE) bump the response generation only, so 30-day derived values survive writes; `invalidateCurrentAccount()` drops HTTP responses, `invalidateAllCurrentAccount()` drops derived values too.
 
-**Important**: `URLCache.removeCachedResponse`/`removeAllCachedResponses` do NOT evict manually stored entries — invalidation is done by overwriting the entry with an expired timestamp.
+**Important**: invalidation never relies on `URLCache.removeCachedResponse`/`removeAllCachedResponses` (their effect on manually stored entries proved unreliable) — an entry is invalidated by overwriting it with an expired timestamp. Only `200` responses are stored; other 2xx codes pass through uncached.
 
 ### Error Handling
 

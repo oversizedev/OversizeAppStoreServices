@@ -87,7 +87,7 @@ public final class ASCResponseCache: @unchecked Sendable {
         ttl: TimeInterval,
     ) {
         var headers = headerFields(of: response).filter { !Header.dropped.contains($0.key.lowercased()) }
-        headers[Header.cacheControl] = "max-age=\(Int(ttl))"
+        headers[Header.cacheControl] = "max-age=\(Self.maxAge(for: ttl))"
         headers[Header.cachedAt] = String(Date().timeIntervalSince1970)
 
         guard let keyURL = keyRequest.url,
@@ -132,6 +132,11 @@ public final class ASCResponseCache: @unchecked Sendable {
             .init(response: expiredResponse, data: cached.data, storagePolicy: .allowed),
             for: keyRequest,
         )
+    }
+
+    private static func maxAge(for ttl: TimeInterval) -> Int {
+        guard ttl.isFinite else { return Int(Int32.max) }
+        return Int(min(max(ttl, 0), Double(Int32.max)))
     }
 
     private func headerFields(of response: HTTPURLResponse) -> [String: String] {

@@ -124,6 +124,30 @@ struct ASCValueCacheTests {
         #expect(cache.load(Payload.self, key: "key") == Self.payload)
     }
 
+    @Test("Should skip a save whose generation was purged while loading")
+    func purgedGenerationSkipsSave() {
+        redirectStorage()
+        let accountID = account()
+        let cache = ASCValueCache(namespace: "purge-race", ttl: 300, accountID: accountID)
+
+        let generation = cache.generation()
+        ASCCacheScope.bumpValueGeneration(for: accountID)
+        cache.save(Self.payload, key: "key", generation: generation)
+
+        #expect(cache.load(Payload.self, key: "key") == nil)
+    }
+
+    @Test("Should save when the generation is unchanged")
+    func unchangedGenerationSaves() {
+        redirectStorage()
+        let cache = ASCValueCache(namespace: "same-generation", ttl: 300, accountID: account())
+
+        let generation = cache.generation()
+        cache.save(Self.payload, key: "key", generation: generation)
+
+        #expect(cache.load(Payload.self, key: "key") == Self.payload)
+    }
+
     @Test("Should drop the entry on remove")
     func removeInvalidates() {
         redirectStorage()

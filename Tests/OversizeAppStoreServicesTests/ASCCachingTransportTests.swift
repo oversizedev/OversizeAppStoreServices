@@ -206,6 +206,48 @@ struct ASCCachingTransportTests {
 
         #expect(StubURLProtocol.requestCount == 2)
     }
+
+    @Test("Should invalidate cache after a mutating request sent through the client")
+    func mutationThroughClientInvalidatesCache() async throws {
+        let client = makeClient()
+        let patchURL = try #require(URL(string: "https://api.appstoreconnect.apple.com/v1/apps/123"))
+
+        _ = await ASCCache.cached(ttl: 300) {
+            try await client.send(Resources.v1.apps.get())
+        }
+        try await client.send(Request<Void>.patch(patchURL))
+        _ = await ASCCache.cached(ttl: 300) {
+            try await client.send(Resources.v1.apps.get())
+        }
+
+        #expect(StubURLProtocol.requestCount == 3)
+    }
+
+    @Test("Should not cache non-200 successful responses")
+    func partialContentIsNotCached() async {
+        let client = makeClient(status: 206)
+
+        for _ in 0 ..< 2 {
+            _ = await ASCCache.cached(ttl: 300) {
+                try await client.send(Resources.v1.apps.get())
+            }
+        }
+
+        #expect(StubURLProtocol.requestCount == 2)
+    }
+
+    @Test("Should accept an infinite ttl")
+    func infiniteTTLIsClamped() async {
+        let client = makeClient()
+
+        for _ in 0 ..< 2 {
+            _ = await ASCCache.cached(ttl: .infinity) {
+                try await client.send(Resources.v1.apps.get())
+            }
+        }
+
+        #expect(StubURLProtocol.requestCount == 1)
+    }
 }
 
 final class StubURLProtocol: URLProtocol, @unchecked Sendable {

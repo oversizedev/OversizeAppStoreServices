@@ -76,19 +76,20 @@ final class ASCCachingURLProtocol: URLProtocol {
         if !force, let url = request.url, let keyRequest,
            let cached = cache.cachedResponse(for: keyRequest, originalURL: url, ttl: ttl)
         {
+            guard !Task.isCancelled else { return }
             finish(response: cached.response, data: cached.data)
             return
         }
 
         do {
             let (data, response) = try await Self.innerSession.data(for: marked(request))
-            if let httpResponse = response as? HTTPURLResponse {
-                if (200 ..< 300).contains(httpResponse.statusCode), let keyRequest {
-                    cache.store(data: data, response: httpResponse, for: keyRequest, ttl: ttl)
-                }
+            guard !Task.isCancelled else { return }
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200, let keyRequest {
+                cache.store(data: data, response: httpResponse, for: keyRequest, ttl: ttl)
             }
             finish(response: response, data: data)
         } catch {
+            guard !Task.isCancelled, !error.isCancellation else { return }
             client?.urlProtocol(self, didFailWithError: error)
         }
     }
