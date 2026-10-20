@@ -36,16 +36,7 @@ open Package.swift
 
 ## Package Dependencies Management
 
-The `Package.swift` has **two dependency configurations**:
-- `remoteDependencies`: Uses packages from GitHub
-- `localDependencies`: Uses local file paths (../OversizeCore, ../OversizeModels, ../OversizeServices)
-
-**Current configuration**: `localDependencies` (line 25)
-
-When switching between local and remote development, modify line 25:
-```swift
-let dependencies: [PackageDescription.Package.Dependency] = localDependencies  // or remoteDependencies
-```
+The manifest always declares remote, versioned dependencies so this package can be consumed from a remote branch or revision. Local applications can override dependency identities with local packages in their root manifest or Xcode project. Do not choose dependencies based on developer folders on the machine.
 
 ## Architecture
 

@@ -1,6 +1,5 @@
 // swift-tools-version: 6.1
 
-import Foundation
 import PackageDescription
 
 let commonDependencies: [PackageDescription.Package.Dependency] = [
@@ -10,18 +9,11 @@ let commonDependencies: [PackageDescription.Package.Dependency] = [
     .package(url: "https://github.com/apple/swift-crypto.git", .upToNextMajor(from: "4.0.0")),
 ]
 
-let remoteKitDependencies: [PackageDescription.Package.Dependency] = [
+let kitDependencies: [PackageDescription.Package.Dependency] = [
     .package(url: "https://github.com/hmlongco/Factory.git", .upToNextMajor(from: "3.0.2")),
     .package(url: "https://github.com/oversizedev/OversizeCore.git", .upToNextMajor(from: "1.3.0")),
 ]
 
-let localKitDependencies: [PackageDescription.Package.Dependency] = [
-    .package(url: "https://github.com/hmlongco/Factory.git", .upToNextMajor(from: "3.0.2")),
-    .package(name: "OversizeCore", path: "../OversizeCore"),
-]
-
-let isLocalDev = FileManager.default.fileExists(atPath: "\(NSHomeDirectory())/Developer/Packages/OversizeCore")
-let kitDependencies: [PackageDescription.Package.Dependency] = isLocalDev ? localKitDependencies : remoteKitDependencies
 let dependencies: [PackageDescription.Package.Dependency] = commonDependencies + kitDependencies
 
 let applePlatforms: [PackageDescription.Platform] = [.iOS, .macOS, .tvOS, .watchOS, .visionOS, .macCatalyst]
