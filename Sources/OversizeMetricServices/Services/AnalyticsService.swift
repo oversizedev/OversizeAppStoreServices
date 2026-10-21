@@ -19,12 +19,11 @@ public actor AnalyticsService {
     private static let maxConcurrentDownloads = 4
 
     public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
-        let resolvedAccountID = ASCClientFactory.resolveCacheAccountID(for: authenticator, explicit: cacheAccountID)
-        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: resolvedAccountID)
+        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: cacheAccountID)
         territoryDownloadsCache = ASCValueCache(
             namespace: "territory-downloads",
             ttl: ASCCache.TTL.week,
-            accountID: resolvedAccountID,
+            accountID: cacheAccountID,
         )
     }
 

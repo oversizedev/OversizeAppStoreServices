@@ -13,22 +13,11 @@ public enum ASCClientFactory {
     ) -> AppStoreConnectClient {
         #if canImport(Darwin)
         AppStoreConnectClient(
-            transport: ASCCachingTransport(
-                accountID: resolveCacheAccountID(for: authenticator, explicit: cacheAccountID),
-            ),
+            transport: ASCCachingTransport(accountID: cacheAccountID),
             authenticator: authenticator,
         )
         #else
         AppStoreConnectClient(authenticator: authenticator)
         #endif
-    }
-
-    /// Resolves the account the caches are scoped to. Returns `nil` when the account cannot be
-    /// determined, in which case caching is disabled rather than shared between accounts.
-    public static func resolveCacheAccountID(
-        for _: some Authenticator,
-        explicit: String? = nil,
-    ) -> String? {
-        explicit
     }
 }

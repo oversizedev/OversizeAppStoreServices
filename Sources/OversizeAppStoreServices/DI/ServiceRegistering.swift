@@ -4,102 +4,74 @@
 //
 
 #if canImport(Darwin)
+import AppStoreConnect
 import FactoryKit
 
 public extension Container {
     var appStoreConfiguration: Factory<Result<ASCAccountConfiguration, Error>> {
-        self { .failure(ASCAuthenticationError.missingCredentials) }
+        self { .failure(ASCAuthenticationError.missingCredentials) }.cached
+    }
+
+    func ascService<Service>(
+        key: StaticString = #function,
+        _ make: @escaping @Sendable (any Authenticator, String?) -> Service,
+    ) -> Factory<Service> {
+        self(key: key) {
+            let context = ASCServiceContext(configuration: self.appStoreConfiguration())
+            return make(context.authenticator, context.cacheAccountID)
+        }
     }
 
     var appsService: Factory<AppsServicesProtocol> {
-        self {
-            let context = ASCServiceContext(configuration: self.appStoreConfiguration())
-            return AppsService(authenticator: context.authenticator, cacheAccountID: context.cacheAccountID)
-        }
+        ascService { AppsService(authenticator: $0, cacheAccountID: $1) }
     }
 
     var inAppPurchasesService: Factory<InAppPurchasesService> {
-        self {
-            let context = ASCServiceContext(configuration: self.appStoreConfiguration())
-            return InAppPurchasesService(authenticator: context.authenticator, cacheAccountID: context.cacheAccountID)
-        }
+        ascService { InAppPurchasesService(authenticator: $0, cacheAccountID: $1) }
     }
 
     var subscriptionsService: Factory<SubscriptionsService> {
-        self {
-            let context = ASCServiceContext(configuration: self.appStoreConfiguration())
-            return SubscriptionsService(authenticator: context.authenticator, cacheAccountID: context.cacheAccountID)
-        }
+        ascService { SubscriptionsService(authenticator: $0, cacheAccountID: $1) }
     }
 
     var certificateService: Factory<CertificateService> {
-        self {
-            let context = ASCServiceContext(configuration: self.appStoreConfiguration())
-            return CertificateService(authenticator: context.authenticator, cacheAccountID: context.cacheAccountID)
-        }
+        ascService { CertificateService(authenticator: $0, cacheAccountID: $1) }
     }
 
     var customerReviewService: Factory<CustomerReviewService> {
-        self {
-            let context = ASCServiceContext(configuration: self.appStoreConfiguration())
-            return CustomerReviewService(authenticator: context.authenticator, cacheAccountID: context.cacheAccountID)
-        }
+        ascService { CustomerReviewService(authenticator: $0, cacheAccountID: $1) }
     }
 
     var usersService: Factory<UsersService> {
-        self {
-            let context = ASCServiceContext(configuration: self.appStoreConfiguration())
-            return UsersService(authenticator: context.authenticator, cacheAccountID: context.cacheAccountID)
-        }
+        ascService { UsersService(authenticator: $0, cacheAccountID: $1) }
     }
 
     var buildsService: Factory<BuildsService> {
-        self {
-            let context = ASCServiceContext(configuration: self.appStoreConfiguration())
-            return BuildsService(authenticator: context.authenticator, cacheAccountID: context.cacheAccountID)
-        }
+        ascService { BuildsService(authenticator: $0, cacheAccountID: $1) }
     }
 
     var versionsService: Factory<any VersionsServicesProtocol> {
-        self {
-            let context = ASCServiceContext(configuration: self.appStoreConfiguration())
-            return VersionsService(authenticator: context.authenticator, cacheAccountID: context.cacheAccountID)
-        }
+        ascService { VersionsService(authenticator: $0, cacheAccountID: $1) }
     }
 
     var appInfoService: Factory<AppInfoService> {
-        self {
-            let context = ASCServiceContext(configuration: self.appStoreConfiguration())
-            return AppInfoService(authenticator: context.authenticator, cacheAccountID: context.cacheAccountID)
-        }
+        ascService { AppInfoService(authenticator: $0, cacheAccountID: $1) }
     }
 
     var appStoreReviewService: Factory<any AppStoreReviewServicesProtocol> {
-        self {
-            let context = ASCServiceContext(configuration: self.appStoreConfiguration())
-            return AppStoreReviewService(authenticator: context.authenticator, cacheAccountID: context.cacheAccountID)
-        }
+        ascService { AppStoreReviewService(authenticator: $0, cacheAccountID: $1) }
     }
 
     var appCategoryService: Factory<AppCategoryService> {
-        self {
-            let context = ASCServiceContext(configuration: self.appStoreConfiguration())
-            return AppCategoryService(authenticator: context.authenticator, cacheAccountID: context.cacheAccountID)
-        }
+        ascService { AppCategoryService(authenticator: $0, cacheAccountID: $1) }
     }
 
     var reviewSubmissionsService: Factory<any ReviewSubmissionsServicesProtocol> {
-        self {
-            let context = ASCServiceContext(configuration: self.appStoreConfiguration())
-            return ReviewSubmissionsService(authenticator: context.authenticator, cacheAccountID: context.cacheAccountID)
-        }
+        ascService { ReviewSubmissionsService(authenticator: $0, cacheAccountID: $1) }
     }
 
     var appScreenshotsService: Factory<AppScreenshotsService> {
-        self {
-            let context = ASCServiceContext(configuration: self.appStoreConfiguration())
-            return AppScreenshotsService(authenticator: context.authenticator, cacheAccountID: context.cacheAccountID)
-        }
+        ascService { AppScreenshotsService(authenticator: $0, cacheAccountID: $1) }
     }
 }
 #endif

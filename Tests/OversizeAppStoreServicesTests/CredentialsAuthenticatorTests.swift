@@ -4,6 +4,7 @@ import AppStoreConnect
 import CryptoKit
 import FactoryKit
 import Foundation
+import os
 @testable import OversizeAppStoreServices
 import Testing
 
@@ -59,8 +60,6 @@ struct CredentialsAuthenticatorTests {
         #expect(first.cacheAccountID != second.cacheAccountID)
         #expect(try JSONDecoder().decode(Payload.self, from: decode(firstToken.split(separator: ".")[1])).iss == "first")
         #expect(try JSONDecoder().decode(Payload.self, from: decode(secondToken.split(separator: ".")[1])).iss == "second")
-        #expect(ASCClientFactory.resolveCacheAccountID(for: firstAuth) == nil)
-        #expect(ASCClientFactory.resolveCacheAccountID(for: firstAuth, explicit: first.cacheAccountID) == first.cacheAccountID)
     }
 
     @Test
@@ -83,6 +82,29 @@ struct CredentialsAuthenticatorTests {
     func configurationFailureIsPreserved() {
         var authenticator = ASCServiceContext(configuration: .failure(TestError.storageUnavailable)).authenticator
         #expect(throws: TestError.storageUnavailable) { try authenticator.token() }
+    }
+
+    @Test
+    func configurationIsReadOnceUntilRegisteredOrReset() {
+        let container = Container()
+        let reads = OSAllocatedUnfairLock(initialState: 0)
+        let register = {
+            container.appStoreConfiguration.register {
+                reads.withLock { $0 += 1 }
+                return .failure(ASCAuthenticationError.missingCredentials)
+            }
+        }
+        register()
+        _ = container.appStoreConfiguration()
+        _ = container.appsService()
+        _ = container.versionsService()
+        #expect(reads.withLock { $0 } == 1)
+        register()
+        _ = container.appsService()
+        #expect(reads.withLock { $0 } == 2)
+        container.manager.reset(scope: .cached)
+        _ = container.appsService()
+        #expect(reads.withLock { $0 } == 3)
     }
 
     private func decode(_ part: Substring) throws -> Data {

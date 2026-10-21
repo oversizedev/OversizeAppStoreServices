@@ -17,12 +17,11 @@ public actor SalesAndFinanceService {
     private static let maxConcurrentDownloads = 4
 
     public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
-        let resolvedAccountID = ASCClientFactory.resolveCacheAccountID(for: authenticator, explicit: cacheAccountID)
-        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: resolvedAccountID)
+        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: cacheAccountID)
         dailySalesCache = ASCValueCache(
             namespace: "daily-sales",
             ttl: ASCCache.TTL.month,
-            accountID: resolvedAccountID,
+            accountID: cacheAccountID,
         )
     }
 
