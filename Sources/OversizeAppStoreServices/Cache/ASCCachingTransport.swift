@@ -30,10 +30,9 @@ public struct ASCCachingTransport: Transport {
 
     public func send(request: URLRequest, decoder: JSONDecoder) async throws -> Response<Data> {
         if Self.mutatingMethods.contains(request.httpMethod?.uppercased() ?? "") {
-            if let scopeAccount {
-                ASCCacheScope.bumpGeneration(for: scopeAccount)
+            return try await invalidatingCache {
+                try await session.send(request: request, decoder: decoder)
             }
-            return try await session.send(request: request, decoder: decoder)
         }
 
         guard let policy = ASCCache.policy, let scopeAccount else {
@@ -51,10 +50,20 @@ public struct ASCCachingTransport: Transport {
     }
 
     public func upload(request: URLRequest, data: Data, decoder: JSONDecoder) async throws -> Response<Data> {
-        if let scopeAccount {
-            ASCCacheScope.bumpGeneration(for: scopeAccount)
+        try await invalidatingCache {
+            try await session.upload(request: request, data: data, decoder: decoder)
         }
-        return try await session.upload(request: request, data: data, decoder: decoder)
+    }
+
+    // MARK: - Invalidation
+
+    /// The generation moves before the mutation, so a lost response still invalidates the cache, and
+    /// again once it finishes, so a read that ran alongside it cannot keep the old state cached.
+    private func invalidatingCache<Value>(_ mutation: () async throws -> Value) async throws -> Value {
+        guard let scopeAccount else { return try await mutation() }
+        ASCCacheScope.bumpGeneration(for: scopeAccount)
+        defer { ASCCacheScope.bumpGeneration(for: scopeAccount) }
+        return try await mutation()
     }
 
     // MARK: - Request stamping

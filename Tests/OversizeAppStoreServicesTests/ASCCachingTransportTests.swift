@@ -223,6 +223,17 @@ struct ASCCachingTransportTests {
         #expect(StubURLProtocol.requestCount == 3)
     }
 
+    @Test("Should invalidate responses cached while a mutation was running")
+    func mutationInvalidatesCacheAgainWhenItFinishes() async throws {
+        let accountID = "concurrent-mutation-tests-" + UUID().uuidString
+        let client = makeClient(accountID: accountID)
+        let patchURL = try #require(URL(string: "https://api.appstoreconnect.apple.com/v1/apps/123"))
+
+        try await client.send(Request<Void>.patch(patchURL))
+
+        #expect(ASCCacheScope.generation(for: accountID) == 2)
+    }
+
     @Test("Should invalidate cached responses when a mutation fails")
     func failedMutationInvalidatesCache() async throws {
         let accountID = "failed-mutation-tests-" + UUID().uuidString
@@ -238,7 +249,7 @@ struct ASCCachingTransportTests {
             try await client.send(Request<Void>.patch(patchURL))
             Issue.record("Expected mutation to fail")
         } catch {
-            #expect(ASCCacheScope.generation(for: accountID) == 1)
+            #expect(ASCCacheScope.generation(for: accountID) == 2)
         }
 
         StubURLProtocol.reset(status: 200, body: Self.appsBody, headers: ["Content-Type": "application/json"])
