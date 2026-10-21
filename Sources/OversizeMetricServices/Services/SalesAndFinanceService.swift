@@ -210,7 +210,7 @@ public actor SalesAndFinanceService {
         force: Bool,
     ) async -> DailyProceedsOutcome {
         guard let date = AnalyticsReportInstance.dateFormatter.date(from: reportDate) else { return .missing }
-        let cacheKey = "daily-proceeds-by-currency-\(vendorNumber)-\(appAppleId ?? "all")-\(reportDate)"
+        let cacheKey = "daily-proceeds-with-purchases-\(vendorNumber)-\(appAppleId ?? "all")-\(reportDate)"
         let generation = dailySalesCache.generation()
 
         if !force, let cached = dailySalesCache.load([String: Double].self, key: cacheKey) {
@@ -220,13 +220,7 @@ public actor SalesAndFinanceService {
         let salesResult = await fetchDailySales(vendorNumber: vendorNumber, reportDate: reportDate)
         switch salesResult {
         case let .success(reports):
-            var totals: [String: Double] = [:]
-            for report in reports {
-                if let appAppleId, report.appleIdentifier != appAppleId {
-                    continue
-                }
-                totals[report.currencyOfProceeds, default: 0] += report.developerProceeds * Double(report.units)
-            }
+            let totals = Self.proceedsByCurrency(reports, appAppleId: appAppleId)
             dailySalesCache.save(totals, key: cacheKey, generation: generation)
             return .day(date, totals)
         case let .failure(error):
@@ -234,6 +228,21 @@ public actor SalesAndFinanceService {
                 return .missing
             }
             return .failure(error)
+        }
+    }
+
+    /// In-app purchases and subscriptions carry their own Apple identifier and name the app only
+    /// through `Parent Identifier`, the app's SKU, so they are matched through the SKU of the app's rows.
+    static func proceedsByCurrency(_ reports: [SalesSummaryReport], appAppleId: String?) -> [String: Double] {
+        var included = reports
+        if let appAppleId {
+            let appSKUs = Set(reports.filter { $0.appleIdentifier == appAppleId }.map(\.sku))
+            included = reports.filter { report in
+                report.appleIdentifier == appAppleId || report.parentIdentifier.map(appSKUs.contains) == true
+            }
+        }
+        return included.reduce(into: [:]) { totals, report in
+            totals[report.currencyOfProceeds, default: 0] += report.developerProceeds * Double(report.units)
         }
     }
 
