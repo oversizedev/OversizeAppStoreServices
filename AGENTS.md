@@ -31,5 +31,5 @@
 - Pull requests should include: concise summary, linked issue (if any), and test output (`swift test`).
 
 ## Configuration & Dependencies
-- Dependencies can be toggled between local and remote in `Package.swift` (`localDependencies` vs `remoteDependencies`).
-- Auth uses `EnvAuthenticator` and reads credentials from Keychain or `.env` via `NetworkEnvironment`.
+- Package dependencies use remote version requirements. For local development, override dependencies in the root application package or Xcode project; do not auto-detect developer folders in this manifest.
+- Auth uses `CredentialsAuthenticator(credentials:api:)`. The caller owns credential storage and passes `cacheAccountID` explicitly. Factory consumers register `appStoreConfiguration`; an unconfigured service fails before sending a request.

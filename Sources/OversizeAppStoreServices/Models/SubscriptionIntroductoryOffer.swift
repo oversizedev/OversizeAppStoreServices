@@ -36,15 +36,21 @@ public struct SubscriptionIntroductoryOffer: Sendable, Identifiable {
 
         self.included = .init(
             subscription: included?.compactMap { item -> Subscription? in
-                if case let .subscription(value) = item { return .init(schema: value) }
+                if case let .subscription(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             }.first,
             territory: included?.compactMap { item -> Territory? in
-                if case let .territory(value) = item { return .init(schema: value) }
+                if case let .territory(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             }.first,
             subscriptionPricePoint: included?.compactMap { item -> SubscriptionPricePoint? in
-                if case let .subscriptionPricePoint(value) = item { return .init(schema: value) }
+                if case let .subscriptionPricePoint(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             }.first,
         )

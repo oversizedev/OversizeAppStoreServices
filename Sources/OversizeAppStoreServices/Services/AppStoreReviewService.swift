@@ -8,15 +8,14 @@ import AppStoreConnect
 import Foundation
 import OversizeCore
 
-public actor AppStoreReviewService {
+public actor AppStoreReviewService: AppStoreReviewServicesProtocol {
     private let client: AppStoreConnectClient
 
-    public init(authenticator: some AppStoreConnect.Authenticator) {
-        self.client = AppStoreConnectClient(authenticator: authenticator)
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
+        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: cacheAccountID)
     }
 
     public func fetchAppStoreReviewDetail(versionId: String) async -> Result<AppStoreReviewDetail, Error> {
-
         let request = Resources.v1.appStoreVersions.id(versionId).appStoreReviewDetail.get(
             include: [.appStoreReviewAttachments],
         )
@@ -32,7 +31,6 @@ public actor AppStoreReviewService {
     }
 
     public func fetchAppStoreReviewDetailAttachments(versionId: String) async -> Result<[AppStoreReviewAttachment], Error> {
-
         let request = Resources.v1.appStoreReviewDetails.id(
             versionId,
         ).appStoreReviewAttachments.get()
@@ -56,8 +54,6 @@ public actor AppStoreReviewService {
         isDemoAccountRequired: Bool?,
         notes: String?,
     ) async -> Result<AppStoreReviewDetail, Error> {
-
-
         let requestAttributes: AppStoreReviewDetailUpdateRequest.Data.Attributes = .init(
             contactFirstName: contactFirstName?.isEmpty == true ? nil : contactFirstName,
             contactLastName: contactLastName?.isEmpty == true ? nil : contactLastName,
@@ -101,8 +97,6 @@ public actor AppStoreReviewService {
         isDemoAccountRequired: Bool?,
         notes: String?,
     ) async -> Result<AppStoreReviewDetail, Error> {
-
-
         let requestAttributes: AppStoreReviewDetailCreateRequest.Data.Attributes = .init(
             contactFirstName: contactFirstName,
             contactLastName: contactLastName,

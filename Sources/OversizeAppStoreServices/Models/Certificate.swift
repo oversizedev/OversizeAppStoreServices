@@ -38,7 +38,7 @@ public extension Certificate {
 }
 
 private extension AppStoreAPI.CertificateType {
-    public init?(from certType: CertificateType) {
+    init?(from certType: CertificateType) {
         guard let resolved = Self(rawValue: certType.rawValue) else { return nil }
         self = resolved
     }

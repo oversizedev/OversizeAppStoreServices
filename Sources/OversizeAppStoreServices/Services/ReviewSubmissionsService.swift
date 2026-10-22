@@ -8,21 +8,17 @@ import AppStoreConnect
 import Foundation
 import OversizeCore
 
-public actor ReviewSubmissionsService {
+public actor ReviewSubmissionsService: ReviewSubmissionsServicesProtocol {
     private let client: AppStoreConnectClient
-    private let cacheService: CacheService
 
-    public init(authenticator: some AppStoreConnect.Authenticator, cacheService: CacheService = CacheService()) {
-        self.client = AppStoreConnectClient(authenticator: authenticator)
-        self.cacheService = cacheService
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
+        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: cacheAccountID)
     }
 
     public func postReviewSubmission(
         appId: String,
         platform: Platform,
     ) async -> Result<ReviewSubmission, Error> {
-
-
         do {
             let apiPlatform: AppStoreAPI.Platform = switch platform {
             case .ios: .iOS
@@ -59,8 +55,6 @@ public actor ReviewSubmissionsService {
         reviewSubmissionId: String,
         appStoreVersionsId: String,
     ) async -> Result<ReviewSubmissionItem, Error> {
-
-
         do {
             let reviewSubmissionItemCreateRequest = ReviewSubmissionItemCreateRequest(
                 data: .init(
@@ -95,8 +89,6 @@ public actor ReviewSubmissionsService {
         isSubmitted: Bool,
         isCanceled: Bool? = nil,
     ) async -> Result<ReviewSubmission, Error> {
-
-
         do {
             let submitRequest = ReviewSubmissionUpdateRequest(
                 data: .init(
@@ -147,8 +139,6 @@ public actor ReviewSubmissionsService {
     }
 
     public func fetchReviewSubmissions(appId: String) async -> Result<[ReviewSubmission], Error> {
-
-
         do {
             let request = Resources.v1.reviewSubmissions.get(filterApp: [appId])
             let response = try await client.send(request)
@@ -164,9 +154,7 @@ public actor ReviewSubmissionsService {
         appId: String,
         force: Bool = false,
     ) async -> Result<[ReviewSubmission], Error> {
-
-
-        return await cacheService.fetchWithCache(key: "fetchReviewSubmissionsIncludedAll\(appId)", force: force) {
+        await ASCCache.cached(ttl: ASCCache.TTL.short, force: force) {
             let request = Resources.v1.reviewSubmissions.get(
                 filterApp: [appId],
                 include: [
@@ -187,9 +175,7 @@ public actor ReviewSubmissionsService {
         reviewSubmissionId: String,
         force: Bool = false,
     ) async -> Result<[ReviewSubmissionItem], Error> {
-
-
-        return await cacheService.fetchWithCache(key: "fetchReviewSubmissionItemsIncludedAll\(reviewSubmissionId)", force: force) {
+        await ASCCache.cached(ttl: ASCCache.TTL.short, force: force) {
             let request = Resources.v1.reviewSubmissions.id(reviewSubmissionId).items.get(
                 limit: 200,
                 include: [
@@ -204,6 +190,9 @@ public actor ReviewSubmissionsService {
                     .gameCenterChallengeVersion,
                     .gameCenterLeaderboardSetVersion,
                     .gameCenterLeaderboardVersion,
+                    .inAppPurchaseVersion,
+                    .subscriptionVersion,
+                    .subscriptionGroupVersion,
                 ],
             )
             return try await client.send(request)
@@ -213,8 +202,6 @@ public actor ReviewSubmissionsService {
     }
 
     public func cancelReviewSubmission(id: String) async -> Result<Void, Error> {
-
-
         do {
             let cancelRequest = ReviewSubmissionUpdateRequest(
                 data: .init(
@@ -235,8 +222,6 @@ public actor ReviewSubmissionsService {
     }
 
     public func cancelIrisReviewSubmission(id: String) async -> Result<Void, Error> {
-
-
         struct CancelBody: Encodable, Sendable {
             struct DataPayload: Encodable, Sendable {
                 let type: String
@@ -273,8 +258,6 @@ private extension ReviewSubmissionsService {
         appId: String,
         platform: Platform,
     ) async -> Result<ReviewSubmission, Error> {
-
-
         let filterPlatform: Resources.V1.ReviewSubmissions.FilterPlatform = switch platform {
         case .ios: .iOS
         case .macOs: .macOS

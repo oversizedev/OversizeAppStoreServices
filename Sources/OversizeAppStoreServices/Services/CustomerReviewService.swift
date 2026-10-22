@@ -10,8 +10,8 @@ import OversizeCore
 public actor CustomerReviewService {
     private let client: AppStoreConnectClient
 
-    public init(authenticator: some AppStoreConnect.Authenticator) {
-        self.client = AppStoreConnectClient(authenticator: authenticator)
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
+        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: cacheAccountID)
     }
 
     public func fetchCustomerReviews(version: AppStoreVersion) async -> Result<[CustomerReview], Error> {
@@ -19,7 +19,6 @@ public actor CustomerReviewService {
     }
 
     public func fetchAppCustomerReviews(appId: String) async -> Result<[CustomerReview], Error> {
-
         let request = Resources.v1.apps.id(appId).customerReviews.get(sort: [.minusCreatedDate])
         do {
             let data = try await client.send(request).data
@@ -39,7 +38,12 @@ public actor CustomerReviewService {
         )
         do {
             let result = try await client.send(request)
-            let responses: [AppStoreAPI.CustomerReviewResponseV1]? = result.included
+            let responses: [AppStoreAPI.CustomerReviewResponseV1] = (result.included ?? []).compactMap {
+                if case let .customerReviewResponseV1(response) = $0 {
+                    return response
+                }
+                return nil
+            }
             return .success(result.data.compactMap { .init(schema: $0, included: responses) })
         } catch {
             return .failure(error.asNetworkError)
@@ -47,7 +51,6 @@ public actor CustomerReviewService {
     }
 
     public func fetchCustomerReviews(versionId: String) async -> Result<[CustomerReview], Error> {
-
         let request = Resources.v1.appStoreVersions.id(versionId).customerReviews.get()
         do {
             let data = try await client.send(request).data

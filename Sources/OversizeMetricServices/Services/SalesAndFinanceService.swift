@@ -1,21 +1,28 @@
 //
 // Copyright © 2024 Alexander Romanov
-// AnalyticsService_2.swift, created on 25.11.2024
+// SalesAndFinanceService.swift, created on 25.11.2024
 //
 
 import AppStoreAPI
 import AppStoreConnect
 import CodableCSV
 import Foundation
-import OversizeCore
 import Gzip
 import OversizeAppStoreServices
+import OversizeCore
 
 public actor SalesAndFinanceService {
     private let client: AppStoreConnectClient
+    private let dailySalesCache: ASCValueCache
+    private static let maxConcurrentDownloads = 4
 
-    public init(authenticator: some AppStoreConnect.Authenticator) {
-        self.client = AppStoreConnectClient(authenticator: authenticator)
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
+        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: cacheAccountID)
+        dailySalesCache = ASCValueCache(
+            namespace: "daily-sales",
+            ttl: ASCCache.TTL.month,
+            accountID: cacheAccountID,
+        )
     }
 
     public func fetchSalesURL(vendorNumber: String) async -> Result<URL, Error> {
@@ -45,7 +52,8 @@ public actor SalesAndFinanceService {
             let data = try await client.download(request)
             return .success(data)
         } catch {
-            return .failure(NetworkError.noResponse)
+            Log.error("Fetch sales URL failed", error: error)
+            return .failure(error.asNetworkError)
         }
     }
 
@@ -93,18 +101,18 @@ public actor SalesAndFinanceService {
             let reports = try decoder.decode([InstallReport].self, from: cleanedData)
             return .success(reports)
         } catch {
-            print("FetchSalesReports error: \(error)")
-            return .failure(NetworkError.noResponse)
+            Log.error("Fetch monthly installs failed", error: error)
+            return .failure(error.asNetworkError)
         }
     }
 
-    public func fetchSales(vendorNumber: String) async -> Result<[SalesSummaryReport], Error> {
+    public func fetchDailySales(vendorNumber: String, reportDate: String) async -> Result<[SalesSummaryReport], Error> {
         let request = Resources.v1.salesReports.get(
             filterVendorNumber: [vendorNumber],
             filterReportType: [.sales],
             filterReportSubType: [.summary],
             filterFrequency: [.daily],
-            filterReportDate: ["2024-10-10"],
+            filterReportDate: [reportDate],
             filterVersion: ["1_0"],
         )
         do {
@@ -118,8 +126,141 @@ public actor SalesAndFinanceService {
             let reports = try decoder.decode([SalesSummaryReport].self, from: decompressedData)
             return .success(reports)
         } catch {
-            print("FetchSalesReports error: \(error)")
-            return .failure(NetworkError.noResponse)
+            Log.error("Fetch daily sales failed for \(reportDate)", error: error)
+            return .failure(error.asNetworkError)
+        }
+    }
+
+    public func fetchDailyProceedsSeries(
+        vendorNumber: String,
+        appAppleId: String? = nil,
+        days: Int = 30,
+        force: Bool = false,
+    ) async -> Result<[AnalyticsMetricPoint], Error> {
+        let dates = Self.recentReportDates(days: days)
+        guard !dates.isEmpty else { return .success([]) }
+
+        let outcomes = await withTaskGroup(of: DailyProceedsOutcome.self) { group in
+            var results: [DailyProceedsOutcome] = []
+            var nextIndex = 0
+            while nextIndex < dates.count, nextIndex < Self.maxConcurrentDownloads {
+                let date = dates[nextIndex]
+                group.addTask { [self] in
+                    await dailyProceeds(vendorNumber: vendorNumber, appAppleId: appAppleId, reportDate: date, force: force)
+                }
+                nextIndex += 1
+            }
+            while let outcome = await group.next() {
+                results.append(outcome)
+                if nextIndex < dates.count {
+                    let date = dates[nextIndex]
+                    group.addTask { [self] in
+                        await dailyProceeds(vendorNumber: vendorNumber, appAppleId: appAppleId, reportDate: date, force: force)
+                    }
+                    nextIndex += 1
+                }
+            }
+            return results
+        }
+
+        var dayTotals: [(date: Date, totals: [String: Double])] = []
+        var firstFailure: Error?
+        for outcome in outcomes {
+            switch outcome {
+            case let .day(date, totals):
+                dayTotals.append((date, totals))
+            case .missing:
+                continue
+            case let .failure(error):
+                if firstFailure == nil {
+                    firstFailure = error
+                }
+            }
+        }
+        if let firstFailure {
+            return .failure(firstFailure)
+        }
+
+        var currencyVolumes: [String: Double] = [:]
+        for day in dayTotals {
+            for (currency, total) in day.totals {
+                currencyVolumes[currency, default: 0] += abs(total)
+            }
+        }
+        guard let dominantCurrency = currencyVolumes.max(by: { $0.value < $1.value })?.key else {
+            return .success([])
+        }
+
+        let points = dayTotals
+            .map { AnalyticsMetricPoint(date: $0.date, value: $0.totals[dominantCurrency] ?? 0) }
+            .sorted { $0.date < $1.date }
+        return .success(points)
+    }
+
+    private enum DailyProceedsOutcome {
+        case day(Date, [String: Double])
+        case missing
+        case failure(Error)
+    }
+
+    private func dailyProceeds(
+        vendorNumber: String,
+        appAppleId: String?,
+        reportDate: String,
+        force: Bool,
+    ) async -> DailyProceedsOutcome {
+        guard let date = AnalyticsReportInstance.dateFormatter.date(from: reportDate) else { return .missing }
+        let cacheKey = "daily-proceeds-with-purchases-\(vendorNumber)-\(appAppleId ?? "all")-\(reportDate)"
+        let generation = dailySalesCache.generation()
+
+        if !force, let cached = dailySalesCache.load([String: Double].self, key: cacheKey) {
+            return .day(date, cached)
+        }
+
+        let salesResult = await fetchDailySales(vendorNumber: vendorNumber, reportDate: reportDate)
+        switch salesResult {
+        case let .success(reports):
+            let totals = Self.proceedsByCurrency(reports, appAppleId: appAppleId)
+            dailySalesCache.save(totals, key: cacheKey, generation: generation)
+            return .day(date, totals)
+        case let .failure(error):
+            if Self.isMissingReportError(error.asNetworkError) {
+                return .missing
+            }
+            return .failure(error)
+        }
+    }
+
+    /// In-app purchases and subscriptions carry their own Apple identifier and name the app only
+    /// through `Parent Identifier`, the app's SKU, so they are matched through the SKU of the app's rows.
+    static func proceedsByCurrency(_ reports: [SalesSummaryReport], appAppleId: String?) -> [String: Double] {
+        var included = reports
+        if let appAppleId {
+            let appSKUs = Set(reports.filter { $0.appleIdentifier == appAppleId }.map(\.sku))
+            included = reports.filter { report in
+                report.appleIdentifier == appAppleId || report.parentIdentifier.map(appSKUs.contains) == true
+            }
+        }
+        return included.reduce(into: [:]) { totals, report in
+            totals[report.currencyOfProceeds, default: 0] += report.developerProceeds * Double(report.units)
+        }
+    }
+
+    private static func isMissingReportError(_ error: NetworkError) -> Bool {
+        guard case let .apiError(title, detail) = error else { return false }
+        let text = "\(title) \(detail ?? "")".lowercased()
+        return text.contains("no sales")
+            || text.contains("none were found")
+            || text.contains("no data")
+            || text.contains("not available")
+    }
+
+    private static func recentReportDates(days: Int) -> [String] {
+        let calendar = Calendar.current
+        guard let latestDate = calendar.date(byAdding: .day, value: -1, to: Date()) else { return [] }
+        return (0 ..< max(days, 0)).compactMap { offset in
+            guard let date = calendar.date(byAdding: .day, value: -offset, to: latestDate) else { return nil }
+            return AnalyticsReportInstance.dateFormatter.string(from: date)
         }
     }
 
@@ -134,7 +275,8 @@ public actor SalesAndFinanceService {
             let data = try await client.download(request)
             return .success(data)
         } catch {
-            return .failure(NetworkError.noResponse)
+            Log.error("Fetch finance reports URL failed", error: error)
+            return .failure(error.asNetworkError)
         }
     }
 
@@ -153,12 +295,9 @@ public actor SalesAndFinanceService {
             let reports = FinanceReports(data: decompressedData)
             guard let reports else { return .failure(NetworkError.decode) }
             return .success(reports)
-        } catch let error as NetworkError {
-            print("FetchFinanceReports error: \(error)")
-            return .failure(error)
         } catch {
-            print("FetchFinanceReports error: \(error)")
-            return .failure(NetworkError.noResponse)
+            Log.error("Fetch finance reports failed", error: error)
+            return .failure(error.asNetworkError)
         }
     }
 

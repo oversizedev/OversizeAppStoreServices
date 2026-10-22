@@ -22,6 +22,9 @@ public struct ReviewSubmissionItem: Sendable, Identifiable {
             gameCenterChallengeVersionId: schema.relationships?.gameCenterChallengeVersion?.data?.id,
             gameCenterLeaderboardSetVersionId: schema.relationships?.gameCenterLeaderboardSetVersion?.data?.id,
             gameCenterLeaderboardVersionId: schema.relationships?.gameCenterLeaderboardVersion?.data?.id,
+            inAppPurchaseVersionId: schema.relationships?.inAppPurchaseVersion?.data?.id,
+            subscriptionVersionId: schema.relationships?.subscriptionVersion?.data?.id,
+            subscriptionGroupVersionId: schema.relationships?.subscriptionGroupVersion?.data?.id,
         )
         included = nil
     }
@@ -44,6 +47,9 @@ public struct ReviewSubmissionItem: Sendable, Identifiable {
             gameCenterChallengeVersionId: schema.relationships?.gameCenterChallengeVersion?.data?.id,
             gameCenterLeaderboardSetVersionId: schema.relationships?.gameCenterLeaderboardSetVersion?.data?.id,
             gameCenterLeaderboardVersionId: schema.relationships?.gameCenterLeaderboardVersion?.data?.id,
+            inAppPurchaseVersionId: schema.relationships?.inAppPurchaseVersion?.data?.id,
+            subscriptionVersionId: schema.relationships?.subscriptionVersion?.data?.id,
+            subscriptionGroupVersionId: schema.relationships?.subscriptionGroupVersion?.data?.id,
         )
 
         var appStoreVersion: AppStoreVersion?
@@ -56,6 +62,9 @@ public struct ReviewSubmissionItem: Sendable, Identifiable {
         var gameCenterChallengeVersion: GameCenterChallengeVersion?
         var gameCenterLeaderboardSetVersionV2: GameCenterLeaderboardSetVersionV2?
         var gameCenterLeaderboardVersionV2: GameCenterLeaderboardVersionV2?
+        var inAppPurchaseVersion: InAppPurchaseVersion?
+        var subscriptionVersion: SubscriptionVersion?
+        var subscriptionGroupVersion: SubscriptionGroupVersion?
 
         if let includedItems = included {
             for includedItem in includedItems {
@@ -100,6 +109,18 @@ public struct ReviewSubmissionItem: Sendable, Identifiable {
                     if schema.relationships?.gameCenterLeaderboardVersion?.data?.id == value.id {
                         gameCenterLeaderboardVersionV2 = .init(schema: value)
                     }
+                case let .inAppPurchaseVersion(value):
+                    if schema.relationships?.inAppPurchaseVersion?.data?.id == value.id {
+                        inAppPurchaseVersion = .init(schema: value)
+                    }
+                case let .subscriptionVersion(value):
+                    if schema.relationships?.subscriptionVersion?.data?.id == value.id {
+                        subscriptionVersion = .init(schema: value)
+                    }
+                case let .subscriptionGroupVersion(value):
+                    if schema.relationships?.subscriptionGroupVersion?.data?.id == value.id {
+                        subscriptionGroupVersion = .init(schema: value)
+                    }
                 @unknown default:
                     break
                 }
@@ -116,6 +137,9 @@ public struct ReviewSubmissionItem: Sendable, Identifiable {
             gameCenterChallengeVersion: gameCenterChallengeVersion,
             gameCenterLeaderboardSetVersionV2: gameCenterLeaderboardSetVersionV2,
             gameCenterLeaderboardVersionV2: gameCenterLeaderboardVersionV2,
+            inAppPurchaseVersion: inAppPurchaseVersion,
+            subscriptionVersion: subscriptionVersion,
+            subscriptionGroupVersion: subscriptionGroupVersion,
         )
     }
 
@@ -131,6 +155,9 @@ public struct ReviewSubmissionItem: Sendable, Identifiable {
         public let gameCenterChallengeVersionId: String?
         public let gameCenterLeaderboardSetVersionId: String?
         public let gameCenterLeaderboardVersionId: String?
+        public let inAppPurchaseVersionId: String?
+        public let subscriptionVersionId: String?
+        public let subscriptionGroupVersionId: String?
     }
 
     public struct Included: Sendable {
@@ -144,6 +171,9 @@ public struct ReviewSubmissionItem: Sendable, Identifiable {
         public let gameCenterChallengeVersion: GameCenterChallengeVersion?
         public let gameCenterLeaderboardSetVersionV2: GameCenterLeaderboardSetVersionV2?
         public let gameCenterLeaderboardVersionV2: GameCenterLeaderboardVersionV2?
+        public let inAppPurchaseVersion: InAppPurchaseVersion?
+        public let subscriptionVersion: SubscriptionVersion?
+        public let subscriptionGroupVersion: SubscriptionGroupVersion?
     }
 
     public enum State: String, CaseIterable, Codable, Sendable {

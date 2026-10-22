@@ -15,7 +15,6 @@ public struct AppInfo: Sendable {
     public let brazilAgeRating: BrazilAgeRating?
     public let brazilAgeRatingV2: BrazilAgeRatingV2?
     public let koreaAgeRating: KoreaAgeRating?
-    public let kidsAgeBand: KidsAgeBand?
 
     public let relationships: Relationships?
     public let included: Included?
@@ -30,7 +29,6 @@ public struct AppInfo: Sendable {
         brazilAgeRating = attributes.brazilAgeRating.flatMap { BrazilAgeRating(rawValue: $0.rawValue) }
         brazilAgeRatingV2 = attributes.brazilAgeRatingV2.flatMap { BrazilAgeRatingV2(rawValue: $0.rawValue) }
         koreaAgeRating = attributes.koreaAgeRating.flatMap { KoreaAgeRating(rawValue: $0.rawValue) }
-        kidsAgeBand = attributes.kidsAgeBand.flatMap { KidsAgeBand(rawValue: $0.rawValue) }
 
         relationships = .init(
             primaryCategoryId: schema.relationships?.primaryCategory?.data?.id,
@@ -65,11 +63,13 @@ public struct AppInfo: Sendable {
                 .first {
                     $0.id == schema.relationships?.ageRatingDeclaration?.data?.id
                 }
-            if let primaryCategory, let seconaryCategory {
+            // A secondary category is optional in App Store Connect — requiring it here dropped
+            // the primary category for every app that has only one category set.
+            if let primaryCategory {
                 self.included = .init(
                     primaryCategory: .init(schema: primaryCategory),
-                    secondaryCategory: .init(schema: seconaryCategory),
-                    ageRatingDeclaration: ageRatingDeclaration != nil ? .init(schema: ageRatingDeclaration!) : nil,
+                    secondaryCategory: seconaryCategory.flatMap { .init(schema: $0) },
+                    ageRatingDeclaration: ageRatingDeclaration.flatMap { .init(schema: $0) },
                 )
             } else {
                 self.included = nil

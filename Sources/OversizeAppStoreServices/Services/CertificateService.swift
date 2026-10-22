@@ -11,12 +11,11 @@ import OversizeCore
 public actor CertificateService {
     private let client: AppStoreConnectClient
 
-    public init(authenticator: some AppStoreConnect.Authenticator) {
-        self.client = AppStoreConnectClient(authenticator: authenticator)
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
+        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: cacheAccountID)
     }
 
     public func fetchProfiles() async -> Result<[Profile], Error> {
-
         let request = Resources.v1.profiles.get()
         do {
             let data = try await client.send(request)
@@ -27,7 +26,6 @@ public actor CertificateService {
     }
 
     func fetchActiveCertificates() async throws -> Result<[Certificate], Error> {
-
         let request = Resources.v1.certificates.get()
         do {
             let data = try await client.send(request)

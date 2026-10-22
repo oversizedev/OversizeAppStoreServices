@@ -52,6 +52,7 @@ public struct Subscription: Sendable, Identifiable {
             promotionalOffersIds: schema.relationships?.promotionalOffers?.data?.map { $0.id },
             winBackOffersIds: schema.relationships?.winBackOffers?.data?.map { $0.id },
             imagesIds: schema.relationships?.images?.data?.map { $0.id },
+            versionsIds: schema.relationships?.versions?.data?.map { $0.id },
         )
 
         self.included = .init(included: included)
@@ -130,6 +131,7 @@ public struct Subscription: Sendable, Identifiable {
         public var promotionalOffersIds: [String]?
         public var winBackOffersIds: [String]?
         public var imagesIds: [String]?
+        public var versionsIds: [String]?
 
         public init(
             subscriptionLocalizationsIds: [String]? = nil,
@@ -143,6 +145,7 @@ public struct Subscription: Sendable, Identifiable {
             promotionalOffersIds: [String]? = nil,
             winBackOffersIds: [String]? = nil,
             imagesIds: [String]? = nil,
+            versionsIds: [String]? = nil,
         ) {
             self.subscriptionLocalizationsIds = subscriptionLocalizationsIds
             self.subscriptionPricesIds = subscriptionPricesIds
@@ -155,6 +158,7 @@ public struct Subscription: Sendable, Identifiable {
             self.promotionalOffersIds = promotionalOffersIds
             self.winBackOffersIds = winBackOffersIds
             self.imagesIds = imagesIds
+            self.versionsIds = versionsIds
         }
     }
 
@@ -170,6 +174,7 @@ public struct Subscription: Sendable, Identifiable {
         public let promotionalOffers: [SubscriptionPromotionalOffer]?
         public let winBackOffers: [WinBackOffer]?
         public let subscriptionImages: [SubscriptionImage]?
+        public let versions: [SubscriptionVersion]?
 
         public init(
             subscriptionLocalizations: [SubscriptionLocalization]? = nil,
@@ -183,6 +188,7 @@ public struct Subscription: Sendable, Identifiable {
             promotionalOffers: [SubscriptionPromotionalOffer]? = nil,
             winBackOffers: [WinBackOffer]? = nil,
             subscriptionImages: [SubscriptionImage]? = nil,
+            versions: [SubscriptionVersion]? = nil,
         ) {
             self.subscriptionLocalizations = subscriptionLocalizations
             self.subscriptionPrices = subscriptionPrices
@@ -195,21 +201,28 @@ public struct Subscription: Sendable, Identifiable {
             self.promotionalOffers = promotionalOffers
             self.winBackOffers = winBackOffers
             self.subscriptionImages = subscriptionImages
+            self.versions = versions
         }
 
         public init?(included: [SubscriptionResponse.IncludedItem]?) {
             subscriptionLocalizations = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> SubscriptionLocalization? in
-                if case let .subscriptionLocalization(value) = item { return .init(schema: value) }
+                if case let .subscriptionLocalization(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             }
 
             subscriptionPrices = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> SubscriptionPrice? in
-                if case let .subscriptionPrice(value) = item { return .init(schema: value) }
+                if case let .subscriptionPrice(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             }
 
             subscriptionGroup = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> SubscriptionGroup? in
-                if case let .subscriptionGroup(value) = item { return .init(schema: value) }
+                if case let .subscriptionGroup(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             }.first
 
@@ -221,37 +234,58 @@ public struct Subscription: Sendable, Identifiable {
             }.first
 
             promotedPurchase = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> PromotedPurchase? in
-                if case let .promotedPurchase(value) = item { return .init(schema: value) }
+                if case let .promotedPurchase(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             }.first
 
             subscriptionOfferCodes = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> SubscriptionOfferCode? in
-                if case let .subscriptionOfferCode(value) = item { return .init(schema: value) }
+                if case let .subscriptionOfferCode(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             }
 
             subscriptionAvailability = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> Bool? in
-                if case let .subscriptionAvailability(value) = item { return value.attributes?.isAvailableInNewTerritories }
+                if case let .subscriptionAvailability(value) = item {
+                    return value.attributes?.isAvailableInNewTerritories
+                }
                 return nil
             }.first
 
             introductoryOffers = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> SubscriptionIntroductoryOffer? in
-                if case let .subscriptionIntroductoryOffer(value) = item { return .init(schema: value) }
+                if case let .subscriptionIntroductoryOffer(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             }
 
             promotionalOffers = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> SubscriptionPromotionalOffer? in
-                if case let .subscriptionPromotionalOffer(value) = item { return .init(schema: value) }
+                if case let .subscriptionPromotionalOffer(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             }
 
             winBackOffers = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> WinBackOffer? in
-                if case let .winBackOffer(value) = item { return .init(schema: value) }
+                if case let .winBackOffer(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             }
 
             subscriptionImages = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> SubscriptionImage? in
-                if case let .subscriptionImage(value) = item { return .init(schema: value) }
+                if case let .subscriptionImage(value) = item {
+                    return .init(schema: value)
+                }
+                return nil
+            }
+
+            versions = included?.compactMap { (item: SubscriptionResponse.IncludedItem) -> SubscriptionVersion? in
+                if case let .subscriptionVersion(value) = item {
+                    return .init(schema: value)
+                }
                 return nil
             }
         }

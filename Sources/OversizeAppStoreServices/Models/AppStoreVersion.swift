@@ -94,7 +94,9 @@ public struct AppStoreVersion: Sendable, Identifiable {
             case let .app(app):
                 includedApp = app
             case let .build(build):
-                if buildId == build.id { includedBuild = build }
+                if buildId == build.id {
+                    includedBuild = build
+                }
             case let .appStoreVersionLocalization(localization):
                 if localizationIds.contains(localization.id) {
                     includedAppStoreVersionLocalizations.append(localization)
@@ -117,8 +119,6 @@ public struct AppStoreVersion: Sendable, Identifiable {
                 includedGameCenterAppVersion = gameCenterVersion
             case let .routingAppCoverage(coverage):
                 includedRoutingAppCoverage = coverage
-            default:
-                continue
             }
         }
 
@@ -187,5 +187,27 @@ public struct AppStoreVersion: Sendable, Identifiable {
         public init(appStoreVersionLocalizationsIds: [String]?) {
             self.appStoreVersionLocalizationsIds = appStoreVersionLocalizationsIds
         }
+    }
+}
+
+// MARK: - Release State
+
+public extension AppStoreVersion {
+    /// The version has been superseded by a newer one and is no longer available in the App Store.
+    var isReplaced: Bool {
+        state == .replacedWithNewVersion
+    }
+
+    /// The version is currently available in the App Store.
+    var isPublished: Bool {
+        guard !isReplaced else { return false }
+        return state == .readyForDistribution
+            || storeState == .readyForSale
+            || storeState == .preorderReadyForSale
+    }
+
+    /// The version is still being prepared, reviewed or waiting for release.
+    var isInProgress: Bool {
+        !isReplaced && !isPublished
     }
 }

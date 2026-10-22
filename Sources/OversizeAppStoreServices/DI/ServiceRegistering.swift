@@ -4,63 +4,74 @@
 //
 
 #if canImport(Darwin)
+import AppStoreConnect
 import FactoryKit
 
 public extension Container {
-    var appsService: Factory<AppsService> {
-        self { AppsService(authenticator: EnvAuthenticator()) }
+    var appStoreConfiguration: Factory<Result<ASCAccountConfiguration, Error>> {
+        self { .failure(ASCAuthenticationError.missingCredentials) }.cached
+    }
+
+    func ascService<Service>(
+        key: StaticString = #function,
+        _ make: @escaping @Sendable (any Authenticator, String?) -> Service,
+    ) -> Factory<Service> {
+        self(key: key) {
+            let context = ASCServiceContext(configuration: self.appStoreConfiguration())
+            return make(context.authenticator, context.cacheAccountID)
+        }
+    }
+
+    var appsService: Factory<AppsServicesProtocol> {
+        ascService { AppsService(authenticator: $0, cacheAccountID: $1) }
     }
 
     var inAppPurchasesService: Factory<InAppPurchasesService> {
-        self { InAppPurchasesService(authenticator: EnvAuthenticator()) }
+        ascService { InAppPurchasesService(authenticator: $0, cacheAccountID: $1) }
     }
 
     var subscriptionsService: Factory<SubscriptionsService> {
-        self { SubscriptionsService(authenticator: EnvAuthenticator()) }
+        ascService { SubscriptionsService(authenticator: $0, cacheAccountID: $1) }
     }
 
     var certificateService: Factory<CertificateService> {
-        self { CertificateService(authenticator: EnvAuthenticator()) }
+        ascService { CertificateService(authenticator: $0, cacheAccountID: $1) }
     }
 
     var customerReviewService: Factory<CustomerReviewService> {
-        self { CustomerReviewService(authenticator: EnvAuthenticator()) }
+        ascService { CustomerReviewService(authenticator: $0, cacheAccountID: $1) }
     }
 
     var usersService: Factory<UsersService> {
-        self { UsersService(authenticator: EnvAuthenticator()) }
+        ascService { UsersService(authenticator: $0, cacheAccountID: $1) }
     }
 
     var buildsService: Factory<BuildsService> {
-        self { BuildsService(authenticator: EnvAuthenticator()) }
+        ascService { BuildsService(authenticator: $0, cacheAccountID: $1) }
     }
 
-    var versionsService: Factory<VersionsService> {
-        self { VersionsService(authenticator: EnvAuthenticator()) }
+    var versionsService: Factory<any VersionsServicesProtocol> {
+        ascService { VersionsService(authenticator: $0, cacheAccountID: $1) }
     }
 
     var appInfoService: Factory<AppInfoService> {
-        self { AppInfoService(authenticator: EnvAuthenticator()) }
+        ascService { AppInfoService(authenticator: $0, cacheAccountID: $1) }
     }
 
-    var appStoreReviewService: Factory<AppStoreReviewService> {
-        self { AppStoreReviewService(authenticator: EnvAuthenticator()) }
+    var appStoreReviewService: Factory<any AppStoreReviewServicesProtocol> {
+        ascService { AppStoreReviewService(authenticator: $0, cacheAccountID: $1) }
     }
 
     var appCategoryService: Factory<AppCategoryService> {
-        self { AppCategoryService(authenticator: EnvAuthenticator()) }
+        ascService { AppCategoryService(authenticator: $0, cacheAccountID: $1) }
     }
 
-    var reviewSubmissionsService: Factory<ReviewSubmissionsService> {
-        self { ReviewSubmissionsService(authenticator: EnvAuthenticator()) }
+    var reviewSubmissionsService: Factory<any ReviewSubmissionsServicesProtocol> {
+        ascService { ReviewSubmissionsService(authenticator: $0, cacheAccountID: $1) }
     }
 
     var appScreenshotsService: Factory<AppScreenshotsService> {
-        self { AppScreenshotsService(authenticator: EnvAuthenticator()) }
-    }
-
-    var cacheService: Factory<CacheService> {
-        self { CacheService() }
+        ascService { AppScreenshotsService(authenticator: $0, cacheAccountID: $1) }
     }
 }
 #endif

@@ -10,12 +10,11 @@ import OversizeCore
 public actor UsersService {
     private let client: AppStoreConnectClient
 
-    public init(authenticator: some AppStoreConnect.Authenticator) {
-        self.client = AppStoreConnectClient(authenticator: authenticator)
+    public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
+        client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: cacheAccountID)
     }
 
     public func fetchUsers(versionId _: String) async -> Result<[User], Error> {
-
         let request = Resources.v1.users.get()
         do {
             let data = try await client.send(request).data

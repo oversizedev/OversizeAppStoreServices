@@ -7,9 +7,11 @@ import AppStoreConnect
 import Foundation
 import OversizeCore
 
-extension Error {
+public extension Error {
     var asNetworkError: NetworkError {
-        if self is CancellationError { return .unknown(self) }
+        if self is CancellationError {
+            return .unknown(self)
+        }
         if let urlError = self as? URLError {
             switch urlError.code {
             case .cancelled:
@@ -35,16 +37,25 @@ extension Error {
                 return .decode
             }
         }
-        if let networkError = self as? NetworkError { return networkError }
-        #if canImport(Darwin)
-        if (self as? EnvAuthenticator.Error) != nil { return .unauthorized }
-        #endif
+        if let networkError = self as? NetworkError {
+            return networkError
+        }
+        if self is ASCAuthenticationError {
+            return .unauthorized
+        }
         return .noResponse
     }
 
     var isCancellation: Bool {
-        if self is CancellationError { return true }
-        if let urlError = self as? URLError, urlError.code == .cancelled { return true }
+        if self is CancellationError {
+            return true
+        }
+        if let urlError = self as? URLError, urlError.code == .cancelled {
+            return true
+        }
+        if let networkError = self as? NetworkError, case let .unknown(inner?) = networkError {
+            return inner.isCancellation
+        }
         return false
     }
 }
