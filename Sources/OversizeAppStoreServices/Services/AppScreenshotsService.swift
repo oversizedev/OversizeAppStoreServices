@@ -20,6 +20,7 @@ public actor AppScreenshotsService {
         client = ASCClientFactory.makeClient(authenticator: authenticator, cacheAccountID: cacheAccountID)
     }
 
+    @available(*, deprecated, message: "appScreenshotSets and appScreenshots are deprecated since App Store Connect API 4.5. Use AppAssetLibraryService.")
     public func fetchAppScreenshotSets(
         localizationId: String,
         screenshotDisplayType: ScreenshotDisplayType? = nil,
@@ -38,6 +39,7 @@ public actor AppScreenshotsService {
         }
     }
 
+    @available(*, deprecated, message: "appScreenshotSets and appScreenshots are deprecated since App Store Connect API 4.5. Use AppAssetLibraryService.")
     public func postAppScreenshotSet(
         localizationId: String,
         screenshotDisplayType: ScreenshotDisplayType,
@@ -69,6 +71,7 @@ public actor AppScreenshotsService {
         }
     }
 
+    @available(*, deprecated, message: "appScreenshotSets and appScreenshots are deprecated since App Store Connect API 4.5. Use AppAssetLibraryService.")
     public func deleteScreenshotSet(id: String) async -> Result<Void, Error> {
         do {
             let request = Resources.v1.appScreenshotSets.id(id).delete
@@ -80,6 +83,7 @@ public actor AppScreenshotsService {
         }
     }
 
+    @available(*, deprecated, message: "appScreenshotSets and appScreenshots are deprecated since App Store Connect API 4.5. Use AppAssetLibraryService.")
     public func reserveAppScreenshot(
         screenshotSetId: String,
         fileName: String,
@@ -115,6 +119,7 @@ public actor AppScreenshotsService {
         }
     }
 
+    @available(*, deprecated, message: "appScreenshotSets and appScreenshots are deprecated since App Store Connect API 4.5. Use AppAssetLibraryService.")
     public func uploadAppScreenshot(
         fileData: Data,
         uploadOperations: [UploadOperation],
@@ -135,6 +140,7 @@ public actor AppScreenshotsService {
         }
     }
 
+    @available(*, deprecated, message: "appScreenshotSets and appScreenshots are deprecated since App Store Connect API 4.5. Use AppAssetLibraryService.")
     public func commitAppScreenshot(
         screenshotId: String,
         sourceFileChecksum: String,
@@ -163,6 +169,7 @@ public actor AppScreenshotsService {
         }
     }
 
+    @available(*, deprecated, message: "appScreenshotSets and appScreenshots are deprecated since App Store Connect API 4.5. Use AppAssetLibraryService.")
     public func deleteAppScreenshot(id: String) async -> Result<Void, Error> {
         do {
             let request = Resources.v1.appScreenshots.id(id).delete
@@ -174,6 +181,7 @@ public actor AppScreenshotsService {
         }
     }
 
+    @available(*, deprecated, message: "appScreenshotSets and appScreenshots are deprecated since App Store Connect API 4.5. Use AppAssetLibraryService.")
     public func updateScreenshotOrder(
         screenshotSetId: String,
         screenshotIds: [String],
@@ -195,6 +203,7 @@ public actor AppScreenshotsService {
         }
     }
 
+    @available(*, deprecated, message: "appScreenshotSets and appScreenshots are deprecated since App Store Connect API 4.5. Use AppAssetLibraryService.")
     public func calculateChecksum(for data: Data) -> String {
         var md5 = Insecure.MD5()
         md5.update(data: data)

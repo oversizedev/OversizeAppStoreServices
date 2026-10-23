@@ -27,6 +27,19 @@ public actor BuildsService {
         }
     }
 
+    public func fetchBuildDeviceFamilies(buildId: String, forse: Bool = false) async -> Result<BuildDeviceFamilies, Error> {
+        await ASCCache.cached(ttl: ASCCache.TTL.long, force: forse) {
+            let request = Resources.v1.builds.id(buildId).get(include: [.buildBundles])
+            return try await client.send(request)
+        }.map { response in
+            let protocols = (response.included ?? []).flatMap { item -> [String] in
+                guard case let .buildBundle(bundle) = item, bundle.attributes?.bundleType != .appClip else { return [] }
+                return bundle.attributes?.deviceProtocols ?? []
+            }
+            return BuildDeviceFamilies(deviceProtocols: protocols)
+        }
+    }
+
     public func fetchBuildBundlesId(buildBundlesId: String, forse: Bool = false) async -> Result<[BuildBundleFileSize], Error> {
         await ASCCache.cached(ttl: ASCCache.TTL.short, force: forse) {
             let request = Resources.v1.buildBundles.id(buildBundlesId).buildBundleFileSizes.get()
