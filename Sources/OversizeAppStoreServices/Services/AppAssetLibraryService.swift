@@ -168,7 +168,7 @@ public actor AppAssetLibraryService {
         do {
             _ = try await client.send(Resources.v1.appAssetLibraryPlacements.id(placementId).delete)
             if let imageId {
-                _ = try await client.send(Resources.v1.appAssetLibraryImages.id(imageId).delete)
+                _ = try? await client.send(Resources.v1.appAssetLibraryImages.id(imageId).delete)
             }
             return .success(())
         } catch {
