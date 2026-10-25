@@ -74,7 +74,7 @@ public extension Container {
         ascService { AppScreenshotsService(authenticator: $0, cacheAccountID: $1) }
     }
 
-    var appAssetLibraryService: Factory<AppAssetLibraryService> {
+    var appAssetLibraryService: Factory<any AppAssetLibraryServicesProtocol> {
         ascService { AppAssetLibraryService(authenticator: $0, cacheAccountID: $1) }
     }
 }

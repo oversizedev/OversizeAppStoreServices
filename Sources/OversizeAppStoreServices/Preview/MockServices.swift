@@ -143,6 +143,70 @@ public struct MockVersionsService: VersionsServicesProtocol {
     }
 }
 
+public struct MockAppAssetLibraryService: AppAssetLibraryServicesProtocol {
+    public init() {}
+
+    public func fetchAssetLibraryId(appId _: String, force _: Bool) async -> Result<String, Error> {
+        .success("mock-asset-library")
+    }
+
+    public func fetchRefData(placementType: AssetLibraryPlacementType, force _: Bool) async -> Result<AssetLibraryRefData, Error> {
+        .success(AssetLibraryRefData(placementType: placementType, groups: []))
+    }
+
+    public func fetchPlacements(
+        localizationId _: String,
+        placementType: AssetLibraryPlacementType,
+        force _: Bool,
+    ) async -> Result<[AssetLibraryPlacement], Error> {
+        let placements = (1 ... 3).map { index in
+            AssetLibraryPlacement(
+                id: "mock-placement-\(index)",
+                placementType: placementType,
+                placementGroup: "mock-group",
+                state: "APPROVED",
+                imageId: "mock-image-\(index)",
+                image: AssetLibraryImage(id: "mock-image-\(index)", fileName: "Screen 0\(index).png"),
+            )
+        }
+        return .success(placements)
+    }
+
+    public func fetchImage(id: String) async -> Result<AssetLibraryImage, Error> {
+        .success(AssetLibraryImage(id: id, fileName: "Screen.png"))
+    }
+
+    public func uploadScreenshot(
+        assetLibraryId _: String,
+        localizationId _: String,
+        placementGroup: String,
+        fileName: String,
+        data _: Data,
+    ) async -> Result<AssetLibraryPlacement, Error> {
+        .success(AssetLibraryPlacement(id: "mock-uploaded", placementType: .appScreenshot, placementGroup: placementGroup, image: AssetLibraryImage(id: "mock-uploaded-image", fileName: fileName)))
+    }
+
+    public func uploadCreative(
+        assetLibraryId _: String,
+        localizationId _: String,
+        placementType: AssetLibraryPlacementType,
+        placementGroup: String?,
+        category _: AssetLibraryAssetCategory,
+        fileName: String,
+        data _: Data,
+    ) async -> Result<AssetLibraryPlacement, Error> {
+        .success(AssetLibraryPlacement(id: "mock-uploaded", placementType: placementType, placementGroup: placementGroup, image: AssetLibraryImage(id: "mock-uploaded-image", fileName: fileName)))
+    }
+
+    public func reorderPlacements(localizationId _: String, placementGroup _: String, placementIds _: [String]) async -> Result<Void, Error> {
+        .success(())
+    }
+
+    public func deletePlacement(placementId _: String, imageId _: String?) async -> Result<Void, Error> {
+        .success(())
+    }
+}
+
 public struct MockReviewSubmissionsService: ReviewSubmissionsServicesProtocol {
     public init() {}
 

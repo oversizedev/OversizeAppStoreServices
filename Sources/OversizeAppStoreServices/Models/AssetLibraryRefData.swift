@@ -7,21 +7,35 @@ import AppStoreAPI
 import Foundation
 
 public struct AssetLibraryRefData: Sendable {
-    public let screenshotGroups: [PlacementGroup]
+    public let placementType: AssetLibraryPlacementType
+    public let groups: [PlacementGroup]
+    public let acceptedCategories: [AssetLibraryAssetCategory]
 
-    public init(screenshotGroups: [PlacementGroup]) {
-        self.screenshotGroups = screenshotGroups
+    public var screenshotGroups: [PlacementGroup] { groups }
+
+    public init(
+        placementType: AssetLibraryPlacementType = .appScreenshot,
+        groups: [PlacementGroup],
+        acceptedCategories: [AssetLibraryAssetCategory] = [],
+    ) {
+        self.placementType = placementType
+        self.groups = groups
+        self.acceptedCategories = acceptedCategories
     }
 
-    public init(schema: [AppStoreAPI.AppAssetLibraryRefDatum]) {
+    public init(screenshotGroups: [PlacementGroup]) {
+        self.init(placementType: .appScreenshot, groups: screenshotGroups)
+    }
+
+    public init(schema: [AppStoreAPI.AppAssetLibraryRefDatum], placementType: AssetLibraryPlacementType = .appScreenshot) {
         let attributes = schema.compactMap(\.attributes)
         let profileGroups = attributes.flatMap { $0.placementProfileGroups ?? [] }
         let specs = attributes.flatMap { $0.imageSpecs ?? [] }.compactMap { ImageSpec(schema: $0) }
         let specsById = Dictionary(specs.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
-        let mappings = attributes
+        let matchingTypes = attributes
             .flatMap { $0.placementTypes ?? [] }
-            .filter { $0.placementTypeID == .appScreenshot }
-            .flatMap { $0.specMappings ?? [] }
+            .filter { $0.placementTypeID.flatMap(AssetLibraryPlacementType.init(schema:)) == placementType }
+        let mappings = matchingTypes.flatMap { $0.specMappings ?? [] }
 
         var groups: [PlacementGroup] = []
         for mapping in mappings {
@@ -36,11 +50,25 @@ public struct AssetLibraryRefData: Sendable {
                 ),
             )
         }
-        screenshotGroups = groups
+        var categories: [AssetLibraryAssetCategory] = []
+        for category in matchingTypes.flatMap({ $0.acceptsAssetCategories ?? [] }).compactMap(AssetLibraryAssetCategory.init(schema:)) where !categories.contains(category) {
+            categories.append(category)
+        }
+        self.init(placementType: placementType, groups: groups, acceptedCategories: categories)
     }
 
     public func group(id: String) -> PlacementGroup? {
-        screenshotGroups.first { $0.id == id }
+        groups.first { $0.id == id }
+    }
+
+    public var uploadCategory: AssetLibraryAssetCategory {
+        if acceptedCategories.contains(.creativeAssets), !acceptedCategories.contains(.appScreenshotsAndPreviews) {
+            return .creativeAssets
+        }
+        if acceptedCategories.contains(.appScreenshotsAndPreviews), !acceptedCategories.contains(.creativeAssets) {
+            return .appScreenshotsAndPreviews
+        }
+        return placementType == .appScreenshot ? .appScreenshotsAndPreviews : .creativeAssets
     }
 }
 
@@ -83,6 +111,9 @@ public extension AssetLibraryRefData {
         public let isAlphaAllowed: Bool
         public let fileExtensions: [String]
         public let maxFileSize: Int64?
+        public let mimeTypes: [String]
+        public let isUniversalAsset: Bool
+        public let compatiblePlacementTypes: [AssetLibraryPlacementType]
 
         public init(
             id: String,
@@ -95,6 +126,9 @@ public extension AssetLibraryRefData {
             isAlphaAllowed: Bool = false,
             fileExtensions: [String] = [],
             maxFileSize: Int64? = nil,
+            mimeTypes: [String] = [],
+            isUniversalAsset: Bool = false,
+            compatiblePlacementTypes: [AssetLibraryPlacementType] = [],
         ) {
             self.id = id
             self.shortName = shortName
@@ -106,6 +140,9 @@ public extension AssetLibraryRefData {
             self.isAlphaAllowed = isAlphaAllowed
             self.fileExtensions = fileExtensions
             self.maxFileSize = maxFileSize
+            self.mimeTypes = mimeTypes
+            self.isUniversalAsset = isUniversalAsset
+            self.compatiblePlacementTypes = compatiblePlacementTypes
         }
 
         init?(schema: AppStoreAPI.AppAssetLibraryRefDatum.Attributes.ImageSpec) {
@@ -121,6 +158,9 @@ public extension AssetLibraryRefData {
                 isAlphaAllowed: schema.isAlphaAllowed ?? false,
                 fileExtensions: schema.fileExtensions ?? [],
                 maxFileSize: schema.maxFileSize,
+                mimeTypes: schema.mimeTypes ?? [],
+                isUniversalAsset: schema.isUniversalAsset ?? false,
+                compatiblePlacementTypes: (schema.compatiblePlacementTypes ?? []).compactMap(AssetLibraryPlacementType.init(schema:)),
             )
         }
 

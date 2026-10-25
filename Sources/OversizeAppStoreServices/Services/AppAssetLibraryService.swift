@@ -25,16 +25,34 @@ public actor AppAssetLibraryService {
     }
 
     public func fetchScreenshotRefData(force: Bool = false) async -> Result<AssetLibraryRefData, Error> {
+        await fetchRefData(placementType: .appScreenshot, force: force)
+    }
+
+    public func fetchRefData(
+        placementType: AssetLibraryPlacementType,
+        force: Bool = false,
+    ) async -> Result<AssetLibraryRefData, Error> {
         await ASCCache.cached(ttl: ASCCache.TTL.long, force: force) {
-            let request = Resources.v1.appAssetLibraryRefData.get(filterPlacementTypes: [AppAssetLibraryPlacementType.appScreenshot.rawValue])
+            let request = Resources.v1.appAssetLibraryRefData.get(filterPlacementTypes: [placementType.rawValue])
             return try await client.send(request).data
-        }.map { AssetLibraryRefData(schema: $0) }
+        }.map { AssetLibraryRefData(schema: $0, placementType: placementType) }
     }
 
     public func fetchScreenshotPlacements(localizationId: String, force: Bool = false) async -> Result<[AssetLibraryPlacement], Error> {
-        await ASCCache.cached(force: force) {
+        await fetchPlacements(localizationId: localizationId, placementType: .appScreenshot, force: force)
+    }
+
+    public func fetchPlacements(
+        localizationId: String,
+        placementType: AssetLibraryPlacementType,
+        force: Bool = false,
+    ) async -> Result<[AssetLibraryPlacement], Error> {
+        guard let filterType = Self.placementFilter(for: placementType) else {
+            return .failure(NetworkError.noResponse)
+        }
+        return await ASCCache.cached(force: force) {
             let request = Resources.v1.appStoreVersionLocalizations.id(localizationId).placements.get(
-                filterPlacementType: [.appScreenshot],
+                filterPlacementType: [filterType],
                 sort: [.placementGroupPosition],
                 limit: 200,
                 include: [.image],
@@ -50,6 +68,7 @@ public actor AppAssetLibraryService {
                 let model = AssetLibraryPlacement(schema: placement)
                 return AssetLibraryPlacement(
                     id: model.id,
+                    placementType: model.placementType,
                     placementGroup: model.placementGroup,
                     state: model.state,
                     stateDetails: model.stateDetails,
@@ -76,32 +95,35 @@ public actor AppAssetLibraryService {
         fileName: String,
         data: Data,
     ) async -> Result<AssetLibraryPlacement, Error> {
-        var imageId: String?
-        do {
-            let reserved = try await createImage(assetLibraryId: assetLibraryId, fileName: fileName, fileSize: data.count)
-            imageId = reserved.id
-            guard !reserved.uploadOperations.isEmpty else { throw NetworkError.noResponse }
+        await upload(
+            assetLibraryId: assetLibraryId,
+            localizationId: localizationId,
+            placementType: .appScreenshot,
+            placementGroup: placementGroup,
+            category: .appScreenshotsAndPreviews,
+            fileName: fileName,
+            data: data,
+        )
+    }
 
-            try await ASCAssetUpload.upload(data: data, operations: reserved.uploadOperations.map(\.schema), client: client)
-            try await commitImage(id: reserved.id)
-            let image = try await waitForImage(id: reserved.id)
-            let placement = try await createPlacement(imageId: image.id, localizationId: localizationId, placementGroup: placementGroup)
-            return .success(
-                AssetLibraryPlacement(
-                    id: placement.id,
-                    placementGroup: placement.placementGroup,
-                    state: placement.state,
-                    stateDetails: placement.stateDetails,
-                    imageId: image.id,
-                    image: image,
-                ),
-            )
-        } catch {
-            if let imageId {
-                _ = try? await client.send(Resources.v1.appAssetLibraryImages.id(imageId).delete)
-            }
-            return .failure(error.asNetworkError)
-        }
+    public func uploadCreative(
+        assetLibraryId: String,
+        localizationId: String,
+        placementType: AssetLibraryPlacementType,
+        placementGroup: String? = nil,
+        category: AssetLibraryAssetCategory = .creativeAssets,
+        fileName: String,
+        data: Data,
+    ) async -> Result<AssetLibraryPlacement, Error> {
+        await upload(
+            assetLibraryId: assetLibraryId,
+            localizationId: localizationId,
+            placementType: placementType,
+            placementGroup: placementGroup,
+            category: category,
+            fileName: fileName,
+            data: data,
+        )
     }
 
     public func reorderPlacements(
@@ -139,6 +161,10 @@ public actor AppAssetLibraryService {
     }
 
     public func deleteScreenshot(placementId: String, imageId: String?) async -> Result<Void, Error> {
+        await deletePlacement(placementId: placementId, imageId: imageId)
+    }
+
+    public func deletePlacement(placementId: String, imageId: String?) async -> Result<Void, Error> {
         do {
             _ = try await client.send(Resources.v1.appAssetLibraryPlacements.id(placementId).delete)
             if let imageId {
@@ -152,11 +178,70 @@ public actor AppAssetLibraryService {
 }
 
 private extension AppAssetLibraryService {
-    func createImage(assetLibraryId: String, fileName: String, fileSize: Int) async throws -> AssetLibraryImage {
+    static func placementFilter(
+        for placementType: AssetLibraryPlacementType,
+    ) -> Resources.V1.AppStoreVersionLocalizations.WithID.Placements.FilterPlacementType? {
+        .init(rawValue: placementType.rawValue)
+    }
+
+    func upload(
+        assetLibraryId: String,
+        localizationId: String,
+        placementType: AssetLibraryPlacementType,
+        placementGroup: String?,
+        category: AssetLibraryAssetCategory,
+        fileName: String,
+        data: Data,
+    ) async -> Result<AssetLibraryPlacement, Error> {
+        var imageId: String?
+        do {
+            let reserved = try await createImage(
+                assetLibraryId: assetLibraryId,
+                category: category,
+                fileName: fileName,
+                fileSize: data.count,
+            )
+            imageId = reserved.id
+            guard !reserved.uploadOperations.isEmpty else { throw NetworkError.noResponse }
+
+            try await ASCAssetUpload.upload(data: data, operations: reserved.uploadOperations.map(\.schema), client: client)
+            try await commitImage(id: reserved.id)
+            let image = try await waitForImage(id: reserved.id)
+            let placement = try await createPlacement(
+                imageId: image.id,
+                localizationId: localizationId,
+                placementType: placementType,
+                placementGroup: placementGroup,
+            )
+            return .success(
+                AssetLibraryPlacement(
+                    id: placement.id,
+                    placementType: placement.placementType ?? placementType,
+                    placementGroup: placement.placementGroup,
+                    state: placement.state,
+                    stateDetails: placement.stateDetails,
+                    imageId: image.id,
+                    image: image,
+                ),
+            )
+        } catch {
+            if let imageId {
+                _ = try? await client.send(Resources.v1.appAssetLibraryImages.id(imageId).delete)
+            }
+            return .failure(error.asNetworkError)
+        }
+    }
+
+    func createImage(
+        assetLibraryId: String,
+        category: AssetLibraryAssetCategory,
+        fileName: String,
+        fileSize: Int,
+    ) async throws -> AssetLibraryImage {
         let request = Resources.v1.appAssetLibraryImages.post(
             .init(
                 data: .init(
-                    attributes: .init(category: .appScreenshotsAndPreviews, fileName: fileName, fileSize: Int64(fileSize)),
+                    attributes: .init(category: category.schema, fileName: fileName, fileSize: Int64(fileSize)),
                     relationships: .init(assetLibrary: .init(data: .init(id: assetLibraryId))),
                 ),
             ),
@@ -176,7 +261,7 @@ private extension AppAssetLibraryService {
             let image = AssetLibraryImage(schema: try await client.send(Resources.v1.appAssetLibraryImages.id(id).get()).data)
             if image.state == .failed {
                 let detail = image.stateDetails.compactMap(\.description).joined(separator: "\n")
-                throw NetworkError.apiError(title: "Screenshot processing failed", detail: detail.isEmpty ? nil : detail)
+                throw NetworkError.apiError(title: "Image processing failed", detail: detail.isEmpty ? nil : detail)
             }
             if let state = image.state, !state.isProcessing {
                 return image
@@ -186,14 +271,20 @@ private extension AppAssetLibraryService {
         throw NetworkError.timeout
     }
 
-    func createPlacement(imageId: String, localizationId: String, placementGroup: String) async throws -> AssetLibraryPlacement {
+    func createPlacement(
+        imageId: String,
+        localizationId: String,
+        placementType: AssetLibraryPlacementType,
+        placementGroup: String?,
+    ) async throws -> AssetLibraryPlacement {
+        var attributes: [String: AnyJSON] = ["placementType": .string(placementType.rawValue)]
+        if let placementGroup {
+            attributes["placementGroup"] = .string(placementGroup)
+        }
         let body: AnyJSON = .object([
             "data": .object([
                 "type": .string("appAssetLibraryPlacements"),
-                "attributes": .object([
-                    "placementType": .string(AppAssetLibraryPlacementType.appScreenshot.rawValue),
-                    "placementGroup": .string(placementGroup),
-                ]),
+                "attributes": .object(attributes),
                 "relationships": .object([
                     "image": .object(["data": .object(["type": .string("appAssetLibraryImages"), "id": .string(imageId)])]),
                     "appStoreVersionLocalization": .object([

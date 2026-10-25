@@ -8,6 +8,7 @@ import Foundation
 
 public struct AssetLibraryPlacement: Identifiable, Sendable {
     public let id: String
+    public var placementType: AssetLibraryPlacementType?
     public var placementGroup: String?
     public var state: String?
     public var stateDetails: [AppMediaStateError]
@@ -16,6 +17,7 @@ public struct AssetLibraryPlacement: Identifiable, Sendable {
 
     public init(
         id: String,
+        placementType: AssetLibraryPlacementType? = nil,
         placementGroup: String? = nil,
         state: String? = nil,
         stateDetails: [AppMediaStateError] = [],
@@ -23,6 +25,7 @@ public struct AssetLibraryPlacement: Identifiable, Sendable {
         image: AssetLibraryImage? = nil,
     ) {
         self.id = id
+        self.placementType = placementType
         self.placementGroup = placementGroup
         self.state = state
         self.stateDetails = stateDetails
@@ -32,6 +35,7 @@ public struct AssetLibraryPlacement: Identifiable, Sendable {
 
     public init(schema: AppStoreAPI.AppAssetLibraryPlacement, image: AssetLibraryImage? = nil) {
         id = schema.id
+        placementType = schema.attributes?.placementType.flatMap(AssetLibraryPlacementType.init(schema:))
         placementGroup = schema.attributes?.placementGroup
         state = schema.attributes?.state?.rawValue
         stateDetails = schema.attributes?.stateDetails?.map { AppMediaStateError(code: $0.code, description: $0.description) } ?? []
