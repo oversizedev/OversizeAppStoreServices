@@ -77,5 +77,9 @@ public extension Container {
     var appAssetLibraryService: Factory<any AppAssetLibraryServicesProtocol> {
         ascService { AppAssetLibraryService(authenticator: $0, cacheAccountID: $1) }
     }
+
+    var appStoreVersionExperimentsService: Factory<any AppStoreVersionExperimentsServicesProtocol> {
+        ascService { AppStoreVersionExperimentsService(authenticator: $0, cacheAccountID: $1) }
+    }
 }
 #endif

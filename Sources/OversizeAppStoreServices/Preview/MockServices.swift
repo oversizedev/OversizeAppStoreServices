@@ -155,7 +155,7 @@ public struct MockAppAssetLibraryService: AppAssetLibraryServicesProtocol {
     }
 
     public func fetchPlacements(
-        localizationId _: String,
+        owner _: AssetLibraryPlacementOwner,
         placementType: AssetLibraryPlacementType,
         force _: Bool,
     ) async -> Result<[AssetLibraryPlacement], Error> {
@@ -176,19 +176,9 @@ public struct MockAppAssetLibraryService: AppAssetLibraryServicesProtocol {
         .success(AssetLibraryImage(id: id, fileName: "Screen.png"))
     }
 
-    public func uploadScreenshot(
-        assetLibraryId _: String,
-        localizationId _: String,
-        placementGroup: String,
-        fileName: String,
-        data _: Data,
-    ) async -> Result<AssetLibraryPlacement, Error> {
-        .success(AssetLibraryPlacement(id: "mock-uploaded", placementType: .appScreenshot, placementGroup: placementGroup, image: AssetLibraryImage(id: "mock-uploaded-image", fileName: fileName)))
-    }
-
     public func uploadCreative(
         assetLibraryId _: String,
-        localizationId _: String,
+        owner _: AssetLibraryPlacementOwner,
         placementType: AssetLibraryPlacementType,
         placementGroup: String?,
         category _: AssetLibraryAssetCategory,
@@ -198,11 +188,81 @@ public struct MockAppAssetLibraryService: AppAssetLibraryServicesProtocol {
         .success(AssetLibraryPlacement(id: "mock-uploaded", placementType: placementType, placementGroup: placementGroup, image: AssetLibraryImage(id: "mock-uploaded-image", fileName: fileName)))
     }
 
-    public func reorderPlacements(localizationId _: String, placementGroup _: String, placementIds _: [String]) async -> Result<Void, Error> {
+    public func reorderPlacements(owner _: AssetLibraryPlacementOwner, placementGroup _: String, placementIds _: [String]) async -> Result<Void, Error> {
         .success(())
     }
 
     public func deletePlacement(placementId _: String, imageId _: String?) async -> Result<Void, Error> {
+        .success(())
+    }
+}
+
+public struct MockAppStoreVersionExperimentsService: AppStoreVersionExperimentsServicesProtocol {
+    public init() {}
+
+    public func fetchExperiments(
+        appId _: String,
+        states _: [AppStoreVersionExperimentV2.State]?,
+        force _: Bool,
+    ) async -> Result<[AppStoreVersionExperimentV2], Error> {
+        .success(MockAppStoreData.experiments)
+    }
+
+    public func fetchExperiment(id: String, force _: Bool) async -> Result<AppStoreVersionExperimentV2, Error> {
+        .success(MockAppStoreData.experiments.first { $0.id == id } ?? MockAppStoreData.experiments[0])
+    }
+
+    public func postExperiment(
+        appId _: String,
+        name: String,
+        platform: Platform,
+        trafficProportion: Int,
+    ) async -> Result<AppStoreVersionExperimentV2, Error> {
+        .success(AppStoreVersionExperimentV2(id: "mock-experiment-new", name: name, platform: platform, trafficProportion: trafficProportion, state: .prepareForSubmission))
+    }
+
+    public func patchExperiment(
+        id: String,
+        name: String?,
+        trafficProportion: Int?,
+        isStarted _: Bool?,
+    ) async -> Result<AppStoreVersionExperimentV2, Error> {
+        .success(AppStoreVersionExperimentV2(id: id, name: name, platform: .ios, trafficProportion: trafficProportion, state: .prepareForSubmission))
+    }
+
+    public func deleteExperiment(id _: String) async -> Result<Void, Error> {
+        .success(())
+    }
+
+    public func fetchTreatments(experimentId _: String, force _: Bool) async -> Result<[AppStoreVersionExperimentTreatment], Error> {
+        .success(MockAppStoreData.experimentTreatments)
+    }
+
+    public func postTreatment(experimentId: String, name: String, appIconName: String?) async -> Result<AppStoreVersionExperimentTreatment, Error> {
+        .success(AppStoreVersionExperimentTreatment(id: "mock-treatment-new", name: name, appIconName: appIconName, experimentId: experimentId))
+    }
+
+    public func patchTreatment(id: String, name: String?, appIconName: String?) async -> Result<AppStoreVersionExperimentTreatment, Error> {
+        .success(AppStoreVersionExperimentTreatment(id: id, name: name, appIconName: appIconName))
+    }
+
+    public func deleteTreatment(id _: String) async -> Result<Void, Error> {
+        .success(())
+    }
+
+    public func fetchTreatmentLocalizations(treatmentId _: String, force _: Bool) async -> Result<[AppStoreVersionExperimentTreatmentLocalization], Error> {
+        .success(MockAppStoreData.experimentTreatments[0].localizations)
+    }
+
+    public func postTreatmentLocalization(
+        treatmentId: String,
+        locale: AppStoreLanguage,
+        placementIds: [String],
+    ) async -> Result<AppStoreVersionExperimentTreatmentLocalization, Error> {
+        .success(AppStoreVersionExperimentTreatmentLocalization(id: "mock-treatment-localization-new", locale: locale, treatmentId: treatmentId, placementIds: placementIds))
+    }
+
+    public func deleteTreatmentLocalization(id _: String) async -> Result<Void, Error> {
         .success(())
     }
 }
@@ -223,6 +283,14 @@ public struct MockReviewSubmissionsService: ReviewSubmissionsServicesProtocol {
     }
 
     public func postAppStoreVersionSubmissionWithItems(appId _: String, appStoreVersionsId _: String, platform _: Platform) async -> Result<ReviewSubmission, Error> {
+        .success(MockAppStoreData.reviewSubmission)
+    }
+
+    public func postReviewSubmissionItems(reviewSubmissionId _: String, experimentId _: String) async -> Result<ReviewSubmissionItem, Error> {
+        .success(MockAppStoreData.reviewSubmissionItem)
+    }
+
+    public func postExperimentSubmissionWithItems(appId _: String, experimentId _: String, platform _: Platform) async -> Result<ReviewSubmission, Error> {
         .success(MockAppStoreData.reviewSubmission)
     }
 
@@ -472,6 +540,52 @@ public enum MockAppStoreData {
     }
 
     // MARK: - Review submissions
+
+    public static var experimentTreatments: [AppStoreVersionExperimentTreatment] {
+        ["A", "B"].map { letter in
+            let treatmentId = "mock-treatment-\(letter.lowercased())"
+            let localizations = [AppStoreLanguage.englishUS, .german].enumerated().map { index, locale in
+                AppStoreVersionExperimentTreatmentLocalization(
+                    id: "\(treatmentId)-localization-\(index)",
+                    locale: locale,
+                    treatmentId: treatmentId,
+                    placementIds: ["mock-placement-1", "mock-placement-2", "mock-placement-3"],
+                )
+            }
+            return AppStoreVersionExperimentTreatment(
+                id: treatmentId,
+                name: "Treatment \(letter)",
+                experimentId: "mock-experiment-1",
+                localizationIds: localizations.map(\.id),
+                localizations: localizations,
+            )
+        }
+    }
+
+    public static var experiments: [AppStoreVersionExperimentV2] {
+        [
+            AppStoreVersionExperimentV2(
+                id: "mock-experiment-1",
+                name: "Dark background screenshots",
+                platform: .ios,
+                trafficProportion: 30,
+                state: .prepareForSubmission,
+                isReviewRequired: true,
+                relationships: .init(appId: "mock-app", appStoreVersionExperimentTreatmentIds: experimentTreatments.map(\.id)),
+                treatments: experimentTreatments,
+            ),
+            AppStoreVersionExperimentV2(
+                id: "mock-experiment-2",
+                name: "Feature-first captions",
+                platform: .ios,
+                trafficProportion: 50,
+                state: .completed,
+                isReviewRequired: false,
+                startDate: Date(timeIntervalSinceNow: -86400 * 40),
+                endDate: Date(timeIntervalSinceNow: -86400 * 10),
+            ),
+        ]
+    }
 
     public static var reviewSubmission: ReviewSubmission {
         makeReviewSubmission(

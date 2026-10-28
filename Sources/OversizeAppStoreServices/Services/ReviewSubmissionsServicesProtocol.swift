@@ -10,6 +10,8 @@ public protocol ReviewSubmissionsServicesProtocol: Sendable {
     func postReviewSubmissionItems(reviewSubmissionId: String, appStoreVersionsId: String) async -> Result<ReviewSubmissionItem, Error>
     func patchReviewSubmissions(reviewSubmissionId: String, isSubmitted: Bool, isCanceled: Bool?) async -> Result<ReviewSubmission, Error>
     func postAppStoreVersionSubmissionWithItems(appId: String, appStoreVersionsId: String, platform: Platform) async -> Result<ReviewSubmission, Error>
+    func postReviewSubmissionItems(reviewSubmissionId: String, experimentId: String) async -> Result<ReviewSubmissionItem, Error>
+    func postExperimentSubmissionWithItems(appId: String, experimentId: String, platform: Platform) async -> Result<ReviewSubmission, Error>
     func fetchReviewSubmissions(appId: String) async -> Result<[ReviewSubmission], Error>
     func fetchReviewSubmissionsIncludedAll(appId: String, force: Bool) async -> Result<[ReviewSubmission], Error>
     func fetchReviewSubmissionItemsIncludedAll(reviewSubmissionId: String, force: Bool) async -> Result<[ReviewSubmissionItem], Error>
