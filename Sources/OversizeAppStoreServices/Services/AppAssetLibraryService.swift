@@ -57,7 +57,7 @@ public actor AppAssetLibraryService {
                 limit: 200,
                 include: [.image],
             )
-            return try await client.send(request)
+            return try await client.send(request.tolerantPlacements).value
         }.map { response in
             let images: [String: AssetLibraryImage] = (response.included ?? []).reduce(into: [:]) { result, item in
                 if case let .appAssetLibraryImage(image) = item {
@@ -194,6 +194,7 @@ private extension AppAssetLibraryService {
         data: Data,
     ) async -> Result<AssetLibraryPlacement, Error> {
         var imageId: String?
+        var step = "createImage"
         do {
             let reserved = try await createImage(
                 assetLibraryId: assetLibraryId,
@@ -204,9 +205,13 @@ private extension AppAssetLibraryService {
             imageId = reserved.id
             guard !reserved.uploadOperations.isEmpty else { throw NetworkError.noResponse }
 
+            step = "uploadParts"
             try await ASCAssetUpload.upload(data: data, operations: reserved.uploadOperations.map(\.schema), client: client)
+            step = "commitImage"
             try await commitImage(id: reserved.id)
+            step = "waitForImage"
             let image = try await waitForImage(id: reserved.id)
+            step = "createPlacement"
             let placement = try await createPlacement(
                 imageId: image.id,
                 localizationId: localizationId,
@@ -225,6 +230,7 @@ private extension AppAssetLibraryService {
                 ),
             )
         } catch {
+            Log.error("Asset upload failed at \(step) for \(fileName)", error: error)
             if let imageId {
                 _ = try? await client.send(Resources.v1.appAssetLibraryImages.id(imageId).delete)
             }
@@ -257,8 +263,10 @@ private extension AppAssetLibraryService {
     }
 
     func waitForImage(id: String) async throws -> AssetLibraryImage {
+        var lastState: AssetLibraryAssetState?
         for _ in 0 ..< Self.pollAttempts {
             let image = AssetLibraryImage(schema: try await client.send(Resources.v1.appAssetLibraryImages.id(id).get()).data)
+            lastState = image.state
             if image.state == .failed {
                 let detail = image.stateDetails.compactMap(\.description).joined(separator: "\n")
                 throw NetworkError.apiError(title: "Image processing failed", detail: detail.isEmpty ? nil : detail)
@@ -268,6 +276,7 @@ private extension AppAssetLibraryService {
             }
             try await Task.sleep(for: Self.pollInterval)
         }
+        Log.error("Image \(id) still processing, last state: \(lastState?.rawValue ?? "nil")")
         throw NetworkError.timeout
     }
 
@@ -299,6 +308,6 @@ private extension AppAssetLibraryService {
             body: body,
             id: "appAssetLibraryPlacements_createInstance",
         )
-        return AssetLibraryPlacement(schema: try await client.send(request).data)
+        return AssetLibraryPlacement(schema: try await client.send(request.tolerantPlacements).value.data)
     }
 }

@@ -21,6 +21,7 @@ public extension Error {
             case .timedOut:
                 return .timeout
             default:
+                Log.error("URLError mapped to noResponse: \(urlError.code.rawValue) \(String(describing: urlError.failureURLString))", error: urlError)
                 return .noResponse
             }
         }
@@ -43,6 +44,7 @@ public extension Error {
         if self is ASCAuthenticationError {
             return .unauthorized
         }
+        Log.error("Unclassified error mapped to noResponse", error: self)
         return .noResponse
     }
 
