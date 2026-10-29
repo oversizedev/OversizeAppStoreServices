@@ -355,6 +355,42 @@ public struct MockAppStoreReviewService: AppStoreReviewServicesProtocol {
     }
 }
 
+public struct MockBuildsService: BuildsServicesProtocol {
+    public init() {}
+
+    public func fetchBuild(buildId _: String, forse _: Bool) async -> Result<Build, Error> {
+        .success(MockAppStoreData.build)
+    }
+
+    public func fetchBuildDeviceFamilies(buildId _: String, forse _: Bool) async -> Result<BuildDeviceFamilies, Error> {
+        .success(BuildDeviceFamilies(supportsiPhone: true, supportsiPad: true))
+    }
+
+    public func fetchBuildBundlesId(buildBundlesId _: String, forse _: Bool) async -> Result<[BuildBundleFileSize], Error> {
+        .success([])
+    }
+
+    public func fetchBuildIcons(buildId _: String, force _: Bool) async -> Result<[BuildIconAsset], Error> {
+        .success(MockAppStoreData.buildIcons)
+    }
+
+    public func fetchAppBuilds(appId _: String) async -> Result<[Build], Error> {
+        .success([MockAppStoreData.build])
+    }
+
+    public func fetchPreReleaseVersionBuilds(appId _: String, versionString _: String, platfrom _: Platform) async -> Result<[Build], Error> {
+        .success([MockAppStoreData.build])
+    }
+
+    public func fetchAppStoreVersionsBuild(versionId _: String) async -> Result<Build?, Error> {
+        .success(MockAppStoreData.build)
+    }
+
+    public func fetchAppStoreVersionsBuildImageUrl(versionId _: String) async -> Result<URL?, Error> {
+        .success(nil)
+    }
+}
+
 // MARK: - Mock data
 
 public enum MockAppStoreData {
@@ -438,6 +474,14 @@ public enum MockAppStoreData {
             ),
             relationships: nil,
         )
+    }
+
+    public static var buildIcons: [BuildIconAsset] {
+        [
+            BuildIconAsset(id: "icon-primary", name: "AppIcon", iconType: .appStore),
+            BuildIconAsset(id: "icon-dark", name: "AppIconDark", iconType: .alternateExperiment),
+            BuildIconAsset(id: "icon-gradient", name: "AppIconGradient", iconType: .alternateExperiment),
+        ]
     }
 
     public static var build: Build {
