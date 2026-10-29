@@ -46,7 +46,7 @@ public extension Container {
         ascService { UsersService(authenticator: $0, cacheAccountID: $1) }
     }
 
-    var buildsService: Factory<BuildsService> {
+    var buildsService: Factory<any BuildsServicesProtocol> {
         ascService { BuildsService(authenticator: $0, cacheAccountID: $1) }
     }
 

@@ -8,7 +8,7 @@ import AppStoreConnect
 import Foundation
 import OversizeCore
 
-public actor BuildsService {
+public actor BuildsService: BuildsServicesProtocol {
     private let client: AppStoreConnectClient
 
     public init(authenticator: some AppStoreConnect.Authenticator, cacheAccountID: String? = nil) {
@@ -46,6 +46,15 @@ public actor BuildsService {
             return try await client.send(request).data
         }.map { data in
             data.compactMap { .init(schema: $0) }
+        }
+    }
+
+    public func fetchBuildIcons(buildId: String, force: Bool = false) async -> Result<[BuildIconAsset], Error> {
+        await ASCCache.cached(ttl: ASCCache.TTL.default, force: force) {
+            let request = Resources.v1.builds.id(buildId).icons.get(limit: 50)
+            return try await client.send(request).data
+        }.map { data in
+            data.map { BuildIconAsset(schema: $0) }
         }
     }
 

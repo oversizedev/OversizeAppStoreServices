@@ -6,7 +6,7 @@
 import AppStoreAPI
 import Foundation
 
-public struct ImageAsset: Sendable {
+public struct ImageAsset: Sendable, Hashable {
     public let templateURL: String?
     public let width: Int?
     public let height: Int?
