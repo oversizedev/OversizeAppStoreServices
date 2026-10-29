@@ -138,6 +138,50 @@ public actor ReviewSubmissionsService: ReviewSubmissionsServicesProtocol {
         }
     }
 
+    public func postReviewSubmissionItems(
+        reviewSubmissionId: String,
+        experimentId: String,
+    ) async -> Result<ReviewSubmissionItem, Error> {
+        do {
+            let request = Resources.v1.reviewSubmissionItems.post(
+                ReviewSubmissionItemCreateRequest(
+                    data: .init(
+                        type: .reviewSubmissionItems,
+                        relationships: .init(
+                            reviewSubmission: .init(data: .init(type: .reviewSubmissions, id: reviewSubmissionId)),
+                            appStoreVersionExperimentV2: .init(data: .init(id: experimentId)),
+                        ),
+                    ),
+                ),
+            )
+            let item = try await client.send(request).data
+            guard let submissionItem: ReviewSubmissionItem = .init(schema: item) else {
+                return .failure(NetworkError.decode)
+            }
+            return .success(submissionItem)
+        } catch {
+            return handleRequestFailure(error: error)
+        }
+    }
+
+    public func postExperimentSubmissionWithItems(
+        appId: String,
+        experimentId: String,
+        platform: Platform,
+    ) async -> Result<ReviewSubmission, Error> {
+        switch await fetchOrCreateReviewSubmission(appId: appId, platform: platform) {
+        case let .success(submission):
+            switch await postReviewSubmissionItems(reviewSubmissionId: submission.id, experimentId: experimentId) {
+            case .success:
+                await patchReviewSubmissions(reviewSubmissionId: submission.id, isSubmitted: true)
+            case let .failure(error):
+                .failure(error)
+            }
+        case let .failure(error):
+            .failure(error)
+        }
+    }
+
     public func fetchReviewSubmissions(appId: String) async -> Result<[ReviewSubmission], Error> {
         do {
             let request = Resources.v1.reviewSubmissions.get(filterApp: [appId])
